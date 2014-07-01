@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- 登陆界面的登录按钮 -->
+    <ImageButton
+        android:id="@+id/configBtn"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="35dp"
+        android:src="@drawable/login_config_btn"
+        android:background="#00000000" />
+
+    <ImageButton
+        android:id="@+id/loginBtn"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="@string/login"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:src="@drawable/login_login_btn"
+        android:background="#00000000" />
+    <!-- 登陆界面的登录按钮 -->
+
+    <!-- 登录输入框 -->
+    <ImageView
+        android:id="@+id/pswIV"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_above="@id/loginBtn"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginBottom="80dp"
+        android:src="@drawable/login_psw_icon" />
+
+    <EditText
+        android:id="@+id/pswET"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_above="@id/loginBtn"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="70dp"
+        android:layout_marginBottom="80dp"
+        android:inputType="textPassword"
+        android:maxLength="20"
+        android:hint="@string/input_psw_hint" 
+        android:text="test"/>
+
+    <ImageView
+        android:id="@+id/userIV"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_above="@id/pswIV"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginBottom="35dp"
+        android:src="@drawable/login_user_icon" />
+
+    <EditText
+        android:id="@+id/userET"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_above="@id/pswET"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="30dp"
+        android:layout_marginLeft="70dp"
+        android:layout_marginRight="10dp"
+        android:hint="@string/input_user_name_hint"
+        android:text="@string/login_test_user"/>
+
+    <ImageView
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="@string/store"
+        android:layout_above="@id/userIV"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginBottom="35dp"
+        android:src="@drawable/login_store_icon" />
+
+    <Spinner
+        android:id="@+id/storeSpin"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_above="@id/userET"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="30dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="70dp" 
+        android:entries="@array/store"/>
+    <!-- 登录输入框 -->
+
+</RelativeLayout>

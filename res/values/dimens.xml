@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 登录编辑框 -->
+    <dimen name="login_edit_text">200dp</dimen>
+
+    <!-- 九宫格返回按钮 -->
+    <dimen name="jgg_btn">120dp</dimen>
+
+    <!-- 调拨入库页面按钮 -->
+    <dimen name="allot_in_btn">100dp</dimen>
+
+    <!-- 调拨出库页面按钮 -->
+    <dimen name="allot_out_btn">80dp</dimen>
+
+    <!-- 标题栏高度，用于计算列表高度 -->
+    <dimen name="title_height">70dp</dimen>
+
+    <!-- 门店显示区高度，用于计算列表高度 -->
+    <dimen name="store_height">40dp</dimen>
+
+    <!-- 发货方显示区高度，用于计算列表高度 -->
+    <dimen name="shipper_height">30dp</dimen>
+
+    <!-- 条码显示区高度，用于计算列表高度 -->
+    <dimen name="scan_height">30dp</dimen>
+
+    <!-- 操作按钮高度，用于计算列表高度 -->
+    <dimen name="operate_height">60dp</dimen>
+
+    <!-- padding补差高度(根据实际情况而定)，用于计算列表高度 -->
+    <dimen name="padding_reserve">25dp</dimen>
+
+    <!-- padding补差高度(根据实际情况而定)，用于计算列表高度 -->
+    <dimen name="padding_reserve1">40dp</dimen>
+
+    <!-- Undobar -->
+    <dimen name="marginLeft">8dp</dimen>
+    <dimen name="marginRight">8dp</dimen>
+    <dimen name="marginBottom">16dp</dimen>
+</resources>

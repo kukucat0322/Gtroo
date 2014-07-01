@@ -1,0 +1,328 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/corners_bg"
+            android:gravity="center_horizontal"
+            android:padding="20dp"
+            android:text="@string/systemDataDownload"
+            android:textAppearance="?android:attr/textAppearanceLarge">
+        </TextView>    
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/statusStoreName"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:layout_width="0dp"
+                android:singleLine="true"
+                android:background="@drawable/corners_bg"
+                android:gravity="left"
+                android:padding="10dp"/>
+
+            <TextView
+                android:id="@+id/statusTime"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:layout_width="0dp"
+                android:singleLine="true"
+                android:background="@drawable/corners_bg"
+                android:gravity="left"
+                android:padding="10dp"/>
+        </LinearLayout>        
+               
+		<RelativeLayout
+		    android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            
+		    <CheckBox
+		        android:id="@+id/userDataCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="@string/dataDownloadUserData"
+		        android:textSize="18sp"
+		        android:layout_marginTop="10dp"
+		        android:layout_centerHorizontal="true"/>
+	
+		    <CheckBox
+		        android:id="@+id/productDataCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:textSize="18sp"
+		        android:layout_centerHorizontal="true"
+		        android:text="@string/dataDownloadProductData"
+		        android:layout_below="@+id/userDataCheckBox"/>
+		
+		    <CheckBox
+		        android:id="@+id/vipTypeCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:textSize="18sp"
+		        android:layout_centerHorizontal="true"
+		        android:text="@string/dataDownloadVipType"
+		        android:layout_below="@+id/productDataCheckBox"/>
+		
+		    <CheckBox
+		        android:id="@+id/itemStrategyCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:textSize="18sp"
+		        android:layout_centerHorizontal="true"
+		        android:text="@string/dataDownloadItemStrategy"
+		        android:layout_below="@+id/vipTypeCheckBox"/>
+		
+		    <CheckBox
+		        android:id="@+id/systemParamCheckBox"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:textSize="18sp"
+		        android:layout_centerHorizontal="true"
+		        android:text="@string/dataDownloadSystemParam"
+		        android:layout_below="@+id/itemStrategyCheckBox"/>
+		    	    
+		    <View 
+		        android:id="@+id/blackLine" 
+		       	android:layout_width="match_parent"  
+		       	android:layout_height="1px"  
+		       	android:background="@android:color/black"
+		       	android:layout_marginTop="5dp"
+		       	android:layout_below="@+id/systemParamCheckBox">
+		    </View>  
+		    	  
+			<LinearLayout
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:orientation="vertical"
+			    android:layout_below="@+id/blackLine">
+			    
+			    <LinearLayout
+			        android:layout_width="match_parent"
+			        android:layout_height="wrap_content"
+			        android:orientation="horizontal">
+			        
+				    <TextView
+				        android:id="@+id/userDataTextView"
+				        android:layout_width="0dp"
+				        android:layout_weight="1"
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="10dp"
+				        android:layout_marginLeft="6dp"
+				        android:gravity="center"
+				        android:text="@string/dataDownloadUserData"
+				        android:textSize="18sp"/>	
+				        	    
+				    <ProgressBar
+				        android:id="@+id/userDataProgressBar"
+				        android:layout_width="0dp"
+				        android:layout_weight="2"
+					    android:gravity="center"			        
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="10dp"
+				        android:layout_marginLeft="6dp"
+				        android:progress="100"
+				        android:visibility="invisible"
+				        style="?android:attr/progressBarStyleHorizontal"/>	
+				        	    		    
+				    <TextView
+				        android:id="@+id/userDataPercentTextView"
+				        android:layout_width="0dp"
+				        android:layout_weight="1"
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="10dp"
+				        android:layout_marginLeft="6dp"
+				        android:gravity="center"
+				        android:textSize="18sp"/> 
+				        
+			    </LinearLayout> 
+			          
+			    <LinearLayout
+			        android:layout_width="match_parent"
+			        android:layout_height="wrap_content"
+			        android:orientation="horizontal">
+				    			    
+				    <TextView
+				        android:id="@+id/productDataTextView"
+				        android:layout_width="0dp"
+				        android:layout_weight="1"
+				        android:gravity="center"
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="6dp"
+				        android:layout_marginLeft="6dp"
+				        android:text="@string/dataDownloadProductData"
+				        android:textSize="18sp"/>
+				    
+				    <ProgressBar
+				        android:id="@+id/productDataProgressBar"
+				        android:layout_width="0dp"
+				        android:layout_weight="2"
+				        android:gravity="center"
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="10dp"
+				        android:layout_marginLeft="6dp"
+				        android:progress="100"
+				        android:visibility="invisible"
+				        style="?android:attr/progressBarStyleHorizontal"/>
+				    		    
+				    <TextView
+				        android:id="@+id/productDataPercentTextView"
+				        android:layout_width="0dp"
+				        android:layout_weight="1"
+				        android:gravity="center"
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="10dp"
+				        android:layout_marginLeft="6dp"
+				        android:textSize="18sp"/>   
+				</LinearLayout>
+
+			    <LinearLayout
+			        android:layout_width="match_parent"
+			        android:layout_height="wrap_content"
+			        android:orientation="horizontal">
+				    			    		    		    
+				    <TextView
+				        android:id="@+id/vipTypeTextView"
+				        android:layout_width="0dp"
+				        android:layout_weight="1"
+				        android:gravity="center"
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="6dp"
+				        android:layout_marginLeft="6dp"
+				        android:text="@string/dataDownloadVipType"
+				        android:textSize="18sp"/>
+				    
+				    <ProgressBar
+				        android:id="@+id/vipTypeProgressBar"
+				        android:layout_width="0dp"
+				        android:layout_weight="2"
+				        android:gravity="center"
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="10dp"
+				        android:layout_marginLeft="6dp"
+				        android:progress="100"
+				        android:visibility="invisible"
+				        style="?android:attr/progressBarStyleHorizontal"/>
+				    		    
+				    <TextView
+				        android:id="@+id/vipTypePercentTextView"
+				        android:layout_width="0dp"
+				        android:layout_weight="1"
+				        android:gravity="center"
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="10dp"
+				        android:layout_marginLeft="6dp"
+				        android:textSize="18sp"/>   
+			    </LinearLayout>
+
+			    <LinearLayout
+			        android:layout_width="match_parent"
+			        android:layout_height="wrap_content"
+			        android:orientation="horizontal">			    
+			    			    		    
+				    <TextView
+				        android:id="@+id/itemStrategyTextView"
+				        android:layout_width="0dp"
+				        android:layout_weight="1"
+				        android:gravity="center"
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="6dp"
+				        android:layout_marginLeft="6dp"
+				        android:text="@string/dataDownloadItemStrategy"
+				        android:textSize="18sp"/>
+		
+				    <ProgressBar
+				        android:id="@+id/itemStrategyProgressBar"
+				        android:layout_width="0dp"
+				        android:layout_weight="2"
+				        android:gravity="center"
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="10dp"
+				        android:layout_marginLeft="6dp"
+				        android:progress="100"
+				        android:visibility="invisible"
+				        style="?android:attr/progressBarStyleHorizontal"/>
+				    		    
+				    <TextView
+				        android:id="@+id/itemStrategyPercentTextView"
+				        android:layout_width="0dp"
+				        android:layout_weight="1"
+				        android:gravity="center"
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="10dp"
+				        android:layout_marginLeft="6dp"
+				        android:textSize="18sp"/>  		   
+			    </LinearLayout>
+
+			    <LinearLayout
+			        android:layout_width="match_parent"
+			        android:layout_height="wrap_content"
+			        android:orientation="horizontal">			    
+			    			    		    
+				    <TextView
+				        android:id="@+id/systemParamTextView"
+				        android:layout_width="0dp"
+				        android:layout_weight="1"
+				        android:gravity="center"
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="6dp"
+				        android:layout_marginLeft="6dp"
+				        android:text="@string/dataDownloadSystemParam"
+				        android:textSize="18sp"/>
+				    
+				    <ProgressBar
+				        android:id="@+id/systemParamProgressBar"
+				        android:layout_width="0dp"
+				        android:layout_weight="2"
+				        android:gravity="center"
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="10dp"
+				        android:layout_marginLeft="6dp"
+				        android:progress="100"
+				        android:visibility="invisible"
+				        style="?android:attr/progressBarStyleHorizontal"/>
+				    		    
+				    <TextView
+				        android:id="@+id/systemParamPercentTextView"
+				        android:layout_width="0dp"
+				        android:layout_weight="1"
+				        android:gravity="center"
+				        android:layout_height="wrap_content"
+				        android:layout_marginTop="10dp"
+				        android:layout_marginLeft="6dp"
+				        android:textSize="18sp"/>				    
+				</LinearLayout>	    
+			      			    
+			</LinearLayout>
+					    
+        </RelativeLayout>
+                   
+    </LinearLayout>
+    
+ 	<LinearLayout
+ 	    android:layout_width="match_parent"
+ 	    android:layout_height="wrap_content"
+ 	    android:layout_alignParentBottom="true"
+ 	    android:orientation="vertical">
+             
+        <Button
+            android:id="@+id/downloadButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_download"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+	</LinearLayout>
+	
+</RelativeLayout>

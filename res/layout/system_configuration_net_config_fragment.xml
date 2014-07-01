@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#EFEFEFEF" >
+  
+    <TextView
+        android:id="@+id/downloadURLAddressTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/downloadURLAddress"
+        android:layout_marginLeft="6dp"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/downloadURLAddressEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minEms="16"
+        android:hint="@string/pleaseInputServerURL"
+        android:padding="2dip"
+        android:layout_marginLeft="6dp"
+        android:scrollHorizontally="true"
+        android:inputType="textUri"
+        android:layout_below="@+id/downloadURLAddressTextView"
+        android:singleLine="true"
+        android:textSize="14sp" />
+    
+    <TextView
+        android:id="@+id/interactiveURLAddressTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/interactiveURLAddress"
+        android:layout_below="@+id/downloadURLAddressEditText"
+        android:layout_marginLeft="6dp"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/interactiveURLAddressEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="@string/pleaseInputServerURL"
+        android:minEms="16"
+        android:padding="2dip"
+        android:inputType="textUri"
+        android:layout_marginLeft="6dp"
+        android:scrollHorizontally="true"
+        android:layout_below="@+id/interactiveURLAddressTextView"
+        android:singleLine="true"
+        android:textSize="14sp" 
+        android:text="http://g.burgeon.cn:90/servlets/binserv/Rest"/>
+    
+    <Button
+        android:id="@+id/serverTestButton"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/interactiveURLAddressEditText"
+        android:layout_marginLeft="20dp"
+        android:text="@string/netConfigURLServerTest"
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/systemUpdateConfigButton"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="20dp"
+        android:layout_below="@+id/interactiveURLAddressEditText"
+        android:text="@string/netConfigSystemUpdateConfig"
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/dataDownloadButton"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/serverTestButton"
+        android:layout_marginLeft="20dp"
+        android:text="@string/netConfigDataDownload"
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/changePasswordButton"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="20dp"
+        android:layout_below="@+id/serverTestButton"
+        android:text="@string/netConfigChangePassword"
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="@string/btn_save"
+        />
+
+
+
+</RelativeLayout>

@@ -1,0 +1,209 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/corners_bg"
+            android:gravity="center_horizontal"
+            android:padding="20dp"
+            android:text="@string/inventoryQuery"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/statusStoreName"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:layout_width="0dp"
+                android:singleLine="true"
+                android:background="@drawable/corners_bg"
+                android:gravity="left"
+                android:padding="10dp"/>
+
+            <TextView
+                android:id="@+id/statusTime"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:layout_width="0dp"
+                android:singleLine="true"
+                android:background="@drawable/corners_bg"
+                android:gravity="left"
+                android:padding="10dp"/>
+        </LinearLayout>        
+ 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:background="@drawable/corners_bg"
+                android:gravity="left"
+                android:padding="10dp"
+                android:text="@string/inventoryBarCode" />
+
+            <EditText
+                android:id="@+id/inventoryBarCodeEditText"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:layout_width="0dp"
+                android:singleLine="true"
+                android:hint="Near:请输入你的条码"
+                android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                android:background="@drawable/corners_bg"
+                android:gravity="left"
+                android:padding="10dp"/>
+        </LinearLayout>         
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:background="@drawable/corners_bg"
+                android:gravity="left"
+                android:padding="10dp"
+                android:text="@string/inventoryStyleNumber" />
+
+            <EditText
+                android:id="@+id/inventoryStyleNumberEditText"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:layout_width="0dp"
+                android:singleLine="true"
+                android:hint="Near:请输入你的款号"
+                android:digits="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                android:background="@drawable/corners_bg"
+                android:gravity="left"
+                android:padding="10dp"/>
+        </LinearLayout>        
+              
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/inventoryStoreName"
+                android:textSize="15sp" />
+
+            <View
+                android:layout_width="0.5dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/black" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/inventoryStyleNumber"
+                android:textSize="15sp" />
+
+            <View
+                android:layout_width="0.5dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/black" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/inventoryStyleCount"
+                android:textSize="15sp" />
+            <View
+                android:layout_width="0.5dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/black" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/inventoryBarCode"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/inventoryListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" 
+            android:fastScrollEnabled="true" 
+            android:transcriptMode="normal"  
+            android:scrollbarStyle="insideInset" 
+            android:layout_gravity="bottom">
+        </ListView> 
+    </LinearLayout>
+    
+ 	<LinearLayout
+ 	    android:layout_width="match_parent"
+ 	    android:layout_height="wrap_content"
+ 	    android:layout_alignParentBottom="true"
+ 	    android:orientation="vertical">
+        
+        <TextView
+            android:id="@+id/inventoryCountRecord"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:background="@drawable/corners_bg"
+            android:gravity="left"
+            android:padding="10dp">
+        </TextView>
+        
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal" >
+	
+	        <Button
+	            android:id="@+id/inventoryButtonHelp"
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:text="@string/btn_help"
+	            android:textAppearance="?android:attr/textAppearanceMedium" />
+	
+	
+	        <Button
+	            android:id="@+id/inventoryButtonSearch"
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:text="@string/btn_search"
+	            android:textAppearance="?android:attr/textAppearanceMedium" />
+	
+	        <Button
+	            android:id="@+id/inventoryButtonBack"
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:text="@string/btn_back"
+	            android:textAppearance="?android:attr/textAppearanceMedium" />
+	    </LinearLayout>
+	</LinearLayout>
+</RelativeLayout>

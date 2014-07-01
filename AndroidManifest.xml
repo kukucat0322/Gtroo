@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cn.burgeon.core"
+    android:installLocation="preferExternal"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="14" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <application
+        android:name="cn.burgeon.core.App"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" 
+        >
+        <activity android:name="cn.burgeon.core.ui.LoginActivity" android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="cn.burgeon.core.ui.SystemActivity" />
+        <activity android:name="cn.burgeon.core.ui.allot.AllotManagerActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.allot.AllotOutInActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.allot.AllotReplenishmentActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.allot.AllotReplenishmentOrderActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.sales.SalesManagerActivity" />
+        <activity android:name="cn.burgeon.core.ui.sales.DailySalesActivity" />
+        <activity android:name="cn.burgeon.core.ui.sales.SalesOrderSearchActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.sales.SalesReportActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.sales.SalesDetailActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.sales.SalesDailyReportActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.sales.SalesMonthlyReportActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.sales.SalesWareSummerActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.sales.SalesArchiveSummerActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.sales.SalesNewOrderActivity" android:windowSoftInputMode="adjustPan|stateHidden" android:launchMode="singleTask"/>
+        <activity android:name="cn.burgeon.core.ui.sales.SalesSettleActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.sales.SalesOrderDetailActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.sales.SalesWareSummerDetailActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.allot.AllotInActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.allot.AllotInDetailActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.allot.AllotOutActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.allot.AllotOutApplyActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.allot.AllotInQueryActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.allot.AllotOutQueryActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.allot.AllotReplenishmentApplyActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.allot.AllotReplenishmentQueryActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.allot.AllotReplenishmentOrderApplyActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.allot.AllotReplenishmentOrderQueryActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.inventory.InventoryManagerActivity" />
+        <activity android:name="cn.burgeon.core.ui.inventory.InventoryQueryActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.inventory.InventoryRefreshActivity" />
+        <activity android:name="cn.burgeon.core.ui.inventory.InventoryNearActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.member.MemberManagerActivity" />
+        <activity android:name="cn.burgeon.core.ui.member.MemberRegistActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.member.MemberListActivity"/>
+        <activity android:name="cn.burgeon.core.ui.member.MemberSearchActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.check.CheckManagerActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.check.CheckScanActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.check.CheckDocManagerActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.check.CheckQueryActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.system.SystemManagerActivity"/>
+        <activity android:name="cn.burgeon.core.ui.system.SystemConfigurationActivity" android:windowSoftInputMode="adjustPan|stateHidden"/>
+        <activity android:name="cn.burgeon.core.ui.system.SystemConfigurationNetConfigDataDownloadActivity"/>
+        <activity android:name="cn.burgeon.core.ui.system.SystemNetTestActivity"/>
+        <activity android:name="cn.burgeon.core.ui.system.SystemUpdateActivity"/>
+        <activity android:name="cn.burgeon.core.ui.system.SystemDataDownloadActivity"/>
+        <activity android:name="cn.burgeon.core.ui.system.SystemDataCleanActivity"/>
+    </application>
+
+</manifest>

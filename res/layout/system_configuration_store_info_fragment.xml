@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ffffff" >
+           
+    <TextView
+        android:id="@+id/storeNoTextView"
+        android:layout_width="90dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="20dp"
+        android:layout_height="wrap_content"
+        android:text="@string/storeInfoStoreIndex"
+        android:gravity="left"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/storeNoEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint=""
+        android:minEms="12"
+        android:layout_toRightOf="@+id/storeNoTextView"
+        android:layout_alignBaseline="@+id/storeNoTextView"
+        android:layout_marginLeft="20dp"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:textSize="14sp" />
+    
+    <TextView
+        android:id="@+id/customerNameTextView"
+        android:layout_width="90dp"
+        android:layout_below="@+id/storeNoTextView"
+        android:layout_alignLeft="@+id/storeNoTextView"
+        android:layout_marginTop="100dp"
+        android:layout_height="wrap_content"
+        android:text="@string/storeInfoCustomerName"
+        android:gravity="left"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/customerNameEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/customerNameTextView"
+        android:layout_alignLeft="@+id/storeNoEditText"
+        android:hint=""
+        android:minEms="12"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/terminalNoTextView"
+        android:layout_width="90dp"
+        android:layout_below="@+id/customerNameTextView"
+        android:layout_alignLeft="@+id/storeNoTextView"
+        android:layout_marginTop="100dp"
+        android:layout_height="wrap_content"
+        android:text="@string/storeInfoTerminalIndex"
+        android:gravity="left"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/terminalNoEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/terminalNoTextView"
+        android:layout_alignLeft="@+id/customerNameEditText"
+        android:hint=""
+        android:minEms="12"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/inventoryRowCountTextView"
+        android:layout_width="90dp"
+        android:layout_below="@+id/terminalNoTextView"
+        android:layout_alignLeft="@+id/storeNoTextView"
+        android:layout_marginTop="100dp"
+        android:layout_height="wrap_content"
+        android:text="@string/storeInfoInventoryShowLines"
+        android:gravity="left"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/inventoryRowCountEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/inventoryRowCountTextView"
+        android:layout_alignLeft="@+id/terminalNoEditText"
+        android:hint=""
+        android:minEms="12"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:textSize="14sp" />
+	    	    
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="@string/btn_save"/>
+</RelativeLayout>

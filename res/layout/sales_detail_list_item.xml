@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+
+    <TextView
+        android:id="@+id/salesdetail_tiaoma"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/salesdetail_danjia"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/salesdetail_zhekou"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/salesdetail_shuliang"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/salesdetail_jine"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/salesdetail_pinming"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:textSize="15sp" />
+
+</LinearLayout>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="newOrderArr">
+        <item>正常</item>
+        <item>全额</item>
+        <item>赠送</item>
+        <item>退货</item>
+    </string-array>
+
+    <string-array name="vipType">
+        <item>超级普通卡</item>
+        <item>超级白金卡</item>
+        <item>超级黄金卡</item>
+    </string-array>
+
+    <string-array name="status">
+        <item>原始单</item>
+    </string-array>
+
+    <string-array name="empployee">
+        <item>虞旻琦</item>
+    </string-array>
+    
+    <string-array name="store">
+        <item>苏州001</item>
+    </string-array>
+    
+    <!--扫描条码截取位数-->
+    <string-array name="scanBarcodeInterceptNumber">
+        <item>位数1</item>
+        <item>位数2</item>
+        <item>位数3</item>
+        <item>位数4</item>
+        <item>位数5</item>
+    </string-array>
+    
+    <!--金额数据精度-->
+    <string-array name="moneyDataAccuracy">
+        <item>精度1</item>
+        <item>精度2</item>
+        <item>精度3</item>
+        <item>精度4</item>
+        <item>精度5</item>
+    </string-array>
+    
+    <!--金额取整方式-->
+    <string-array name="moenyRoundingStyle">
+        <item>方式1</item>
+        <item>方式2</item>
+        <item>方式3</item>
+        <item>方式4</item>
+        <item>方式5</item>
+    </string-array>
+</resources>
