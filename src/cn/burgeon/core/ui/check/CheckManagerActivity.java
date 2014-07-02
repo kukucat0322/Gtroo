@@ -24,9 +24,13 @@ import cn.burgeon.core.Constant;
 import cn.burgeon.core.R;
 import cn.burgeon.core.adapter.CheckManagerAdapter;
 import cn.burgeon.core.bean.Order;
+import cn.burgeon.core.bean.Product;
 import cn.burgeon.core.bean.RequestResult;
 import cn.burgeon.core.ui.BaseActivity;
+import cn.burgeon.core.ui.sales.SalesManagerActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
+import cn.burgeon.core.widget.UndoBarController;
+import cn.burgeon.core.widget.UndoBarStyle;
 
 public class CheckManagerActivity extends BaseActivity {
 
@@ -66,6 +70,8 @@ public class CheckManagerActivity extends BaseActivity {
                         for (Order order : orders) {
                             uploadSalesOrder(order);
                         }
+                        UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+    		        	UndoBarController.show(CheckManagerActivity.this, "盘点上传成功", null, MESSAGESTYLE);
                     }
                 }
             }
@@ -83,7 +89,7 @@ public class CheckManagerActivity extends BaseActivity {
             order.setOrderType(c.getString(c.getColumnIndex("type")));
             order.setSaleAsistant(c.getString(c.getColumnIndex("orderEmployee")));
             order.setOrderCount(c.getString(c.getColumnIndex("count")));
-            order.setBarCode(c.getString(c.getColumnIndex("barcode")));
+            order.setUuid(c.getString(c.getColumnIndex("checkUUID")));
             data.add(order);
         }
         if (c != null && !c.isClosed())
@@ -147,10 +153,19 @@ public class CheckManagerActivity extends BaseActivity {
                 refobj.put("table", 12255);
                 JSONArray addList = new JSONArray();
 
-                JSONObject item = new JSONObject();
-                item.put("QTYCOUNT", Integer.valueOf(order.getOrderCount()));
-                item.put("M_PRODUCT_ID__NAME", "108234A091-18");
-                addList.put(item);
+                List<Product> detailsItems = getDetailsData(order.getUuid());
+    			if(detailsItems != null && detailsItems.size() > 0){
+    				for(Product product : detailsItems){
+    					JSONObject item = new JSONObject();
+    					item.put("QTYCOUNT", product.getCount());
+    					item.put("M_PRODUCT_ID__NAME", product.getBarCode());
+    					addList.put(item);
+    				}
+    			}
+//                JSONObject item = new JSONObject();
+//                item.put("QTYCOUNT", Integer.valueOf(order.getOrderCount()));
+//                item.put("M_PRODUCT_ID__NAME", "108234A091-18");
+//                addList.put(item);
                 refobj.put("addList", addList);
                 refobjs.put(refobj);
 
@@ -204,6 +219,21 @@ public class CheckManagerActivity extends BaseActivity {
         } finally {
             db.endTransaction();
         }
+    }
+    
+	private List<Product> getDetailsData(String primaryKey) {
+		List<Product> details = new ArrayList<Product>();
+		Cursor c = db.rawQuery("select barcode, count from c_check_detail where checkUUID = ?", new String[]{primaryKey});
+		Product product = null;
+		while(c.moveToNext()){
+			product = new Product();
+			product.setBarCode(c.getString(c.getColumnIndex("barcode")));
+			product.setCount(c.getString(c.getColumnIndex("count")));
+			details.add(product);
+		}
+		if(c != null && !c.isClosed())
+			c.close();
+		return details;
     }
 
 }

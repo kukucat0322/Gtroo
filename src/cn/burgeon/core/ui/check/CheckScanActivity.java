@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,6 +20,7 @@ import android.widget.TextView.OnEditorActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import cn.burgeon.core.App;
@@ -181,6 +183,11 @@ public class CheckScanActivity extends BaseActivity {
                     }
                     break;
                 case R.id.gatherBtn:
+                	db.beginTransaction();
+                	db.execSQL("delete from c_check");
+                	db.execSQL("delete from c_check_detail");
+                	db.setTransactionSuccessful();
+                	db.endTransaction();
                     break;
                 case R.id.reviewBtn:
                     // 若有数据
@@ -209,9 +216,7 @@ public class CheckScanActivity extends BaseActivity {
                             @Override
                             public void onClick(View v) {
                                 // 批量更新数据库
-                                for (Product product : products) {
-                                    updateState(product);
-                                }
+                                updateState(products);
 
                                 // 关闭对话框
                                 if (customDialogForCheck.isShowing())
@@ -243,31 +248,51 @@ public class CheckScanActivity extends BaseActivity {
         dialog.show();
     }
 
-    private void updateState(Product product) {
+    private void updateState(List<Product> products) {
+    	Log.d("check", "updateState===" + products.size());
         db.beginTransaction();
         try {
             String uuid = UUID.randomUUID().toString();
             Date currentTime = new Date();
-            db.execSQL("insert into c_check('barcode', 'shelf','checkTime','checkno','count','type','orderEmployee',"
-                            + "'status','isChecked','checkUUID')" +
-                            " values(?,?,?,?,?,?,?,?,?,?)",
+            db.execSQL("insert into c_check('checkTime','checkno','count','type','orderEmployee','status','isChecked','checkUUID')" +
+                            " values(?,?,?,?,?,?,?,?)",
                     new Object[]{
-                            product.getBarCode(),
-                            shelfET.getText().toString(),
                             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(currentTime),
                             getNo(),
-                            product.getCount(),
+                            getCount(products),
                             customDialogForCheck.getCheckType(),
                             customDialogForCheck.getChecker(),
                             "已完成",
                             "未上传",
                             uuid}
             );
+            
+            for(Product product : products){
+	            db.execSQL("insert into c_check_detail('shelf','barcode','count','color','size','stylename','checkUUID')" +
+	                    " values(?,?,?,?,?,?,?)",
+		            new Object[]{
+	                    	shelfET.getText().toString(),
+		                    product.getBarCode(),
+		                    product.getCount(),
+		                    product.getColor(),
+		                    product.getSize(),
+		                    product.getName(),
+		                    uuid}
+	            		);
+            }
             db.setTransactionSuccessful();
-        } catch (Exception e) {
+        } catch (Exception e) {e.printStackTrace();
         } finally {
             db.endTransaction();
         }
+    }
+    
+    private int getCount(List<Product> products){
+    	int count = 0;
+    	for(Product pro : products){
+    		count += Integer.parseInt(pro.getCount());
+    	}
+    	return count;
     }
 
     @Override
