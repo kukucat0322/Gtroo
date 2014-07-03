@@ -1,6 +1,7 @@
 package cn.burgeon.core.ui;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,17 +12,21 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.AlertDialog;
 import android.content.res.Resources.NotFoundException;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
@@ -34,7 +39,7 @@ import com.android.volley.Response;
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
  
 	private final String TAG = "LoginActivity";
-    private Spinner storeSpinner;
+    private EditText storeSpinner;
     private EditText userET, pswET;
     private ImageView configBtn, loginBtn;
 
@@ -51,9 +56,16 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         init();
         
     }
+    
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	if(!"".equals(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey)))
+    		storeSpinner.setText(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey));
+    }
 
     private void init() {
-        storeSpinner = (Spinner) findViewById(R.id.storeSpin);
+        storeSpinner = (EditText) findViewById(R.id.storeSpin);
         userET = (EditText) findViewById(R.id.userET);
         pswET = (EditText) findViewById(R.id.pswET);
 
@@ -91,13 +103,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         String[] stores = resJAToList(response);
                         ArrayAdapter<String> adapter = new ArrayAdapter<String>(LoginActivity.this, android.R.layout.simple_spinner_item, stores);
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        storeSpinner.setAdapter(adapter);
+                        //storeSpinner.setAdapter(adapter);
 
                         // 初始化门店名
                         String storeInDBVal = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key);
                         if (storeInDBVal != null && storeInDBVal.length() > 0) {
                             int position = adapter.getPosition(storeInDBVal);
-                            storeSpinner.setSelection(position, true);
+                            //storeSpinner.setSelection(position, true);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -116,10 +128,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             	forwardActivity(SystemConfigurationActivity.class);
                 break;
             case R.id.loginBtn:
+            	if(hasConfigured()){
             	 // 存入本地
-                App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.store_key, storeSpinner.getSelectedItem().toString());
+                App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.store_key, storeSpinner.getText().toString());
                 App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.user_key, userET.getText().toString());
-            	// 跳转并传递数据
+                forwardActivity(SystemActivity.class);
+            	}else{
+            		showTips(R.string.tipsNeedConfigure);
+            	}
+                // 跳转并传递数据
                 //IntentData intentData = new IntentData();
                 //intentData.setStore(storeSpinner.getSelectedItem().toString());
                 //intentData.setUser(userET.getText().toString());
@@ -225,8 +242,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 					}
 				}).start();;*/
 				
-				forwardActivity(SystemActivity.class);
-                
                 /*
                 try {
                     Map<String, String> params = new HashMap<String, String>();
@@ -293,7 +308,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         }
     }
 
-    private String[] resJAToList(String response) throws JSONException {
+    private boolean hasConfigured() {
+    	File f = new File(this.getFilesDir().toString() + "/myDataDownload/");
+    	if (!f.exists()) {
+	    	return false;
+	    }
+		return true;
+	}
+
+	private String[] resJAToList(String response) throws JSONException {
         String[] stores = null;
 
         JSONArray resJA = new JSONArray(response);
@@ -340,6 +363,23 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             finish();
             System.exit(0);
         }
+    }
+    
+    //显示对话框
+    private void showTips(int whichTips){
+    	LayoutInflater inflater = getLayoutInflater();
+    	//布局文件待添加！！！！！！！！！！
+    	View tipsLayout = inflater.inflate(R.layout.inventory_refresh_tips, 
+    			(ViewGroup)findViewById(R.id.inventoryRefreshTipsLayout));
+    	TextView tipsText = (TextView) tipsLayout.findViewById(R.id.inventoryRefreshingTipsText);
+    	tipsText.setText(whichTips);
+    	
+    	new AlertDialog.Builder(LoginActivity.this)
+    		.setTitle(getString(R.string.tipsDataDownload))
+    		.setView(tipsLayout)
+    		.setPositiveButton(getString(R.string.confirm),null)
+    		.show();
+    	
     }
 
 }

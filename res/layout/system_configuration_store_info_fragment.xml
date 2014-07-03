@@ -16,7 +16,7 @@
         android:text="@string/storeInfoStoreIndex"
         android:gravity="left"
         android:textSize="14sp" />
-
+<!-- 
     <EditText
         android:id="@+id/storeNoEditText"
         android:layout_width="wrap_content"
@@ -29,6 +29,19 @@
         android:scrollHorizontally="true"
         android:singleLine="true"
         android:textSize="14sp" />
+   -->  
+    <AutoCompleteTextView 
+        android:id="@+id/storeNoEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minEms="12"
+        android:completionThreshold="1"
+        android:hint="请输入门店，会自动提示"
+        android:dropDownAnchor="@+id/storeNoEditText"
+        android:layout_toRightOf="@+id/storeNoTextView"
+        android:layout_alignBaseline="@+id/storeNoTextView"
+        android:layout_marginLeft="20dp"
+        android:textSize="14sp"/>
     
     <TextView
         android:id="@+id/customerNameTextView"

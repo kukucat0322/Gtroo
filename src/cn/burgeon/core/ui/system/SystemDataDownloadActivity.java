@@ -50,7 +50,8 @@ public class SystemDataDownloadActivity extends BaseActivity{
 	
 	//用户资料下载地址
 	private final String userDataURL     =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/sys_user.zip";
-	private final String[]userDataURLs   =    {userDataURL};
+	private final String storeDataURL     =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/tc_store.zip";
+	private final String[]userDataURLs   =    {storeDataURL};
 	
 	//商品资料下载地址
 	private final String productData_tc_sku_URL         =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/tc_sku.zip";
@@ -73,8 +74,10 @@ public class SystemDataDownloadActivity extends BaseActivity{
 	private final String[]vipTypeURLs      =    {vipTypeURL};
 	
 	//单品策略下载地址
-	private final String itemStrategyURL   =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/tc_stuff.zip";
-	private final String[]itemStrategyURLs =    {itemStrategyURL};
+	private final String TdefPosSkuURL   =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/TdefPosSku.zip";
+	private final String TdefPosSkuDtURL   =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/TdefPosSkuDt.zip";
+	private final String TdefPosSkuRel   =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/TdefPosSkuRel.zip";
+	private final String[]itemStrategyURLs =    {TdefPosSkuURL,TdefPosSkuDtURL,TdefPosSkuRel};
 	
 	//系统参数下载地址
 	private final String systemParamURL    =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/sys_parm.zip";
@@ -105,8 +108,10 @@ public class SystemDataDownloadActivity extends BaseActivity{
 	private final String[]vipTypeDownloadFileNames      = {vipTypeDownloadFileName};
 	
 	//单品策略
-	private final String itemStrategyDownloadFileName   = "itemStrategy.zip";
-	private final String[]itemStrategyDownloadFileNames = {itemStrategyDownloadFileName};
+	private final String TdefPosSkuDownloadFileName   = "TdefPosSku.zip";
+	private final String TdefPosSkuDtDownloadFileName   = "TdefPosSkuDt.zip";
+	private final String TdefPosSkuRelDownloadFileName   = "TdefPosSkuRel.zip";
+	private final String[]itemStrategyDownloadFileNames = {TdefPosSkuDownloadFileName,TdefPosSkuDtDownloadFileName,TdefPosSkuRelDownloadFileName};
 	
 	//系统参数
 	private final String systemParamDownloadFileName    = "systemParam.zip";
@@ -705,6 +710,18 @@ public class SystemDataDownloadActivity extends BaseActivity{
 		if(filePath.equals(userDataUnZipFiles[0])){
 			if(LocalDebug) Log.d(TAG,"插user表");
 		}
+		if(filePath.equals(userDataUnZipFiles[0])){
+			if(LocalDebug) Log.d(TAG,"插store表");
+			try{
+				db.execSQL("insert into tc_store(store,st_name,abolishied,buyerid,buyerid1,storeno,clientid,organiseid) "
+						+ "values (?,?,?,?,?,?,?,?)", 
+						new Object[]{temp[0],temp[1].substring(2),temp[2].substring(2),
+						temp[3].substring(2),temp[4].substring(2),temp[5].substring(2),
+						temp[6].substring(2),temp[7].substring(2)});
+			}catch(Exception e){
+				if(LocalDebug) Log.d(TAG,"插tc_store表失败！");
+			}	
+		}
 		
 		if(filePath.equals(productDataUnZipFiles[0])){
 			if(LocalDebug) Log.d(TAG,"插tc_sku表");
@@ -783,8 +800,43 @@ public class SystemDataDownloadActivity extends BaseActivity{
 		}
 		
 		if(filePath.equals(itemStrategyUnZipFiles[0])){
-			if(LocalDebug) Log.d(TAG,"插itemStrategy表");
-			
+			if(LocalDebug) Log.d(TAG,"插TdefPosSku表");
+			try{
+				db.execSQL("insert into TdefPosSkuDt(flowno,posdisname,describes,datebeg,dateEnd,novipdisc,creater ) "
+						+ "values (?,?,?,?,?,?,?)", 
+						new Object[]{temp[0],temp[1].substring(2),temp[2].substring(2),temp[3].substring(2),
+								temp[4].substring(2),temp[5].substring(2),temp[6].substring(2)});
+			}catch(Exception e){
+				if(LocalDebug) Log.d(TAG,"插TdefPosSku表失败！");
+			}
+		}
+		
+/*db.execSQL("CREATE TABLE IF NOT EXISTS TdefPosSku(flowno INTEGER PRIMARY KEY,posdisname varchar,describes varchar,datebeg varchar,dateEnd varchar,novipdisc varchar,creater varchar,reatetime varchar)");
+		
+		db.execSQL("CREATE TABLE IF NOT EXISTS TdefPosSkuDt(flowno INTEGER PRIMARY KEY,sku varchar,exetype varchar,exexcontent varchar,istyle varchar)");
+		
+		db.execSQL("CREATE TABLE IF NOT EXISTS TdefPosSkuRel(flowno INTEGER PRIMARY KEY,store varchar)");*/
+		
+		if(filePath.equals(itemStrategyUnZipFiles[1])){
+			if(LocalDebug) Log.d(TAG,"插TdefPosSkuDt表");
+			try{
+				db.execSQL("insert into TdefPosSkuDt(flowno,sku,exetype,exexcontent,istyle) "
+						+ "values (?,?,?,?,?)", 
+						new Object[]{temp[0],temp[1].substring(2),temp[2].substring(2),temp[3].substring(2),
+								temp[4].substring(2)});
+			}catch(Exception e){
+				if(LocalDebug) Log.d(TAG,"插TdefPosSkuDt表失败！");
+			}
+		}
+		
+		if(filePath.equals(itemStrategyUnZipFiles[2])){
+			if(LocalDebug) Log.d(TAG,"插TdefPosSkuRel表");
+			try{
+				db.execSQL("insert into TdefPosSkuRel(flowno,store) values (?,?)", 
+						new Object[]{temp[0],temp[1].substring(2)});
+			}catch(Exception e){
+				if(LocalDebug) Log.d(TAG,"插TdefPosSkuRel表失败！");
+			}
 		}
 		
 		if(filePath.equals(systemParamUnZipFiles[0])){

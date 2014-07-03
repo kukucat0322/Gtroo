@@ -1,19 +1,28 @@
 package cn.burgeon.core.ui.system;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import cn.burgeon.core.App;
 import cn.burgeon.core.R;
 import cn.burgeon.core.adapter.SystemConfigurationFragmentPagerAdapter;
+import cn.burgeon.core.ui.BaseActivity;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -33,7 +42,11 @@ public class SystemConfigurationActivity extends FragmentActivity {
     private int mPosition1;
     private int mPosition2;
     private int mPosition3;
+    private List<String> data = new ArrayList<String>();
     
+    public List<String> getStoreData(){
+    	return data;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -119,6 +132,9 @@ public class SystemConfigurationActivity extends FragmentActivity {
                 } else if (mCurrIndex == 3) {
                     animation = new TranslateAnimation(mPosition3, mPosition1, 0, 0);
                 }
+                if(data.size() == 0){
+                	fetchData();
+                }
                 break;
             case 2:
                 if (mCurrIndex == 0) {
@@ -153,6 +169,17 @@ public class SystemConfigurationActivity extends FragmentActivity {
         public void onPageScrollStateChanged(int arg0) {
         }
     }
+    
+    private List<String> fetchData() {
+    	SQLiteDatabase db = ((App)getApplication()).getDB();
+    	Cursor c = db.rawQuery("select st_name from tc_store", null);
+    	Log.d(TAG, "cursor size = " + c.getCount());
+    	while(c.moveToNext()){
+    		data.add(c.getString(c.getColumnIndex("st_name")));
+    	}
+    	if(c !=null && !c.isClosed()) c.close();
+		return data;  
+	}
     
     @Override
 	public void onBackPressed() {

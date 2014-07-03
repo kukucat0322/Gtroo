@@ -1,15 +1,27 @@
 package cn.burgeon.core.ui.system;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
+import cn.burgeon.core.ui.BaseActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
 import android.app.AlertDialog;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -18,7 +30,7 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
     private static final String TAG = "SystemConfigurationStoreInfoFragment";
   
     //输入控件
-    private EditText mStoreNoEditor;
+    private AutoCompleteTextView mStoreNoEditor;
     private EditText mCustomerNameEditor;
     private EditText mTerminalNoEditor;
     private EditText mInventoryRowCountEditor;
@@ -38,6 +50,7 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
     
     //保存按钮    
     private Button mSave;
+    ArrayAdapter adapter;
 
     static SystemConfigurationStoreInfoFragment newInstance() {
         SystemConfigurationStoreInfoFragment newFragment = new SystemConfigurationStoreInfoFragment();
@@ -47,13 +60,25 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "=====onCreate====");
+    }
+    
+    @Override
+    public void onResume() {
+    	super.onResume();
+    	Log.d(TAG, "=====onResume====");
+	    	adapter = new ArrayAdapter(getActivity(),android.R.layout.simple_dropdown_item_1line, ((SystemConfigurationActivity)getActivity()).getStoreData());
+	    	mStoreNoEditor.setAdapter(adapter);
     }
 
-    @Override
+
+
+	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.system_configuration_store_info_fragment, container, false);
         
-        mStoreNoEditor = (EditText) view.findViewById(R.id.storeNoEditText);
+        mStoreNoEditor = (AutoCompleteTextView) view.findViewById(R.id.storeNoEditText);
+        
         mCustomerNameEditor = (EditText) view.findViewById(R.id.customerNameEditText);
         mTerminalNoEditor = (EditText) view.findViewById(R.id.terminalNoEditText);
         mInventoryRowCountEditor = (EditText) view.findViewById(R.id.inventoryRowCountEditText);
@@ -71,6 +96,7 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
         return view;
 
     }
+	
 
     //保存门店信息
     private void checkToSave(){
@@ -195,5 +221,6 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
     }
-
+    
+    
 }

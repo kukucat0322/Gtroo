@@ -96,6 +96,12 @@ public class DbHelper extends SQLiteOpenHelper {
 		
 		db.execSQL("CREATE TABLE IF NOT EXISTS tc_payway(_id INTEGER PRIMARY KEY,name varchar)");
 		
+		db.execSQL("CREATE TABLE IF NOT EXISTS TdefPosSku(flowno INTEGER PRIMARY KEY,posdisname varchar,describes varchar,datebeg varchar,dateEnd varchar,novipdisc varchar,creater varchar,reatetime varchar)");
+		
+		db.execSQL("CREATE TABLE IF NOT EXISTS TdefPosSkuDt(flowno INTEGER PRIMARY KEY,sku varchar,exetype varchar,exexcontent varchar,istyle varchar)");
+		
+		db.execSQL("CREATE TABLE IF NOT EXISTS TdefPosSkuRel(flowno INTEGER PRIMARY KEY,store varchar)");
+		
 	}
 
 	@Override
