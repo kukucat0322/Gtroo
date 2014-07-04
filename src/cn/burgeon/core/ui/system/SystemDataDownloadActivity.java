@@ -802,7 +802,7 @@ public class SystemDataDownloadActivity extends BaseActivity{
 		if(filePath.equals(itemStrategyUnZipFiles[0])){
 			if(LocalDebug) Log.d(TAG,"插TdefPosSku表");
 			try{
-				db.execSQL("insert into TdefPosSkuDt(flowno,posdisname,describes,datebeg,dateEnd,novipdisc,creater ) "
+				db.execSQL("insert into TdefPosSku(flowno,posdisname,describes,datebeg,dateEnd,novipdisc,creater ) "
 						+ "values (?,?,?,?,?,?,?)", 
 						new Object[]{temp[0],temp[1].substring(2),temp[2].substring(2),temp[3].substring(2),
 								temp[4].substring(2),temp[5].substring(2),temp[6].substring(2)});
@@ -810,12 +810,6 @@ public class SystemDataDownloadActivity extends BaseActivity{
 				if(LocalDebug) Log.d(TAG,"插TdefPosSku表失败！");
 			}
 		}
-		
-/*db.execSQL("CREATE TABLE IF NOT EXISTS TdefPosSku(flowno INTEGER PRIMARY KEY,posdisname varchar,describes varchar,datebeg varchar,dateEnd varchar,novipdisc varchar,creater varchar,reatetime varchar)");
-		
-		db.execSQL("CREATE TABLE IF NOT EXISTS TdefPosSkuDt(flowno INTEGER PRIMARY KEY,sku varchar,exetype varchar,exexcontent varchar,istyle varchar)");
-		
-		db.execSQL("CREATE TABLE IF NOT EXISTS TdefPosSkuRel(flowno INTEGER PRIMARY KEY,store varchar)");*/
 		
 		if(filePath.equals(itemStrategyUnZipFiles[1])){
 			if(LocalDebug) Log.d(TAG,"插TdefPosSkuDt表");

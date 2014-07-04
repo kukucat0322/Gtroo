@@ -1,7 +1,10 @@
 package cn.burgeon.core.ui.sales;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -295,7 +298,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 
 	private void varLocal(String barcode) {
 		Log.d(TAG, "barcode2======" + barcode);
-		String sql = "select b.style_name,c.clrname,d.sizename,e.fprice"
+		String sql = "select a.style,b.style_name,c.clrname,d.sizename,e.fprice"
 					+" from tc_sku as a"
 					+" left join tc_style as b"
 					+" on a.style = b.style"
@@ -322,6 +325,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 		List<Product> items = new ArrayList<Product>(1);
 		Product pro = new Product();
 		pro.setBarCode(barcode);
+		pro.setStyle(c.getString(c.getColumnIndex("style")));
 		pro.setName(c.getString(c.getColumnIndex("style_name")));
 		pro.setPrice(c.getString(c.getColumnIndex("fprice")));
 		pro.setColor(c.getString(c.getColumnIndex("clrname")));
@@ -340,31 +344,70 @@ public class SalesNewOrderActivity extends BaseActivity {
 //		Log.d(TAG, "salesTypeSP=" + salesTypeSP.getSelectedItemPosition());
 //		Log.d(TAG, "price=" + pro.getPrice());
 		switch (salesTypeSP.getSelectedItemPosition()) {
-		case 0://正常
-			if(cardNoET.getText().length() > 0)
-				pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
-			else
-				pro.setMoney(String.format("%.2f",price * proDiscount));
-			break;
-		case 1://全额
-			if(cardNoET.getText().length() > 0)
-				pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
-			else
-				pro.setMoney(String.format("%.2f",price * proDiscount));
-			break;
-		case 2://赠送
-			pro.setMoney("0.00");
-			break;
-		case 3://退货
-			pro.setCount("-1");
-			pro.setMoney(pro.getPrice());
-			break;
-		default:
-			break;
+			case 0://正常
+				if(cardNoET.getText().length() > 0){
+					//策略
+					pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
+				}else{
+					pro.setMoney(String.format("%.2f",price * proDiscount));
+				}
+				break;
+			case 1://全额
+				if(cardNoET.getText().length() > 0)
+					pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
+				else
+					pro.setMoney(String.format("%.2f",price * proDiscount));
+				break;
+			case 2://赠送
+				pro.setMoney("0.00");
+				break;
+			case 3://退货
+				pro.setCount("-1");
+				pro.setMoney(pro.getPrice());
+				break;
+			default:
+				break;
 		}
 		
 		items.add(pro);
 		return items;
+	}
+	
+	private boolean isFitPolicy(Product pro){
+		boolean flag1 = false;
+		boolean flag2 = false;
+		boolean flag3 = false;
+		String flowNO = null;
+		//1.是否在策略中
+		Cursor c = db.rawQuery("select * from TdefPosSkuDt where sku = ?", new String[]{pro.getStyle()});
+		if(c.moveToFirst()){
+			flag1 = true;
+			flowNO = c.getString(c.getColumnIndex("flowno"));
+		} else return false;
+		//2.策略有没有本店
+		c = db.rawQuery("select * from TdefPosSkuRel where store = ?", new String[]{"4024"});
+		if(c.getCount() > 0) flag2 = true;
+		else return false;
+		//3.策略有没有过期
+		c = db.rawQuery("select * from TdefPosSku where flowno = ?", new String[]{flowNO});
+		if(c.moveToFirst()){
+			try {
+				String start = c.getString(c.getColumnIndex("datebeg"));
+				String end = c.getString(c.getColumnIndex("dateEnd"));
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+				Date date1 = sdf.parse(start);
+				Date date2 = sdf.parse(end);
+				Calendar c1 = Calendar.getInstance();
+				Calendar c2 = Calendar.getInstance();
+				Calendar now = Calendar.getInstance();
+				c1.setTime(date1);
+				c2.setTime(date2);
+				now.setTime(new Date());
+				if(c1.before(now) && now.before(c2))
+					flag = true;
+			} catch (ParseException e) {}
+		}else return false;
+		return flag1 && flag2 && flag3;
 	}
 
 
