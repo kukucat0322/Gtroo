@@ -346,13 +346,14 @@ public class SalesNewOrderActivity extends BaseActivity {
 		switch (salesTypeSP.getSelectedItemPosition()) {
 			case 0://正常
 				if(cardNoET.getText().length() > 0){
-					//策略
 					pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
 				}else{
+					//策略
+					if(!isFitPolicy(pro))
 					pro.setMoney(String.format("%.2f",price * proDiscount));
 				}
 				break;
-			case 1://全额
+			case 1://全额 
 				if(cardNoET.getText().length() > 0)
 					pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
 				else
@@ -378,14 +379,17 @@ public class SalesNewOrderActivity extends BaseActivity {
 		boolean flag2 = false;
 		boolean flag3 = false;
 		String flowNO = null;
+		String money = null;
 		//1.是否在策略中
 		Cursor c = db.rawQuery("select * from TdefPosSkuDt where sku = ?", new String[]{pro.getStyle()});
 		if(c.moveToFirst()){
 			flag1 = true;
 			flowNO = c.getString(c.getColumnIndex("flowno"));
+			money = c.getString(c.getColumnIndex("exexcontent"));
+			pro.setMoney(money);
 		} else return false;
 		//2.策略有没有本店
-		c = db.rawQuery("select * from TdefPosSkuRel where store = ?", new String[]{"4024"});
+		c = db.rawQuery("select * from TdefPosSkuRel where store = ?", new String[]{App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey)});
 		if(c.getCount() > 0) flag2 = true;
 		else return false;
 		//3.策略有没有过期
@@ -395,7 +399,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 				String start = c.getString(c.getColumnIndex("datebeg"));
 				String end = c.getString(c.getColumnIndex("dateEnd"));
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-				Date date1 = sdf.parse(start);
+				Date date1 = sdf.parse(start); 
 				Date date2 = sdf.parse(end);
 				Calendar c1 = Calendar.getInstance();
 				Calendar c2 = Calendar.getInstance();
@@ -404,7 +408,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 				c2.setTime(date2);
 				now.setTime(new Date());
 				if(c1.before(now) && now.before(c2))
-					flag = true;
+					flag3 = true;
 			} catch (ParseException e) {}
 		}else return false;
 		return flag1 && flag2 && flag3;

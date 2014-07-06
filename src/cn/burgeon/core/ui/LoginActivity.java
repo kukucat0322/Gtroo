@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.content.res.Resources.NotFoundException;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -130,6 +131,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             case R.id.loginBtn:
             	if(hasConfigured()){
             	 // 存入本地
+            	App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.storeNumberKey, getStoreNo());
                 App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.store_key, storeSpinner.getText().toString());
                 App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.user_key, userET.getText().toString());
                 forwardActivity(SystemActivity.class);
@@ -308,7 +310,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         }
     }
 
-    private boolean hasConfigured() {
+    private String getStoreNo() {
+    	String store = "-9999";
+		Cursor c = db.rawQuery("select store from tc_store where st_name = ?", new String[]{storeSpinner.getText().toString()});
+		if(c.moveToFirst()){
+			store = c.getString(0);
+		}
+		if(c != null && !c.isClosed()) c.close();
+		return store;
+	}
+
+	private boolean hasConfigured() {
     	File f = new File(this.getFilesDir().toString() + "/myDataDownload/");
     	if (!f.exists()) {
 	    	return false;
