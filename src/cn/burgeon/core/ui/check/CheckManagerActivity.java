@@ -2,6 +2,8 @@ package cn.burgeon.core.ui.check;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -146,15 +148,18 @@ public class CheckManagerActivity extends BaseActivity {
                 //detailobjs
                 JSONObject detailObjs = new JSONObject();
                 //reftables
-                detailObjs.put("reftables", new JSONArray().put(319));
+               
                 //refobjs
                 JSONArray refobjs = new JSONArray();
+                
+                //明细
                 JSONObject refobj = new JSONObject();
                 refobj.put("table", 12255);
                 JSONArray addList = new JSONArray();
 
                 List<Product> detailsItems = getDetailsData(order.getUuid());
     			if(detailsItems != null && detailsItems.size() > 0){
+    				Log.d("check", "========明细=========");
     				for(Product product : detailsItems){
     					JSONObject item = new JSONObject();
     					item.put("QTYCOUNT", product.getCount());
@@ -162,28 +167,47 @@ public class CheckManagerActivity extends BaseActivity {
     					addList.put(item);
     				}
     			}
-//                JSONObject item = new JSONObject();
-//                item.put("QTYCOUNT", Integer.valueOf(order.getOrderCount()));
-//                item.put("M_PRODUCT_ID__NAME", "108234A091-18");
-//                addList.put(item);
                 refobj.put("addList", addList);
                 refobjs.put(refobj);
+                
+                //按货架扫描明细
+                JSONObject refobj2 = new JSONObject();
+                refobj2.put("table", 15743);
+                JSONArray addList2 = new JSONArray();
+
+                List<Product> shelfDetailsItems = getDetailsData(order.getUuid());
+    			if(shelfDetailsItems != null && shelfDetailsItems.size() > 0){
+    				Log.d("check", "========按货架扫描明细=========");
+    				for(Product product : shelfDetailsItems){
+    					JSONObject item2 = new JSONObject();
+    					item2.put("SHELFNO", product.getShelf());
+    					item2.put("QTYCOUNT", product.getCount());
+    					item2.put("M_PRODUCT_ID__NAME", product.getBarCode());
+    					addList2.put(item2);
+    				}
+    			}
+                refobj2.put("addList", addList2);
+                refobjs.put(refobj2);
 
                 detailObjs.put("refobjs", refobjs);
+                detailObjs.put("reftables", new JSONArray().put(319)/*.put(1274)*/);
                 paramsInTransactions.put("detailobjs", detailObjs);
 
                 transactions.put("params", paramsInTransactions);
                 array.put(transactions);
+                Log.d("check", array.toString());
                 params.put("transactions", array.toString());
                 sendRequest(params, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        RequestResult result = parseResult(response);
-                        //请求成功，更新记录状态和销售单号
-                        if ("0".equals(result.getCode())) {
-                            updateOrderStatus(result, order);
-                        }
-
+                    	Log.d("check", response);
+                    	if(!TextUtils.isEmpty(response)){
+	                        RequestResult result = parseResult(response);
+	                        //请求成功，更新记录状态和销售单号
+	                        if ("0".equals(result.getCode())) {
+	                            updateOrderStatus(result, order);
+	                        }
+                    	}
                         // 取消进度条
                         stopProgressDialog();
                     }
@@ -229,6 +253,7 @@ public class CheckManagerActivity extends BaseActivity {
 			product = new Product();
 			product.setBarCode(c.getString(c.getColumnIndex("barcode")));
 			product.setCount(c.getString(c.getColumnIndex("count")));
+			product.setShelf(c.getString(c.getColumnIndex("shelf")));
 			details.add(product);
 		}
 		if(c != null && !c.isClosed())

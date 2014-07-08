@@ -17,6 +17,7 @@ public class Order {
 	private String orderCount;
 	private String orderMoney;
 	private String isChecked;
+	private String shelfNO;
 	public Order() {
 		super();
 	}
@@ -126,5 +127,11 @@ public class Order {
 	}
 	public void setOrderMoney(String orderMoney) {
 		this.orderMoney = orderMoney;
+	}
+	public String getShelfNO() {
+		return shelfNO;
+	}
+	public void setShelfNO(String shelfNO) {
+		this.shelfNO = shelfNO;
 	}
 }

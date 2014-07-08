@@ -167,7 +167,7 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
     	
     	//保存门店编号
     	if(!TextUtils.isEmpty(storeNo)){
-    		App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.storeNumberKey, storeNo);
+    		App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.store_key, storeNo);
     	}
     	//保存顾客名称
     	if(!TextUtils.isEmpty(customerName)){

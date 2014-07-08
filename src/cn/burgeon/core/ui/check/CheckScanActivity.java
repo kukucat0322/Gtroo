@@ -4,16 +4,20 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ListView;
+import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -42,6 +46,7 @@ public class CheckScanActivity extends BaseActivity {
     private CheckScanLVAdapter mAdapter;
 
     private CustomDialogForCheck customDialogForCheck;
+    private String selfNo = "01";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +64,7 @@ public class CheckScanActivity extends BaseActivity {
         TextView currTimeTV = (TextView) findViewById(R.id.currTimeTV);
         currTimeTV.setText(getCurrDate());
         shelfET = (EditText) findViewById(R.id.shelfET);
+        shelfET.setOnFocusChangeListener(l);
         barcodeET = (EditText) findViewById(R.id.barcodeET);
         barcodeET.setOnEditorActionListener(editorActionListener);
 
@@ -300,12 +306,12 @@ public class CheckScanActivity extends BaseActivity {
         super.onDestroy();
 
         // 若有未审核的数据，则存入数据库
-        if (products.size() > 0) {
+        /*if (products.size() > 0) {
             for (Product product : products) {
                 // 插入数据
                 updateCheckTable(product);
             }
-        }
+        }*/
     }
 
     private void updateCheckTable(Product currProduct) {
@@ -358,7 +364,23 @@ public class CheckScanActivity extends BaseActivity {
         sb.append(finalCheckNo.toString());
         return sb.toString();
     }
-
+    
+    OnFocusChangeListener l = new OnFocusChangeListener() {
+		
+		@Override
+		public void onFocusChange(View view, boolean hasFocus) {
+			// TODO Auto-generated method stub
+			if(!hasFocus){
+				if(shelfET.getText().length() > 0){
+					if(!selfNo.equals(shelfET.getText().toString())){
+						Log.d("check", "=========");
+						products.clear();
+					}
+				}
+			}
+		}
+	};
+    
     /*@Override
     public void onClick(View v) {
 		switch (v.getId()) {

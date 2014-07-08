@@ -49,17 +49,18 @@ public class SystemDataDownloadActivity extends BaseActivity{
 	private String downloadPath;
 	
 	//用户资料下载地址
-	private final String userDataURL     =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/sys_user.zip";
-	private final String storeDataURL     =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/tc_store.zip";
+	private final String baseUrl = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.downloadURLAddressKey);
+	private final String userDataURL     =    baseUrl + "/sys_user.zip";
+	private final String storeDataURL    =    baseUrl + "/tc_store.zip";
 	private final String[]userDataURLs   =    {storeDataURL};
 	
 	//商品资料下载地址
-	private final String productData_tc_sku_URL         =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/tc_sku.zip";
-	private final String productData_tc_style_URL       =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/tc_style.zip";
-	private final String productData_tc_styleprice_URL  =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/tc_styleprice.zip";
-	private final String productData_TdefClr_URL        =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/TdefClr.zip";
-	private final String productData_TdefSize_URL       =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/TdefSize.zip";
-	private final String productData_tc_payway_URL      =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/tc_payway.zip";
+	private final String productData_tc_sku_URL         =    baseUrl + "/tc_sku.zip";
+	private final String productData_tc_style_URL       =    baseUrl + "/tc_style.zip";
+	private final String productData_tc_styleprice_URL  =    baseUrl + "/tc_styleprice.zip";
+	private final String productData_TdefClr_URL        =    baseUrl + "/TdefClr.zip";
+	private final String productData_TdefSize_URL       =    baseUrl + "/TdefSize.zip";
+	private final String productData_tc_payway_URL      =    baseUrl + "/tc_payway.zip";
 	private final String[]productDataURLs = {
 		productData_tc_sku_URL,
 		productData_tc_style_URL,
@@ -70,17 +71,17 @@ public class SystemDataDownloadActivity extends BaseActivity{
 	};
 	
 	//会员类型下载地址								
-	private final String vipTypeURL        =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/tc_vip.zip";
+	private final String vipTypeURL        =    baseUrl + "/tc_vip.zip";
 	private final String[]vipTypeURLs      =    {vipTypeURL};
 	
 	//单品策略下载地址
-	private final String TdefPosSkuURL   =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/TdefPosSku.zip";
-	private final String TdefPosSkuDtURL   =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/TdefPosSkuDt.zip";
-	private final String TdefPosSkuRel   =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/TdefPosSkuRel.zip";
+	private final String TdefPosSkuURL     =    baseUrl + "/TdefPosSku.zip";
+	private final String TdefPosSkuDtURL   =    baseUrl + "/TdefPosSkuDt.zip";
+	private final String TdefPosSkuRel     =    baseUrl + "/TdefPosSkuRel.zip";
 	private final String[]itemStrategyURLs =    {TdefPosSkuURL,TdefPosSkuDtURL,TdefPosSkuRel};
 	
 	//系统参数下载地址
-	private final String systemParamURL    =    "http://g.burgeon.cn:2080/portalpospda/DownloadFiles/sys_parm.zip";
+	private final String systemParamURL    =    baseUrl + "/sys_parm.zip";
 	private final String[]systemParamURLs  =    {systemParamURL};
 	
 	//下载完之后保存的文件名字
@@ -108,9 +109,9 @@ public class SystemDataDownloadActivity extends BaseActivity{
 	private final String[]vipTypeDownloadFileNames      = {vipTypeDownloadFileName};
 	
 	//单品策略
-	private final String TdefPosSkuDownloadFileName   = "TdefPosSku.zip";
+	private final String TdefPosSkuDownloadFileName     = "TdefPosSku.zip";
 	private final String TdefPosSkuDtDownloadFileName   = "TdefPosSkuDt.zip";
-	private final String TdefPosSkuRelDownloadFileName   = "TdefPosSkuRel.zip";
+	private final String TdefPosSkuRelDownloadFileName  = "TdefPosSkuRel.zip";
 	private final String[]itemStrategyDownloadFileNames = {TdefPosSkuDownloadFileName,TdefPosSkuDtDownloadFileName,TdefPosSkuRelDownloadFileName};
 	
 	//系统参数
@@ -676,6 +677,7 @@ public class SystemDataDownloadActivity extends BaseActivity{
 
 	//开始解析
 	private void parseFile(String filePath){
+		Log.d(TAG, "parseFile" + filePath);
         BufferedReader reader = null;
         try {
         	reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath),"gbk"));

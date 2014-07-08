@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -124,10 +125,6 @@ import com.android.volley.Response;
 					addList.put(item);
 				}
 			}
-			//JSONObject item = new JSONObject();
-			//item.put("QTY", 2);
-			//item.put("M_PRODUCT_ID__NAME", "108234A091-18");
-			//addList.put(item);
 			refobj.put("addList",addList);
 			refobjs.put(refobj);
 			
@@ -146,11 +143,6 @@ import com.android.volley.Response;
 					addList2.put(payitem);
 				}
 			}
-			//JSONObject item2 = new JSONObject();
-			//item2.put("PAYAMOUNT", 369.60);
-			//item2.put("C_PAYWAY_ID__NAME", "现金");
-			//addList2.put(item2);
-			
 			refobj2.put("addList",addList2);
 			refobjs.put(refobj2);
 			
@@ -166,10 +158,12 @@ import com.android.volley.Response;
 				@Override
 				public void onResponse(String response) {
 					Log.d(TAG, response);
-					RequestResult result = parseResult(response);
-					//请求成功，更新记录状态
-					if("0".equals(result.getCode())){
-						updateOrderStatus(result,order);
+					if(!TextUtils.isEmpty(response)){
+						RequestResult result = parseResult(response);
+						//请求成功，更新记录状态
+						if("0".equals(result.getCode())){
+							updateOrderStatus(result,order);
+						}
 					}
 					// 取消进度条
                     stopProgressDialog();

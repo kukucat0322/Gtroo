@@ -61,12 +61,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     @Override
     protected void onResume() {
     	super.onResume();
-    	if(!"".equals(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey)))
-    		storeSpinner.setText(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey));
+    	if(!"".equals(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key)))
+    		storeSpinner.setText(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
     }
 
     private void init() {
-        storeSpinner = (EditText) findViewById(R.id.storeSpin);
+        storeSpinner = (EditText) findViewById(R.id.storeSpin);    
         userET = (EditText) findViewById(R.id.userET);
         pswET = (EditText) findViewById(R.id.pswET);
 
