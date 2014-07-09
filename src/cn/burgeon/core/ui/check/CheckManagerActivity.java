@@ -247,7 +247,7 @@ public class CheckManagerActivity extends BaseActivity {
     
 	private List<Product> getDetailsData(String primaryKey) {
 		List<Product> details = new ArrayList<Product>();
-		Cursor c = db.rawQuery("select barcode, count from c_check_detail where checkUUID = ?", new String[]{primaryKey});
+		Cursor c = db.rawQuery("select barcode, count,  shelf from c_check_detail where checkUUID = ?", new String[]{primaryKey});
 		Product product = null;
 		while(c.moveToNext()){
 			product = new Product();

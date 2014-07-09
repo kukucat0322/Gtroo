@@ -2,11 +2,13 @@ package cn.burgeon.core;
 
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap.CompressFormat;
 import android.util.DisplayMetrics;
+import cn.burgeon.core.bean.Employee;
 import cn.burgeon.core.db.DbHelper;
 import cn.burgeon.core.ic.ImageCacheManager;
 import cn.burgeon.core.ic.ImageCacheManager.CacheType;
@@ -25,6 +27,7 @@ public class App extends Application {
     private String SIPPSWDMD5;
     private DbHelper helper;
     protected SQLiteDatabase db;
+    private ArrayList<Employee> employees = new ArrayList<Employee>();
 
     private static SimonHttpStack simonHttpStack;
 
@@ -122,6 +125,15 @@ public class App extends Application {
     
     public SQLiteDatabase getDB(){
     	return db;
+    }
+    
+    public void clearEmployee(){
+    	if(!employees.isEmpty())
+    		employees.clear();
+    }
+    
+    public ArrayList<Employee> getEmployees(){
+    	return employees;
     }
 
 }

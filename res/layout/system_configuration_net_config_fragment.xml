@@ -28,7 +28,8 @@
         android:textSize="14sp" 
         android:text="http://g.burgeon.cn:2080/portalpospda/DownloadFiles"/>
     
-    <!-- http://g.burgeon.cn:2080/portalpospda/DownloadFiles -->
+    <!-- http://g.burgeon.cn:2080/xepospda -->
+    <!--  -->
     
     <TextView
         android:id="@+id/interactiveURLAddressTextView"

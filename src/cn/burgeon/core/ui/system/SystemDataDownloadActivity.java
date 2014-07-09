@@ -678,32 +678,33 @@ public class SystemDataDownloadActivity extends BaseActivity{
 	//开始解析
 	private void parseFile(String filePath){
 		Log.d(TAG, "parseFile" + filePath);
-        BufferedReader reader = null;
-        try {
-        	reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath),"gbk"));
-    		String line = null; 
-    		String[]data = null;
-           
-    		db.beginTransaction();
-            while ((line = reader.readLine()) != null) { 
-            	data = line.split(",");
-  		        if(LocalDebug) Log.d(TAG,"____" + data.length );
-  		        //让我们来插表吧
-			              插表(filePath,data);               
-            }
-            db.setTransactionSuccessful();
-            db.endTransaction();
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e1) {}
-            }
-        }
-	
+		if(filePath != null){
+	        BufferedReader reader = null;
+	        try {
+	        	reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath),"gbk"));
+	    		String line = null; 
+	    		String[]data = null;
+	           
+	    		db.beginTransaction();
+	            while ((line = reader.readLine()) != null) { 
+	            	data = line.split(",");
+	  		        if(LocalDebug) Log.d(TAG,"____" + data.length );
+	  		        //让我们来插表吧
+				              插表(filePath,data);               
+	            }
+	            db.setTransactionSuccessful();
+	            db.endTransaction();
+	            reader.close();
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        } finally {
+	            if (reader != null) {
+	                try {
+	                    reader.close();
+	                } catch (IOException e1) {}
+	            }
+	        }
+		}
 	}
 
 	//插表！
