@@ -290,13 +290,14 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
     }
     
 	private void parseResult(String response) {
-		mApp.clearEmployee();
-		ArrayList<Employee> employees = mApp.getEmployees();
+		SQLiteDatabase db = mApp.getDB();
         try {
 			JSONArray resJA = new JSONArray(response);
 			JSONObject resJO = resJA.getJSONObject(0);
 			JSONArray rowsJA = resJO.getJSONArray("rows");
 			int len = rowsJA.length();
+			db.beginTransaction();
+			db.execSQL("delete from employee");
 			for (int i = 0; i < len; i++) {
 			    // ["BURGEON1108001","权威全额","苏州经销商","苏州001"]
 			    String currRow = rowsJA.get(i).toString();
@@ -307,8 +308,12 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
 			    employee.setName(currRows[1].substring(1, currRows[1].length() - 1));
 			    employee.setAgency(currRows[2].substring(1, currRows[2].length() - 1));
 			    employee.setStore(currRows[3].substring(1, currRows[3].length() - 2));
-			    employees.add(employee);
+
+			    db.execSQL("insert into employee(id,name,agency,store) values(?,?,?,?)", 
+			    		new Object[]{employee.getId(),employee.getName(),employee.getAgency(),employee.getStore()});
 			}
+			db.setTransactionSuccessful();
+			db.endTransaction();
 		} catch (JSONException e) {
 			Log.d(TAG, e.toString());
 		}

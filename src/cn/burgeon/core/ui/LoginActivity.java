@@ -1,10 +1,6 @@
 package cn.burgeon.core.ui;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +9,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
-import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,7 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
-import cn.burgeon.core.bean.IntentData;
 import cn.burgeon.core.ui.system.SystemConfigurationActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
 
@@ -41,7 +35,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
  
 	private final String TAG = "LoginActivity";
     private EditText storeSpinner;
-    private EditText userET, pswET;
+    private EditText  pswET;
+    private Spinner userSpinner;
     private ImageView configBtn, loginBtn;
 
     @Override
@@ -64,11 +59,29 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     	if(!"".equals(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key)))
     		storeSpinner.setText(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
     	Log.d(TAG, "employee size:"+mApp.getEmployees().size());
+    	ArrayAdapter<String> adapter = new ArrayAdapter<String>(LoginActivity.this, android.R.layout.simple_spinner_item, getEmployees());
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        userSpinner.setAdapter(adapter);
+        //userSpinner.setSelection(position);
     }
 
-    private void init() {
+    private String[] getEmployees() {
+		Cursor c = db.rawQuery("select name from employee",null);
+		if(c!=null){
+			int i = 0;
+			String[] employees = new String[c.getCount()];
+			while(c.moveToNext()){
+				employees[i++] = c.getString(c.getColumnIndex("name"));
+			}
+			if(!c.isClosed()) c.close();
+			return employees;
+		}
+		return new String[]{};
+	}
+
+	private void init() {
         storeSpinner = (EditText) findViewById(R.id.storeSpin);    
-        userET = (EditText) findViewById(R.id.userET);
+        userSpinner = (Spinner) findViewById(R.id.userET);
         pswET = (EditText) findViewById(R.id.pswET);
 
         configBtn = (ImageView) findViewById(R.id.configBtn);
@@ -133,7 +146,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             	if(hasConfigured()){
             	 // 存入本地
                 App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.store_key, storeSpinner.getText().toString());
-                App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.user_key, userET.getText().toString());
+                App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.user_key, userSpinner.getSelectedItem().toString());
                 forwardActivity(SystemActivity.class);
             	}else{
             		showTips(R.string.tipsNeedConfigure);

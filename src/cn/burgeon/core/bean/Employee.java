@@ -29,5 +29,8 @@ public class Employee {
 	public void setStore(String store) {
 		this.store = store;
 	}
-	
+	@Override
+	public String toString() {
+		return getName();
+	}
 }

@@ -102,6 +102,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		
 		db.execSQL("CREATE TABLE IF NOT EXISTS TdefPosSkuRel(flowno INTEGER PRIMARY KEY,store varchar)");
 		
+		db.execSQL("CREATE TABLE IF NOT EXISTS employee(id varchar,name varchar,agency varchar,store varchar)");
+		
 	}
 
 	@Override

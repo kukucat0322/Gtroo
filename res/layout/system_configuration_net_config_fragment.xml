@@ -26,10 +26,10 @@
         android:layout_below="@+id/downloadURLAddressTextView"
         android:singleLine="true"
         android:textSize="14sp" 
-        android:text="http://g.burgeon.cn:2080/portalpospda/DownloadFiles"/>
+        android:text="http://g.burgeon.cn:2080/xepospda"/>
     
     <!-- http://g.burgeon.cn:2080/xepospda -->
-    <!--  -->
+    <!-- http://g.burgeon.cn:2080/portalpospda/DownloadFiles -->
     
     <TextView
         android:id="@+id/interactiveURLAddressTextView"
@@ -53,7 +53,7 @@
         android:layout_below="@+id/interactiveURLAddressTextView"
         android:singleLine="true"
         android:textSize="14sp" 
-        android:text="http://g.burgeon.cn:90/servlets/binserv/Rest"/>
+        android:text="http://g.burgeon.cn:290/servlets/binserv/Rest"/>
     
     <Button
         android:id="@+id/serverTestButton"
