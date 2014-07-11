@@ -17,6 +17,20 @@ public class Member implements Parcelable{
 	private String discount;
 	private String yue;
 	private String status;
+	private int customerID;
+	private int storeID;
+	public int getCustomerID() {
+		return customerID;
+	}
+	public void setCustomerID(int customerID) {
+		this.customerID = customerID;
+	}
+	public int getStoreID() {
+		return storeID;
+	}
+	public void setStoreID(int storeID) {
+		this.storeID = storeID;
+	}
 	public String getStatus() {
 		return status;
 	}

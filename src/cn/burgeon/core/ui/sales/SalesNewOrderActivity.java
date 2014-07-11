@@ -211,7 +211,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 		newSalesOrderDateET.setText(getCurrDate());
 		styleBarcodeET = (EditText) findViewById(R.id.styleBarcodeET);
 		styleBarcodeET.setOnEditorActionListener(editorActionListener);
-		styleBarcodeET.setText("1351600237S");
+		//styleBarcodeET.setText("1351600237S");
 		mListView = (ListView) findViewById(R.id.newOrderLV);
 		mAdapter = new SalesNewOrderAdapter(data, this);
 		mListView.setAdapter(mAdapter);

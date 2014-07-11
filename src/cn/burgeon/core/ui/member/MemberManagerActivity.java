@@ -12,7 +12,9 @@ import org.json.JSONObject;
 import com.android.volley.Response;
 
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -23,6 +25,7 @@ import cn.burgeon.core.App;
 import cn.burgeon.core.Constant;
 import cn.burgeon.core.R;
 import cn.burgeon.core.adapter.MemberManagerAdapter;
+import cn.burgeon.core.bean.Employee;
 import cn.burgeon.core.bean.Member;
 import cn.burgeon.core.bean.Order;
 import cn.burgeon.core.bean.RequestResult;
@@ -58,14 +61,11 @@ public class MemberManagerActivity extends BaseActivity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				String itemValue = (String) parent.getItemAtPosition(position);
-				if (itemValue != null
-						&& Constant.memberManagerTextValues[0].equals(itemValue)) {
+				if (itemValue != null && Constant.memberManagerTextValues[0].equals(itemValue)) {
 					forwardActivity(MemberRegistActivity.class);
-				} else if (itemValue != null
-						&& Constant.memberManagerTextValues[1].equals(itemValue)) {
+				} else if (itemValue != null && Constant.memberManagerTextValues[1].equals(itemValue)) {
 					forwardActivity(MemberListActivity.class);
-				} else if (itemValue != null
-						&& Constant.memberManagerTextValues[2].equals(itemValue)) {
+				} else if (itemValue != null && Constant.memberManagerTextValues[2].equals(itemValue)) {
 					List<Member> vips = query();
 					if(vips != null && vips.size() > 0){
 						for(Member vip : vips){
@@ -74,11 +74,98 @@ public class MemberManagerActivity extends BaseActivity {
 					}
 					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
 		        	UndoBarController.show(MemberManagerActivity.this, "会员上传成功", null, MESSAGESTYLE);
-				}else if (itemValue != null
-						&& Constant.memberManagerTextValues[2].equals(itemValue)) {
+				}else if (itemValue != null && Constant.memberManagerTextValues[3].equals(itemValue)) {
+					downloadVips();
 				}
 			}
 		});
+	}
+	
+	private void downloadVips(){
+		String storeNo = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey);
+		sendRequest(constructParams(storeNo), new Response.Listener<String>() {
+			@Override
+			public void onResponse(String response) {
+				Log.d(TAG, response);
+				if(!TextUtils.isEmpty(response)){
+					parseVips(response);
+				}
+			}
+		});
+	}
+	
+	private void parseVips(String response) {
+        try {
+			JSONArray resJA = new JSONArray(response);
+			JSONObject resJO = resJA.getJSONObject(0);
+			JSONArray rowsJA = resJO.getJSONArray("rows");
+			int len = rowsJA.length();
+			db.beginTransaction();
+			for (int i = 0; i < len; i++) {
+				/*paramsInTransactions.put("columns", new JSONArray().put("ID")
+						.put("CARDNO").put("C_VIPTYPE_ID").put("C_CUSTOMER_ID")
+						.put("C_STORE_ID").put("VIPNAME")
+						.put("MOBIL").put("SEX"));*/
+			    // [288,"12345678",67,448,597,"陈立立",null,"女"]
+			    String currRow = rowsJA.get(i).toString();
+			    String[] currRows = currRow.split(",");
+
+			    Member vip = new Member();
+			    vip.setId(Integer.parseInt(currRows[0].substring(1)));
+			    vip.setCardNum(currRows[1].substring(1, currRows[1].length() - 1));
+			    vip.setType(currRows[2]);
+			    vip.setCustomerID(Integer.parseInt(currRows[3]));
+			    vip.setStoreID(Integer.parseInt(currRows[4]));
+			    vip.setName(currRows[5].substring(1, currRows[5].length() - 1));
+			    vip.setPhoneNum("null".equals(currRows[6])?"":currRows[6].substring(1, currRows[6].length() - 1));
+			    vip.setSex(currRows[7].substring(1, currRows[7].length() - 1));
+
+				/*db.execSQL("CREATE TABLE IF NOT EXISTS c_vip" +  
+		                "(_id INTEGER PRIMARY KEY, cardno VARCHAR,status varchar,"+
+						"name VARCHAR, sex VARCHAR,idno VARCHAR,mobile VARCHAR,birthday VARCHAR,storeID varchar,customerID varchar,"+
+		                "employee VARCHAR,email VARCHAR,createTime VARCHAR,type VARCHAR,discount varchar)");
+				*/
+			    db.execSQL("insert into c_vip(_id,cardno,type,customerID,storeID,name,mobile,sex) "
+			    		+ "values(?,?,?,?,?,?,?,?)", 
+			    		new Object[]{vip.getId(),vip.getCardNum(),vip.getType(),vip.getCustomerID(),
+			    				vip.getStoreID(),vip.getName(),vip.getPhoneNum(),vip.getSex()});
+			}
+			db.setTransactionSuccessful();
+			db.endTransaction();
+		} catch (JSONException e) {
+			Log.d(TAG, e.toString());
+		}
+	}
+	
+    private Map<String, String> constructParams(String storeNo) {
+    	Map<String,String> params = new HashMap<String, String>();
+		JSONArray array;
+		JSONObject transactions;
+		try {
+			array = new JSONArray();
+			transactions = new JSONObject();
+			transactions.put("id", 112);
+			transactions.put("command", "Query");
+			JSONObject paramsInTransactions = new JSONObject();
+			paramsInTransactions.put("table", 12899);
+			paramsInTransactions.put("columns", new JSONArray().put("ID")
+					.put("CARDNO").put("C_VIPTYPE_ID").put("C_CUSTOMER_ID")
+					.put("C_STORE_ID").put("VIPNAME")
+					.put("MOBIL").put("SEX"));
+			
+			//查询条件的params
+			JSONObject queryParams = new JSONObject();
+			queryParams.put("column", "C_STORE_ID");
+			queryParams.put("condition", "=" + storeNo);
+			paramsInTransactions.put("params", queryParams);
+			
+			transactions.put("params", paramsInTransactions);
+			array.put(transactions);
+			Log.d(TAG, array.toString());
+			params.put("transactions", array.toString());
+			
+		} catch (JSONException e) {}
+		return params;
 	}
 	
 	private void upload(final Member vip) {

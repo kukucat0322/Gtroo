@@ -26,7 +26,7 @@
         android:layout_below="@+id/downloadURLAddressTextView"
         android:singleLine="true"
         android:textSize="14sp" 
-        android:text="http://g.burgeon.cn:2080/xepospda"/>
+        android:text="http://g.burgeon.cn:2080/xepospda/DownloadFiles"/>
     
     <!-- http://g.burgeon.cn:2080/xepospda -->
     <!-- http://g.burgeon.cn:2080/portalpospda/DownloadFiles -->
