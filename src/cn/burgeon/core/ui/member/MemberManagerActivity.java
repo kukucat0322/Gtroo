@@ -89,6 +89,7 @@ public class MemberManagerActivity extends BaseActivity {
 				Log.d(TAG, response);
 				if(!TextUtils.isEmpty(response)){
 					parseVips(response);
+					stopProgressDialog();
 				}
 			}
 		});
@@ -118,17 +119,17 @@ public class MemberManagerActivity extends BaseActivity {
 			    vip.setStoreID(Integer.parseInt(currRows[4]));
 			    vip.setName(currRows[5].substring(1, currRows[5].length() - 1));
 			    vip.setPhoneNum("null".equals(currRows[6])?"":currRows[6].substring(1, currRows[6].length() - 1));
-			    vip.setSex(currRows[7].substring(1, currRows[7].length() - 1));
+			    vip.setSex(currRows[7].substring(1, currRows[7].length() - 2));
 
 				/*db.execSQL("CREATE TABLE IF NOT EXISTS c_vip" +  
 		                "(_id INTEGER PRIMARY KEY, cardno VARCHAR,status varchar,"+
 						"name VARCHAR, sex VARCHAR,idno VARCHAR,mobile VARCHAR,birthday VARCHAR,storeID varchar,customerID varchar,"+
 		                "employee VARCHAR,email VARCHAR,createTime VARCHAR,type VARCHAR,discount varchar)");
 				*/
-			    db.execSQL("insert into c_vip(_id,cardno,type,customerID,storeID,name,mobile,sex) "
+			    db.execSQL("insert into c_vip(cardno,type,customerID,storeID,name,mobile,sex,status) "
 			    		+ "values(?,?,?,?,?,?,?,?)", 
-			    		new Object[]{vip.getId(),vip.getCardNum(),vip.getType(),vip.getCustomerID(),
-			    				vip.getStoreID(),vip.getName(),vip.getPhoneNum(),vip.getSex()});
+			    		new Object[]{vip.getCardNum(),vip.getType(),vip.getCustomerID(),
+			    				vip.getStoreID(),vip.getName(),vip.getPhoneNum(),vip.getSex(),getString(R.string.sales_settle_hasup)});
 			}
 			db.setTransactionSuccessful();
 			db.endTransaction();
@@ -150,8 +151,8 @@ public class MemberManagerActivity extends BaseActivity {
 			paramsInTransactions.put("table", 12899);
 			paramsInTransactions.put("columns", new JSONArray().put("ID")
 					.put("CARDNO").put("C_VIPTYPE_ID").put("C_CUSTOMER_ID")
-					.put("C_STORE_ID").put("VIPNAME")
-					.put("MOBIL").put("SEX"));
+					.put("C_STORE_ID").put("VIPNAME").put("EMAIL").put("HR_EMPLOYEE_ID")
+					.put("MOBIL").put("SEX").put("IDNO"));
 			
 			//查询条件的params
 			JSONObject queryParams = new JSONObject();
@@ -176,7 +177,7 @@ public class MemberManagerActivity extends BaseActivity {
 			array = new JSONArray();
 			transactions = new JSONObject();
 			transactions.put("id", 112);
-			transactions.put("command", "Query");
+			transactions.put("command", "ProcessOrder");
 			
 			//第一个params
 			JSONObject paramsInTransactions = new JSONObject();

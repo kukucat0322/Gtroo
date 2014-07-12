@@ -35,6 +35,7 @@ import android.widget.Spinner;
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
 import cn.burgeon.core.bean.Member;
+import cn.burgeon.core.bean.RequestResult;
 import cn.burgeon.core.ui.BaseActivity;
 import cn.burgeon.core.ui.sales.SalesNewOrderActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
@@ -244,35 +245,92 @@ public class MemberRegistActivity extends BaseActivity {
 									emailET.getText().toString().trim(),
 									birthdayET.getText().toString().trim(),
 									new SimpleDateFormat("yyyyMMdd").format(new Date()),
-									App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key),
+									App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key),
 									((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("key"),
-									getString(R.string.sales_settle_noup),
+									"search".equals(from)?getString(R.string.sales_settle_hasup):getString(R.string.sales_settle_noup),
 									((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("value")
 									});
 	            db.setTransactionSuccessful();
 	        } finally {  
 	            db.endTransaction();
 	        }
-			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
-	    	UndoBarController.show(MemberRegistActivity.this, "注册会员成功", new UndoListener() {
-				@Override
-				public void onUndo(Parcelable token) {
-					if("search".equals(from)){
-						Member member = new Member();
-						member.setCardNum(cardNOET.getText().toString());
-						member.setDiscount("90");
-						Intent intent = new Intent(MemberRegistActivity.this,SalesNewOrderActivity.class);
-						Bundle bundle = new Bundle();
-						bundle.putParcelable("searchedMember", member);
-						intent.putExtras(bundle);
-		                startActivity(intent);
-		        		//forwardActivity(SalesNewOrderActivity.class, "searchedMember",cardNOET.getText()+"\\"+100);
-		        	}else{
-		        		forwardActivity(MemberListActivity.class);
-		        	}
-				}
-			}, MESSAGESTYLE);
+	        Member vip = new Member();
+	        vip.setCardNum(cardNOET.getText().toString().trim());
+	        vip.setName(nameET.getText().toString().trim());
+	        vip.setiDentityCardNum(identityET.getText().toString().trim());
+	        vip.setPhoneNum(mobilePhoneET.getText().toString().trim());
+	        vip.setSex(radioGroup.getCheckedRadioButtonId()==R.id.radioMale?getResources().getString(R.string.male):getResources().getString(R.string.female));
+	        vip.setEmail(emailET.getText().toString().trim());
+	        vip.setBirthday(birthdayET.getText().toString().trim());
+	        vip.setType(((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("key"));
+	        if("search".equals(from)){
+	        		uploadV1ip(vip);
+	        }else{
+		        	UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+		    		UndoBarController.show(MemberRegistActivity.this, "注册会员成功", new UndoListener() {
+					@Override
+					public void onUndo(Parcelable token) {
+			        		forwardActivity(MemberListActivity.class);
+					}
+				}, MESSAGESTYLE);
+	        }
 		}
+	}
+	
+	private void uploadV1ip(Member vip){
+		Map<String,String> params = new HashMap<String, String>();
+		JSONArray array;
+		JSONObject transactions;
+		try {
+			array = new JSONArray();
+			transactions = new JSONObject();
+			transactions.put("id", 112);
+			transactions.put("command", "Query");
+			
+			//第一个params
+			JSONObject paramsInTransactions = new JSONObject();
+			paramsInTransactions.put("table", 12899);
+			paramsInTransactions.put("CARDNO",vip.getCardNum());
+			paramsInTransactions.put("C_VIPTYPE_ID__NAME",vip.getType());
+			paramsInTransactions.put("C_CUSTOMER_ID__NAME","苏州经销商");
+			paramsInTransactions.put("C_STORE_ID__NAME",App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
+			paramsInTransactions.put("HR_EMPLOYEE_ID__NAME",vip.getEmployee());
+			paramsInTransactions.put("VIPNAME",vip.getName());
+			paramsInTransactions.put("MOBIL",vip.getPhoneNum());
+			paramsInTransactions.put("SEX","男".equals(vip.getCardNum())?"M":"W");
+			paramsInTransactions.put("M_DIM1_ID__ATTRIBNAME","品牌AS0015");
+			
+			transactions.put("params", paramsInTransactions);
+			array.put(transactions);
+			Log.d(TAG, array.toString());
+			params.put("transactions", array.toString());
+			sendRequest(params,new Response.Listener<String>() {
+				@Override
+				public void onResponse(String response) {
+					Log.d(TAG, response);
+					RequestResult result = parseResult2(response);
+					//请求成功，更新记录状态和销售单号
+					if("0".equals(result.getCode())){
+						Message msg = handler.obtainMessage();
+						msg.obj = result;
+						msg.what = 2;
+						handler.dispatchMessage(msg);
+					}
+					// 取消进度条
+                    stopProgressDialog();
+				}
+			});
+		} catch (JSONException e) {}
+	}
+	
+	private RequestResult parseResult2(String response) {
+		RequestResult result = null;
+	    try {
+			JSONArray resJA = new JSONArray(response);
+			JSONObject resJO = resJA.getJSONObject(0);
+			result = new RequestResult(resJO.getString("code"), resJO.getString("message"));
+		} catch (JSONException e) {}
+		return result;
 	}
 	
 	private void update() {
@@ -337,13 +395,14 @@ public class MemberRegistActivity extends BaseActivity {
 			
 			transactions.put("params", paramsInTransactions);
 			array.put(transactions);
-			//Log.d(TAG, array.toString());
+			Log.d(TAG, array.toString());
 			params.put("transactions", array.toString());
 			sendRequest(params,new Response.Listener<String>() {
 				@Override
 				public void onResponse(String response) {
-					//Log.d(TAG, response);
+					Log.d(TAG, response);
 					Message msg = handler.obtainMessage();
+					msg.what = 1;
 					msg.obj = response;
 					handler.dispatchMessage(msg);
 				}
@@ -377,20 +436,46 @@ public class MemberRegistActivity extends BaseActivity {
 		@Override
 		public void handleMessage(Message msg) {
 			super.handleMessage(msg);
-			String response = (String) msg.obj;
-			stopProgressDialog();
-			if(parseResult(response)){
-				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
-	        	UndoBarController.show(MemberRegistActivity.this, "对不起，此卡号已被使用", null, MESSAGESTYLE);
-			}else{
-				if(verifyLocal()){
+			switch (msg.what) {
+			case 1:
+				String response = (String) msg.obj;
+				stopProgressDialog();
+				if(parseResult(response)){
 					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
 		        	UndoBarController.show(MemberRegistActivity.this, "对不起，此卡号已被使用", null, MESSAGESTYLE);
 				}else{
-					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
-		        	UndoBarController.show(MemberRegistActivity.this, "此卡号可以使用", null, MESSAGESTYLE);
+					if(verifyLocal()){
+						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+			        	UndoBarController.show(MemberRegistActivity.this, "对不起，此卡号已被使用", null, MESSAGESTYLE);
+					}else{
+						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+			        	UndoBarController.show(MemberRegistActivity.this, "此卡号可以使用", null, MESSAGESTYLE);
+					}
 				}
+				break;
+			case 2:
+				RequestResult result =  (RequestResult) msg.obj;
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+	    	    		UndoBarController.show(MemberRegistActivity.this, result.getMessage(), new UndoListener() {
+				@Override
+				public void onUndo(Parcelable token) {
+					if("search".equals(from)){
+						Member member = new Member();
+						member.setCardNum(cardNOET.getText().toString());
+						member.setDiscount("90");
+						Intent intent = new Intent(MemberRegistActivity.this,SalesNewOrderActivity.class);
+						Bundle bundle = new Bundle();
+						bundle.putParcelable("searchedMember", member);
+						intent.putExtras(bundle);
+		                startActivity(intent);
+		        		}
+				}
+			}, MESSAGESTYLE);
+				break;
+			default:
+				break;
 			}
+			
 		}
 		
 	};
