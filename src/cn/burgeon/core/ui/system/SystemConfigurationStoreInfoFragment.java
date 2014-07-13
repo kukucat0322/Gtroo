@@ -298,12 +298,13 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
 			int len = rowsJA.length();
 			db.beginTransaction();
 			db.execSQL("delete from employee");
+			Employee employee = null;
 			for (int i = 0; i < len; i++) {
 			    // ["BURGEON1108001","权威全额","苏州经销商","苏州001"]
 			    String currRow = rowsJA.get(i).toString();
 			    String[] currRows = currRow.split(",");
 
-			    Employee employee = new Employee();
+			    employee = new Employee();
 			    employee.setId(currRows[0].substring(2, currRows[0].length() - 1));
 			    employee.setName(currRows[1].substring(1, currRows[1].length() - 1));
 			    employee.setAgency(currRows[2].substring(1, currRows[2].length() - 1));
@@ -312,6 +313,7 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
 			    db.execSQL("insert into employee(id,name,agency,store) values(?,?,?,?)", 
 			    		new Object[]{employee.getId(),employee.getName(),employee.getAgency(),employee.getStore()});
 			}
+			App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.agency_key, employee.getAgency());
 			db.setTransactionSuccessful();
 			db.endTransaction();
 		} catch (JSONException e) {

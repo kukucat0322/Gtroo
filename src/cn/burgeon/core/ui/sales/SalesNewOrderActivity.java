@@ -58,7 +58,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 	private static final String TAG = "SalesNewOrderActivity";
 	private BarcodeManager bm;
 	Button vipBtn, accountBtn;
-	EditText cardNoET, styleBarcodeET,newSalesOrderDateET;
+	EditText cardNoET, styleBarcodeET,newSalesOrderDateET,salesAssistantET;
 	TextView commonRecordnum,commonCount,commonMoney;
 	ListView mListView;
 	Spinner salesTypeSP;
@@ -198,6 +198,8 @@ public class SalesNewOrderActivity extends BaseActivity {
 			@Override
 			public void onNothingSelected(AdapterView<?> arg0) {}
 		});*/
+        salesAssistantET = (EditText) findViewById(R.id.salesAssistantET);
+        salesAssistantET.setText(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key));
         commonRecordnum = (TextView) findViewById(R.id.sales_common_recordnum);
         commonCount = (TextView) findViewById(R.id.sales_common_count);
         commonMoney = (TextView) findViewById(R.id.sales_common_money);

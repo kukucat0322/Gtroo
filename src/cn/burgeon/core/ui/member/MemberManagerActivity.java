@@ -151,7 +151,7 @@ public class MemberManagerActivity extends BaseActivity {
 			paramsInTransactions.put("table", 12899);
 			paramsInTransactions.put("columns", new JSONArray().put("ID")
 					.put("CARDNO").put("C_VIPTYPE_ID").put("C_CUSTOMER_ID")
-					.put("C_STORE_ID").put("VIPNAME").put("EMAIL").put("HR_EMPLOYEE_ID")
+					.put("C_STORE_ID").put("VIPNAME").put("EMAIL")
 					.put("MOBIL").put("SEX").put("IDNO"));
 			
 			//查询条件的params
@@ -177,20 +177,20 @@ public class MemberManagerActivity extends BaseActivity {
 			array = new JSONArray();
 			transactions = new JSONObject();
 			transactions.put("id", 112);
-			transactions.put("command", "ProcessOrder");
+			transactions.put("command", "ObjectCreate");
 			
 			//第一个params
 			JSONObject paramsInTransactions = new JSONObject();
 			paramsInTransactions.put("table", 12899);
 			paramsInTransactions.put("CARDNO",vip.getCardNum());
 			paramsInTransactions.put("C_VIPTYPE_ID__NAME",vip.getType());
-			paramsInTransactions.put("C_CUSTOMER_ID__NAME","苏州经销商");
+			paramsInTransactions.put("C_CUSTOMER_ID__NAME",App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.agency_key));
 			paramsInTransactions.put("C_STORE_ID__NAME",App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
 			paramsInTransactions.put("HR_EMPLOYEE_ID__NAME",vip.getEmployee());
 			paramsInTransactions.put("VIPNAME",vip.getName());
-			paramsInTransactions.put("MOBIL",vip.getPhoneNum());
+			//paramsInTransactions.put("MOBIL",vip.getPhoneNum());
 			paramsInTransactions.put("SEX","男".equals(vip.getCardNum())?"M":"W");
-			paramsInTransactions.put("M_DIM1_ID__ATTRIBNAME","品牌AS0015");
+			//paramsInTransactions.put("M_DIM1_ID__ATTRIBNAME","品牌AS0015");
 			
 			transactions.put("params", paramsInTransactions);
 			array.put(transactions);

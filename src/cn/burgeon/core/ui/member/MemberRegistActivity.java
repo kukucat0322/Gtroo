@@ -49,9 +49,9 @@ public class MemberRegistActivity extends BaseActivity {
 	
 	private final String TAG = "MemberRegistActivity";
 	Button saveBtn,veryfiyBtn;
-	EditText cardNOET,nameET,identityET,emailET;
+	EditText cardNOET,nameET,identityET,emailET,employeeSP;
 	EditText createDateET,mobilePhoneET,birthdayET;
-	Spinner typeSp,employeeSP;
+	Spinner typeSp;
 	RadioGroup radioGroup;
 	int _id = -1;
 	String from = "";
@@ -109,8 +109,8 @@ public class MemberRegistActivity extends BaseActivity {
 		birthdayET.setOnClickListener(mOnclickListener);
 		radioGroup = (RadioGroup) findViewById(R.id.memberRegistRG);
 		emailET = (EditText) findViewById(R.id.memberRegistEmailET);
-		employeeSP = (Spinner) findViewById(R.id.memberRegistSalesAssistantSP);
-		
+		employeeSP = (EditText) findViewById(R.id.memberRegistSalesAssistantSP);
+		employeeSP.setText(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key));
 		SimpleAdapter adapter = new SimpleAdapter(MemberRegistActivity.this, 
 				fetchData(), 
 				android.R.layout.simple_spinner_item, 
@@ -245,7 +245,7 @@ public class MemberRegistActivity extends BaseActivity {
 									emailET.getText().toString().trim(),
 									birthdayET.getText().toString().trim(),
 									new SimpleDateFormat("yyyyMMdd").format(new Date()),
-									App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key),
+									employeeSP.getText().toString().trim(),
 									((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("key"),
 									"search".equals(from)?getString(R.string.sales_settle_hasup):getString(R.string.sales_settle_noup),
 									((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("value")
@@ -261,6 +261,7 @@ public class MemberRegistActivity extends BaseActivity {
 	        vip.setPhoneNum(mobilePhoneET.getText().toString().trim());
 	        vip.setSex(radioGroup.getCheckedRadioButtonId()==R.id.radioMale?getResources().getString(R.string.male):getResources().getString(R.string.female));
 	        vip.setEmail(emailET.getText().toString().trim());
+	        vip.setEmployee(employeeSP.getText().toString().trim());
 	        vip.setBirthday(birthdayET.getText().toString().trim());
 	        vip.setType(((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("key"));
 	        if("search".equals(from)){
@@ -285,20 +286,20 @@ public class MemberRegistActivity extends BaseActivity {
 			array = new JSONArray();
 			transactions = new JSONObject();
 			transactions.put("id", 112);
-			transactions.put("command", "Query");
+			transactions.put("command", "ObjectCreate");
 			
 			//第一个params
 			JSONObject paramsInTransactions = new JSONObject();
 			paramsInTransactions.put("table", 12899);
 			paramsInTransactions.put("CARDNO",vip.getCardNum());
 			paramsInTransactions.put("C_VIPTYPE_ID__NAME",vip.getType());
-			paramsInTransactions.put("C_CUSTOMER_ID__NAME","苏州经销商");
+			paramsInTransactions.put("C_CUSTOMER_ID__NAME",App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.agency_key));
 			paramsInTransactions.put("C_STORE_ID__NAME",App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
 			paramsInTransactions.put("HR_EMPLOYEE_ID__NAME",vip.getEmployee());
 			paramsInTransactions.put("VIPNAME",vip.getName());
-			paramsInTransactions.put("MOBIL",vip.getPhoneNum());
+			//paramsInTransactions.put("MOBIL",vip.getPhoneNum());
 			paramsInTransactions.put("SEX","男".equals(vip.getCardNum())?"M":"W");
-			paramsInTransactions.put("M_DIM1_ID__ATTRIBNAME","品牌AS0015");
+			//paramsInTransactions.put("M_DIM1_ID__ATTRIBNAME","品牌AS0015");
 			
 			transactions.put("params", paramsInTransactions);
 			array.put(transactions);
@@ -456,13 +457,13 @@ public class MemberRegistActivity extends BaseActivity {
 			case 2:
 				RequestResult result =  (RequestResult) msg.obj;
 				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
-	    	    		UndoBarController.show(MemberRegistActivity.this, result.getMessage(), new UndoListener() {
+	    	    UndoBarController.show(MemberRegistActivity.this, result.getMessage(), new UndoListener() {
 				@Override
 				public void onUndo(Parcelable token) {
 					if("search".equals(from)){
 						Member member = new Member();
 						member.setCardNum(cardNOET.getText().toString());
-						member.setDiscount("90");
+						member.setDiscount(((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("value"));
 						Intent intent = new Intent(MemberRegistActivity.this,SalesNewOrderActivity.class);
 						Bundle bundle = new Bundle();
 						bundle.putParcelable("searchedMember", member);

@@ -107,12 +107,13 @@
                 android:text="@string/sales_new_salesAssistant"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <Spinner
+            <EditText
                 android:id="@+id/salesAssistantET"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2.8"
-                android:entries="@array/empployee"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                  />
         </LinearLayout>
 
