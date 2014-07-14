@@ -115,19 +115,28 @@ public class SalesSettleActivity extends BaseActivity {
 		realityET.setText(String.format("%.2f", pay));
 		ArrayList<PayWay> pays = new ArrayList<PayWay>();
 		if("unknow".equals(command) || null == command){
-			pays.add(new PayWay(27, getResources().getString(R.string.sales_settle_cash), String.format("%.2f",pay)));
-			pays.add(new PayWay(26,getResources().getString(R.string.sales_settle_auto), String.format("%.2f",0.00f)));
-			pays.add(new PayWay(28,getResources().getString(R.string.sales_settle_bank), String.format("%.2f",0.00f)));
+			Cursor c = db.rawQuery("select * from tc_payway", null);
+			while(c.moveToNext()){
+				if(27 == c.getInt(0))
+					pays.add(new PayWay(c.getInt(0), c.getString(1), String.format("%.2f",pay)));
+				else
+					pays.add(new PayWay(c.getInt(0), c.getString(1), String.format("%.2f",0.00f)));
+			}
+//			pays.add(new PayWay(27, getResources().getString(R.string.sales_settle_cash), String.format("%.2f",pay)));
+//			pays.add(new PayWay(26,getResources().getString(R.string.sales_settle_auto), String.format("%.2f",0.00f)));
+//			pays.add(new PayWay(28,getResources().getString(R.string.sales_settle_bank), String.format("%.2f",0.00f)));
 		}else{
 			Cursor c = db.rawQuery("select * from c_payway_detail where settleUUID = ?", new String[]{command});
 			while(c.moveToNext()){
-				if(27 == c.getInt(c.getColumnIndex("paywayID"))){
+				//paywayID INTEGER,name varchar,money varchar
+				/*if(27 == c.getInt(c.getColumnIndex("paywayID"))){
 					pays.add(new PayWay(27, getResources().getString(R.string.sales_settle_cash), String.format("%.2f",Float.parseFloat(c.getString(c.getColumnIndex("money"))))));
 				}else if(26 == c.getInt(c.getColumnIndex("paywayID"))){
 					pays.add(new PayWay(26, getResources().getString(R.string.sales_settle_auto), String.format("%.2f",Float.parseFloat(c.getString(c.getColumnIndex("money"))))));
 				}else if(28 == c.getInt(c.getColumnIndex("paywayID"))){
 					pays.add(new PayWay(28, getResources().getString(R.string.sales_settle_bank), String.format("%.2f",Float.parseFloat(c.getString(c.getColumnIndex("money"))))));
-				}
+				}*/
+				pays.add(new PayWay(c.getInt(c.getColumnIndex("paywayID")), c.getString(c.getColumnIndex("name")), String.format("%.2f",Float.parseFloat(c.getString(c.getColumnIndex("money"))))));
 			}
 			if(c != null && !c.isClosed())
 				c.close();
@@ -277,16 +286,16 @@ public class SalesSettleActivity extends BaseActivity {
         		if(editText.getText().length() > 0){
         			if(editText.getText().toString().indexOf(".") > 0){
         				float moneyp = Float.parseFloat(editText.getText().toString());
-        				if(moneyp > 0){
+        				//if(moneyp > 0){
         					db.execSQL("insert into c_payway_detail('paywayID','name','money','settleUUID')"
         							+" values(?,?,?,?)",new Object[]{payway.getId(),payway.getPayWay(),editText.getText().toString(),uuid});
-        				}
+        				//}
         			}else{
         				int moneyt = Integer.parseInt(editText.getText().toString());
-        				if(moneyt > 0){
+        				//if(moneyt > 0){
         					db.execSQL("insert into c_payway_detail('paywayID','name','money','settleUUID')"
         							+" values(?,?,?,?)",new Object[]{payway.getId(),payway.getPayWay(),editText.getText().toString()+".00",uuid});
-        				}
+        				//}
         			}
         		}
         	}

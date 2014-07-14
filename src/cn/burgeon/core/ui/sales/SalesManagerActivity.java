@@ -72,8 +72,6 @@ import com.android.volley.Response;
                     		uploadSalesOrder(order);
                     	}
                     }
-                    UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
-		        	UndoBarController.show(SalesManagerActivity.this, "销售上传成功", null, MESSAGESTYLE);
                 }
             }
 
@@ -137,10 +135,12 @@ import com.android.volley.Response;
 			List<PayWay> paydetailsItems = getPayWayDetailsData(order.getUuid());
 			if(detailsItems != null && detailsItems.size() > 0){
 				for(PayWay payway : paydetailsItems){
-					JSONObject payitem = new JSONObject();
-					payitem.put("PAYAMOUNT", payway.getPayMoney());
-					payitem.put("C_PAYWAY_ID__NAME", payway.getPayWay());
-					addList2.put(payitem);
+					if(Float.parseFloat(payway.getPayMoney()) > 0){
+						JSONObject payitem = new JSONObject();
+						payitem.put("PAYAMOUNT", payway.getPayMoney());
+						payitem.put("C_PAYWAY_ID__NAME", payway.getPayWay());
+						addList2.put(payitem);
+					}
 				}
 			}
 			refobj2.put("addList",addList2);
@@ -163,10 +163,16 @@ import com.android.volley.Response;
 						//请求成功，更新记录状态
 						if("0".equals(result.getCode())){
 							updateOrderStatus(result,order);
+							UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+				        	UndoBarController.show(SalesManagerActivity.this, order.getOrderNo()+": 上传成功", null, MESSAGESTYLE);
+						}else{
+							UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+				        	UndoBarController.show(SalesManagerActivity.this, order.getOrderNo()+": "+result.getMessage(), null, MESSAGESTYLE);
 						}
 					}
 					// 取消进度条
                     stopProgressDialog();
+                    
 				}
 			});
 		} catch (JSONException e) {
