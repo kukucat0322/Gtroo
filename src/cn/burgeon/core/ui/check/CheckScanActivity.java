@@ -27,6 +27,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import mexxen.mx5010.barcode.BarcodeEvent;
+import mexxen.mx5010.barcode.BarcodeListener;
+import mexxen.mx5010.barcode.BarcodeManager;
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
 import cn.burgeon.core.adapter.CheckScanLVAdapter;
@@ -38,7 +41,7 @@ import cn.burgeon.core.widget.CustomDialogForCheck;
 
 public class CheckScanActivity extends BaseActivity {
     ArrayList<Product> products = new ArrayList<Product>();
-
+    private BarcodeManager bm;
     private ListView checkscanLV;
     private TextView recodeNumTV, totalCountTV;
     private EditText barcodeET, shelfET;
@@ -54,7 +57,23 @@ public class CheckScanActivity extends BaseActivity {
         setContentView(R.layout.activity_check_scan);
 
         init();
+        bm = new BarcodeManager(this);
+		bm.addListener(barcodeListener);
     }
+    
+    BarcodeListener barcodeListener = new BarcodeListener() {
+ 		// 重写 barcodeEvent 方法，获取条码事件
+ 		@Override
+ 		public void barcodeEvent(BarcodeEvent event) {
+ 			// 当条码事件的命令为“SCANNER_READ”时，进行操作
+ 			if (event.getOrder().equals("SCANNER_READ")) {
+ 				// 调用 getBarcode()方法读取条码信息
+ 				Log.d("check", "=======barcode========" + bm.getBarcode());
+ 				barcodeET.setText(bm.getBarcode());
+ 				verifyBarCode(bm.getBarcode());
+ 			}
+ 		}
+ 	};
 
     private void init() {
         // 初始化门店信息

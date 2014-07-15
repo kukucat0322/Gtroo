@@ -30,11 +30,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -91,9 +93,21 @@ public class SalesNewOrderActivity extends BaseActivity {
         	Log.d(TAG, "searchedMember = " + searchedMember ==null?"null" : searchedMember + "");
         	if(searchedMember != null){
         		cardNoET.setText(searchedMember.getCardNum() + "\\" + searchedMember.getDiscount().substring(2));
-        		data.addAll(temp);
-        		mAdapter.notifyDataSetChanged();
-        		upateBottomBarInfo();
+        		if(data.size() > 0){
+        			for(int i = 0; i < mAdapter.getCount(); i++){
+        				Product pro = (Product) mAdapter.getItem(i);
+        				float price = Float.parseFloat(pro.getPrice());
+        				//商品折扣
+        				float proDiscount = Float.parseFloat(pro.getDiscount()) / 100;
+        				//会员折扣
+        				float vipDiscount = 0.0f;
+        				if(cardNoET.getText().length() > 0)
+        					vipDiscount = Float.parseFloat(searchedMember.getDiscount());
+        				pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
+        				mAdapter.notifyDataSetChanged();
+        				upateBottomBarInfo();
+        			}
+        		}
         	}
         	updateID = bundle.getString("updateID");
         	Log.d("xxxx", "updateID = " + updateID ==null?"null" : updateID + "");
@@ -219,6 +233,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 		mListView = (ListView) findViewById(R.id.newOrderLV);
 		mAdapter = new SalesNewOrderAdapter(data, this);
 		mListView.setAdapter(mAdapter);
+		mListView.setOnItemLongClickListener(itemLongClickListener);
 	}
 
 	Calendar c = Calendar.getInstance();
@@ -233,8 +248,8 @@ public class SalesNewOrderActivity extends BaseActivity {
 				if(!"unknow".equals(updateID) && (updateID != null)){
 					showTips();
 				}else{
-					temp.clear();
-					temp.addAll(data);
+					//temp.clear();
+					//temp.addAll(data);
 					forwardActivity(MemberSearchActivity.class);
 				}
 				break;
@@ -506,6 +521,17 @@ public class SalesNewOrderActivity extends BaseActivity {
 			return true;
 		}
 		
+	};
+	
+	OnItemLongClickListener itemLongClickListener = new OnItemLongClickListener() {
+
+		@Override
+		public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+			data.remove(position);
+			mAdapter.notifyDataSetChanged();
+			upateBottomBarInfo();
+			return true;
+		}
 	};
 	
 	 //显示对话框
