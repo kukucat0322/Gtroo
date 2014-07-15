@@ -128,7 +128,7 @@ public class BaseActivity extends Activity {
                     @Override
                     public void run() {
                         // mProgress = ProgressDialog.show(BaseActivity.this, null, "加载中...", true, true);
-                        startProgressDialog();
+                        // startProgressDialog();
                     }
                 });
             }

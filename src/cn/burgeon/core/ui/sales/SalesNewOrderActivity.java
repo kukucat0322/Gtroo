@@ -111,7 +111,9 @@ public class SalesNewOrderActivity extends BaseActivity {
 			if (event.getOrder().equals("SCANNER_READ")) {
 				// 调用 getBarcode()方法读取条码信息
 				Log.d(TAG, "=======barcode========" + bm.getBarcode());
-				verifyBarCode(bm.getBarcode());
+				String baString = bm.getBarcode() != null?bm.getBarcode().trim():"";
+				styleBarcodeET.setText(baString);
+				verifyBarCode(baString);
 			}
 		}
 	};

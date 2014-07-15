@@ -1,10 +1,19 @@
 package cn.burgeon.core.ui.sales;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,11 +76,12 @@ import com.android.volley.Response;
                     forwardActivity(SalesReportActivity.class);
                 } else if (itemValue != null && Constant.salesTopMenuTextValues[2].equals(itemValue)) {
                     List<Order> orders = fetchData();
-                    if(orders != null && orders.size() > 0){
+                   /* if(orders != null && orders.size() > 0){
                     	for(Order order : orders){
                     		uploadSalesOrder(order);
                     	}
-                    }
+                    }*/
+                    new Thread(new RequestRunable("", orders)).start();
                 }
             }
 
@@ -252,5 +262,124 @@ import com.android.volley.Response;
 			c.close();
 		return details;
     }
+	
+	class RequestRunable implements Runnable {
+		
+		private List<Order> orders = new ArrayList<Order>();
+		private String requestParams;
+		
+		public RequestRunable(String requestParams,List<Order> orders) {
+			this.requestParams = requestParams;
+			this.orders = orders;
+		}
+
+		@Override
+		public void run() {
+			for(Order order : orders){
+				App mApp = ((App)getApplication());
+				String tt = mApp.getSDF().format(new Date());
+		        String uriAPI = App.getHosturl();
+		        HttpPost httpRequest = new HttpPost(uriAPI);
+		        List<NameValuePair> params = new ArrayList <NameValuePair>();  
+		        //appKey,时间戳,MD5签名
+		        params.add(new BasicNameValuePair("sip_appkey", App.getSipkey()));
+		        params.add(new BasicNameValuePair("sip_timestamp", tt));
+		        params.add(new BasicNameValuePair("sip_sign", mApp.MD5(App.getSipkey() + tt + mApp.getSIPPSWDMD5())));  
+		        params.add(new BasicNameValuePair("params", construct(order)));
+		        try{   
+		          httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+		          HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
+		          if(httpResponse.getStatusLine().getStatusCode() == 200){
+		            String strResult = EntityUtils.toString(httpResponse.getEntity());
+		            Log.d(TAG, "====" + strResult);
+		          }
+	            } catch(Exception e) {
+	               e.printStackTrace();
+	            }	
+			}
+		}
+
+		private String construct(Order order) {
+			Map<String,String> params = new HashMap<String, String>();
+			JSONArray array = null;
+			JSONObject transactions = null;
+			
+			try {
+				array = new JSONArray();
+				transactions = new JSONObject();
+				transactions.put("id", 112);
+				transactions.put("command", "ProcessOrder");
+				
+				//第一个params
+				JSONObject paramsInTransactions = new JSONObject();
+				paramsInTransactions.put("submit", true);
+				
+				//masterobj
+				JSONObject masterObj = new JSONObject();
+				masterObj.put("id", -1);
+				masterObj.put("REFNO", order.getOrderNo());
+				masterObj.put("SALESREP_ID__NAME", order.getSaleAsistant());
+				masterObj.put("DOCTYPE", order.getOrderType());
+				masterObj.put("C_STORE_ID__NAME", App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
+				masterObj.put("table", 12964);
+				masterObj.put("BILLDATE", order.getOrderDate());
+				masterObj.put("C_RETAILTYPE_ID__NAME", order.getOrderType());
+				paramsInTransactions.put("masterobj", masterObj);
+				
+				//detailobjs
+				JSONObject detailObjs = new JSONObject();
+				//reftables
+				JSONArray refobjs = new JSONArray();
+				JSONObject refobj = new JSONObject();
+				refobj.put("table", 13019);
+				JSONArray addList = new JSONArray();
+				
+				//获取明细表数据集
+				List<Product> detailsItems = getDetailsData(order.getUuid());
+				if(detailsItems != null && detailsItems.size() > 0){
+					for(Product product : detailsItems){
+						JSONObject item = new JSONObject();
+						item.put("QTY", product.getCount());
+						item.put("M_PRODUCT_ID__NAME", product.getBarCode());
+						addList.put(item);
+					}
+				}
+				refobj.put("addList",addList);
+				refobjs.put(refobj);
+				
+				//refobjs2-支付方式
+				JSONObject refobj2 = new JSONObject();
+				refobj2.put("table", 14434);
+				JSONArray addList2 = new JSONArray();
+				
+				//获取明细表数据集
+				List<PayWay> paydetailsItems = getPayWayDetailsData(order.getUuid());
+				if(detailsItems != null && detailsItems.size() > 0){
+					for(PayWay payway : paydetailsItems){
+						if(Float.parseFloat(payway.getPayMoney()) > 0){
+							JSONObject payitem = new JSONObject();
+							payitem.put("PAYAMOUNT", payway.getPayMoney());
+							payitem.put("C_PAYWAY_ID__NAME", payway.getPayWay());
+							addList2.put(payitem);
+						}
+					}
+				}
+				refobj2.put("addList",addList2);
+				refobjs.put(refobj2);
+				
+				detailObjs.put("refobjs", refobjs);
+				detailObjs.put("reftables", new JSONArray().put(710).put(774));
+				paramsInTransactions.put("detailobjs", detailObjs);
+				
+				transactions.put("params", paramsInTransactions);
+				array.put(transactions);
+				Log.d(TAG, array.toString());
+				params.put("transactions", array.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			return array.toString();
+		}
+	};
 	
 }

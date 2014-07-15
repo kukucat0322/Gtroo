@@ -88,8 +88,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="2.8"
                 android:singleLine="true"
-                android:imeOptions="actionSearch"
-                android:text="AS001BL"/>
+                android:imeOptions="actionSearch"/>
         </LinearLayout>
 
         <LinearLayout
