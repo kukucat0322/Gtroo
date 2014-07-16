@@ -124,6 +124,7 @@
     <string name="sales_report_query">销售查询</string>
     <string name="sales_order_detail">单据明细</string>
     <string name="sales_settle_dialogmsg">请确认是否要结账？</string>
+    <string name="sales_del_item">确定要删除该商品？</string>
     <string name="sales_settle_clear">您要切换到会员销售模式，并清除商品数据吗？</string>
     <string name="sales_settle_clear2">已销售的不能再切换到会员模式！</string>
     <string name="replenishmentOrderApply">补货申请</string>

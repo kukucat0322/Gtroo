@@ -55,6 +55,7 @@ public class MemberRegistActivity extends BaseActivity {
 	RadioGroup radioGroup;
 	int _id = -1;
 	String from = "";
+	boolean isVerifyed;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -227,6 +228,10 @@ public class MemberRegistActivity extends BaseActivity {
 			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
         	UndoBarController.show(MemberRegistActivity.this, "身份证号码不正确", null, MESSAGESTYLE);
         	return false;
+		}else if(!isVerifyed){
+			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+        	UndoBarController.show(MemberRegistActivity.this, "卡号尚未验证通过", null, MESSAGESTYLE);
+        	return false;
 		}
 		return true;
 	}
@@ -377,6 +382,7 @@ public class MemberRegistActivity extends BaseActivity {
 	}
 	
 	private boolean verifyNet(){
+		isVerifyed = false;
 		Map<String,String> params = new HashMap<String, String>();
 		JSONArray array;
 		JSONObject transactions;
@@ -442,13 +448,16 @@ public class MemberRegistActivity extends BaseActivity {
 				String response = (String) msg.obj;
 				stopProgressDialog();
 				if(parseResult(response)){
+					isVerifyed = false;
 					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
 		        	UndoBarController.show(MemberRegistActivity.this, "对不起，此卡号已被使用", null, MESSAGESTYLE);
 				}else{
 					if(verifyLocal()){
+						isVerifyed = false;
 						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
 			        	UndoBarController.show(MemberRegistActivity.this, "对不起，此卡号已被使用", null, MESSAGESTYLE);
 					}else{
+						isVerifyed = true;
 						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
 			        	UndoBarController.show(MemberRegistActivity.this, "此卡号可以使用", null, MESSAGESTYLE);
 					}

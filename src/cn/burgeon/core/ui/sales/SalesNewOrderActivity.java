@@ -173,15 +173,6 @@ public class SalesNewOrderActivity extends BaseActivity {
 		}
 	}
     
-    
-/*    @Override
-    protected void onStop() {
-    	super.onStop();
-    	bm.removeListener(barcodeListener);
-    	bm.dismiss();
-    	finish();
-    }*/
-    
     @Override
     protected void onDestroy() {
     	super.onDestroy();
@@ -527,9 +518,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 
 		@Override
 		public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-			data.remove(position);
-			mAdapter.notifyDataSetChanged();
-			upateBottomBarInfo();
+			showDetailTips(position);
 			return true;
 		}
 	};
@@ -541,20 +530,31 @@ public class SalesNewOrderActivity extends BaseActivity {
     		.setTitle(getString(R.string.systemtips))
     		.setMessage(R.string.sales_settle_clear2)
     		.setPositiveButton(getString(R.string.yes),new DialogInterface.OnClickListener(){
-
 				@Override
 				public void onClick(DialogInterface arg0, int arg1) {
-					/*temp.clear();
-					data.clear();
-					flag = true;
-					forwardActivity(MemberSearchActivity.class);*/
 				}});
-			/*.setNegativeButton(getString(R.string.no),new DialogInterface.OnClickListener(){
-
+    	dialog = builder.create();
+    	dialog.show();
+    }
+    
+    //显示对话框
+    private void showDetailTips(final int position){
+    	AlertDialog dialog = null;
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this)
+    		.setTitle(getString(R.string.systemtips))
+    		.setMessage(R.string.sales_del_item)
+    		.setPositiveButton(getString(R.string.confirm),new DialogInterface.OnClickListener(){
 				@Override
+				public void onClick(DialogInterface arg0, int arg1) {
+					data.remove(position);
+					mAdapter.notifyDataSetChanged();
+					upateBottomBarInfo();
+				}})
+			.setNegativeButton(getString(R.string.cancel),new DialogInterface.OnClickListener(){
+				@Override  
 				public void onClick(DialogInterface dialog, int which) {
 					dialog.dismiss();
-				}});*/
+				}});
     	dialog = builder.create();
     	dialog.show();
     }

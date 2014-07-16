@@ -1,15 +1,20 @@
 package cn.burgeon.core.ui.sales;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
@@ -21,6 +26,8 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -70,125 +77,17 @@ import com.android.volley.Response;
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String itemValue = (String) parent.getItemAtPosition(position);
                 if (itemValue != null && Constant.salesTopMenuTextValues[0].equals(itemValue)) {
-                	Log.d("SalesManager", "==================="+itemValue);
                     forwardActivity(DailySalesActivity.class);
                 } else if (itemValue != null && Constant.salesTopMenuTextValues[1].equals(itemValue)) {
                     forwardActivity(SalesReportActivity.class);
                 } else if (itemValue != null && Constant.salesTopMenuTextValues[2].equals(itemValue)) {
-                    List<Order> orders = fetchData();
-                   /* if(orders != null && orders.size() > 0){
-                    	for(Order order : orders){
-                    		uploadSalesOrder(order);
-                    	}
-                    }*/
-                    new Thread(new RequestRunable("", orders)).start();
+                	startProgressDialog();
+                	List<Order> orders = fetchData();
+                    new Thread(new RequestRunable(orders)).start();
                 }
             }
-
         });
     }
-
-	private void uploadSalesOrder(final Order order) {
-		Map<String,String> params = new HashMap<String, String>();
-		JSONArray array;
-		JSONObject transactions;
-		
-		try {
-			array = new JSONArray();
-			transactions = new JSONObject();
-			transactions.put("id", 112);
-			transactions.put("command", "ProcessOrder");
-			
-			//第一个params
-			JSONObject paramsInTransactions = new JSONObject();
-			paramsInTransactions.put("submit", true);
-			
-			//masterobj
-			JSONObject masterObj = new JSONObject();
-			masterObj.put("id", -1);
-			masterObj.put("REFNO", order.getOrderNo());
-			masterObj.put("SALESREP_ID__NAME", order.getSaleAsistant());
-			masterObj.put("DOCTYPE", order.getOrderType());
-			masterObj.put("C_STORE_ID__NAME", App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
-			masterObj.put("table", 12964);
-			masterObj.put("BILLDATE", order.getOrderDate());
-			masterObj.put("C_RETAILTYPE_ID__NAME", order.getOrderType());
-			paramsInTransactions.put("masterobj", masterObj);
-			
-			//detailobjs
-			JSONObject detailObjs = new JSONObject();
-			//reftables
-			JSONArray refobjs = new JSONArray();
-			JSONObject refobj = new JSONObject();
-			refobj.put("table", 13019);
-			JSONArray addList = new JSONArray();
-			
-			//获取明细表数据集
-			List<Product> detailsItems = getDetailsData(order.getUuid());
-			if(detailsItems != null && detailsItems.size() > 0){
-				for(Product product : detailsItems){
-					JSONObject item = new JSONObject();
-					item.put("QTY", product.getCount());
-					item.put("M_PRODUCT_ID__NAME", product.getBarCode());
-					addList.put(item);
-				}
-			}
-			refobj.put("addList",addList);
-			refobjs.put(refobj);
-			
-			//refobjs2-支付方式
-			JSONObject refobj2 = new JSONObject();
-			refobj2.put("table", 14434);
-			JSONArray addList2 = new JSONArray();
-			
-			//获取明细表数据集
-			List<PayWay> paydetailsItems = getPayWayDetailsData(order.getUuid());
-			if(detailsItems != null && detailsItems.size() > 0){
-				for(PayWay payway : paydetailsItems){
-					if(Float.parseFloat(payway.getPayMoney()) > 0){
-						JSONObject payitem = new JSONObject();
-						payitem.put("PAYAMOUNT", payway.getPayMoney());
-						payitem.put("C_PAYWAY_ID__NAME", payway.getPayWay());
-						addList2.put(payitem);
-					}
-				}
-			}
-			refobj2.put("addList",addList2);
-			refobjs.put(refobj2);
-			
-			detailObjs.put("refobjs", refobjs);
-			detailObjs.put("reftables", new JSONArray().put(710).put(774));
-			paramsInTransactions.put("detailobjs", detailObjs);
-			
-			transactions.put("params", paramsInTransactions);
-			array.put(transactions);
-			Log.d(TAG, array.toString());
-			params.put("transactions", array.toString());
-			sendRequest(params,new Response.Listener<String>() {
-				@Override
-				public void onResponse(String response) {
-					Log.d(TAG, response);
-					if(!TextUtils.isEmpty(response)){
-						RequestResult result = parseResult(response);
-						//请求成功，更新记录状态
-						if("0".equals(result.getCode())){
-							updateOrderStatus(result,order);
-							UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
-				        	UndoBarController.show(SalesManagerActivity.this, order.getOrderNo()+": 上传成功", null, MESSAGESTYLE);
-						}else{
-							UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
-				        	UndoBarController.show(SalesManagerActivity.this, order.getOrderNo()+": "+result.getMessage(), null, MESSAGESTYLE);
-						}
-					}
-					// 取消进度条
-                    stopProgressDialog();
-                    
-				}
-			});
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-	}
 	
 	private void updateOrderStatus(RequestResult result, Order order) {
 		db.beginTransaction();
@@ -266,40 +165,52 @@ import com.android.volley.Response;
 	class RequestRunable implements Runnable {
 		
 		private List<Order> orders = new ArrayList<Order>();
-		private String requestParams;
 		
-		public RequestRunable(String requestParams,List<Order> orders) {
-			this.requestParams = requestParams;
+		public RequestRunable(List<Order> orders) {
 			this.orders = orders;
 		}
 
 		@Override
 		public void run() {
+			ArrayList<String> failures = new ArrayList<String>();
 			for(Order order : orders){
 				App mApp = ((App)getApplication());
 				String tt = mApp.getSDF().format(new Date());
 		        String uriAPI = App.getHosturl();
 		        HttpPost httpRequest = new HttpPost(uriAPI);
-		        List<NameValuePair> params = new ArrayList <NameValuePair>();  
-		        //appKey,时间戳,MD5签名
-		        params.add(new BasicNameValuePair("sip_appkey", App.getSipkey()));
-		        params.add(new BasicNameValuePair("sip_timestamp", tt));
-		        params.add(new BasicNameValuePair("sip_sign", mApp.MD5(App.getSipkey() + tt + mApp.getSIPPSWDMD5())));  
-		        params.add(new BasicNameValuePair("params", construct(order)));
-		        try{   
-		          httpRequest.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+		        httpRequest.addHeader("Content-Type", getBodyContentType());
+		        Map<String,String> map = construct(order);
+		        map.put("sip_appkey", App.getSipkey());
+		        map.put("sip_timestamp", tt);
+		        map.put("sip_sign", mApp.MD5(App.getSipkey() + tt + mApp.getSIPPSWDMD5()));
+		        
+		        try{
+		          HttpEntity entity = new ByteArrayEntity(encodeParameters(map, "UTF-8"));
+		          httpRequest.setEntity(entity);
 		          HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
 		          if(httpResponse.getStatusLine().getStatusCode() == 200){
-		            String strResult = EntityUtils.toString(httpResponse.getEntity());
-		            Log.d(TAG, "====" + strResult);
+		            String response = EntityUtils.toString(httpResponse.getEntity());
+		            Log.d(TAG, "====" + response);
+		            if(!TextUtils.isEmpty(response)){
+						RequestResult result = parseResult(response);
+						//请求成功，更新记录状态
+						if("0".equals(result.getCode())){
+							updateOrderStatus(result,order);
+						}else{
+							failures.add(order.getOrderNo()+":"+result.getMessage());
+					}}
 		          }
 	            } catch(Exception e) {
 	               e.printStackTrace();
 	            }	
 			}
+			Message msg = handler.obtainMessage();
+			msg.what = 1;
+			msg.obj = failures;
+			handler.sendMessage(msg);
 		}
 
-		private String construct(Order order) {
+		private Map<String,String> construct(Order order) {
 			Map<String,String> params = new HashMap<String, String>();
 			JSONArray array = null;
 			JSONObject transactions = null;
@@ -378,8 +289,46 @@ import com.android.volley.Response;
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-			return array.toString();
+			return params;
 		}
 	};
 	
+    private byte[] encodeParameters(Map<String, String> params, String paramsEncoding) {
+        StringBuilder encodedParams = new StringBuilder();
+        try {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                encodedParams.append(URLEncoder.encode(entry.getKey(), paramsEncoding));
+                encodedParams.append('=');
+                encodedParams.append(URLEncoder.encode(entry.getValue(), paramsEncoding));
+                encodedParams.append('&');
+            }
+            return encodedParams.toString().getBytes(paramsEncoding);
+        } catch (UnsupportedEncodingException uee) {
+            throw new RuntimeException("Encoding not supported: " + paramsEncoding, uee);
+        }
+    }
+	
+    public String getBodyContentType() {
+        return "application/x-www-form-urlencoded; charset=UTF-8";
+    }
+    
+    Handler handler = new Handler(){
+
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+			stopProgressDialog();
+			ArrayList<String> falures = (ArrayList<String>) msg.obj;
+			if(falures.size() > 0){
+				StringBuilder sb = new StringBuilder();
+				for(String str : falures)
+					sb.append(str).append("\n");
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+	        	UndoBarController.show(SalesManagerActivity.this, sb.toString(), null, MESSAGESTYLE);
+			}else{
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+				UndoBarController.show(SalesManagerActivity.this, "上传成功", null, MESSAGESTYLE);
+			}
+		}
+    };
 }
