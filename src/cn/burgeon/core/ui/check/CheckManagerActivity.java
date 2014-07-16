@@ -80,10 +80,11 @@ public class CheckManagerActivity extends BaseActivity {
         });
     }
 
+    // 上传已审核的
     private List<Order> fetchData() {
         Order order = null;
         List<Order> data = new ArrayList<Order>();
-        Cursor c = db.rawQuery("select * from c_check where isChecked = ?", new String[]{getString(R.string.sales_settle_noup)});
+        Cursor c = db.rawQuery("select * from c_check where isChecked = ? and status = '已完成'", new String[]{getString(R.string.sales_settle_noup)});
         while (c.moveToNext()) {
             order = new Order();
             order.setOrderNo(c.getString(c.getColumnIndex("checkno")));

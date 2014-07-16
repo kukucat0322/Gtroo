@@ -1,9 +1,10 @@
 package cn.burgeon.core.ui.check;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,11 +23,10 @@ public class GatherActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_gather);
 
-		getShelf();
+		getShelfData();
 
-		for (int i = 0; i < shelfDatas.size(); i++) {
-			ShelfData currShelfData = shelfDatas.get(i);
-			mCategoryAdapter.addCategory(currShelfData.getShelf(), new GatherAdapter(this, shelfDatas));
+		for (Map.Entry<String, ArrayList<ShelfData>> entry : shelfDataMap.entrySet()) {
+			mCategoryAdapter.addCategory("货架    " + entry.getKey(), new GatherAdapter(this, entry.getValue()));
 		}
 		ListView categoryList = (ListView) findViewById(R.id.categoryList);
 		categoryList.setAdapter(mCategoryAdapter);
@@ -46,41 +46,28 @@ public class GatherActivity extends BaseActivity {
 		}
 	};
 
-	private void getShelf() {
+	private void getShelfData() {
 		ArrayList<ShelfData> shelfDatas = new ArrayList<ShelfData>();
+		String sql = "select shelf, barcode, sum(count) as count from c_check_detail group by shelf, barcode";
+		Cursor c = db.rawQuery(sql, null);
+		while (c.moveToNext()) {
+			ShelfData shelfData = new ShelfData();
+			shelfData.setShelf(c.getString(c.getColumnIndex("shelf")));
+			shelfData.setBarcode(c.getString(c.getColumnIndex("barcode")));
+			shelfData.setCount(c.getString(c.getColumnIndex("count")));
+			shelfDatas.add(shelfData);
+		}
+		if (c != null && !c.isClosed())
+			c.close();
 
-		ShelfData shelfData = new ShelfData();
-		shelfData.setShelf("01");
-		shelfData.setBarcode("AS001BL");
-		shelfData.setCount("1");
-		shelfDatas.add(shelfData);
-
-		shelfData = new ShelfData();
-		shelfData.setShelf("01");
-		shelfData.setBarcode("AS002BL");
-		shelfData.setCount("2");
-		shelfDatas.add(shelfData);
-
-		shelfData = new ShelfData();
-		shelfData.setShelf("02");
-		shelfData.setBarcode("AS003BL");
-		shelfData.setCount("3");
-		shelfDatas.add(shelfData);
-
-		shelfData = new ShelfData();
-		shelfData.setShelf("02");
-		shelfData.setBarcode("AS004BL");
-		shelfData.setCount("4");
-		shelfDatas.add(shelfData);
-
-		ArrayList<ShelfData> tempList = new ArrayList<ShelfData>();
 		for (ShelfData data : shelfDatas) {
 			// 含有当前key
 			if (shelfDataMap.containsKey(data.getShelf())) {
 				shelfDataMap.get(data.getShelf()).add(data);
 			} else {
-				tempList.add(data);
-				shelfDataMap.put(data.getShelf(), tempList);
+				ArrayList<ShelfData> list = new ArrayList<ShelfData>();
+				list.add(data);
+				shelfDataMap.put(data.getShelf(), list);
 			}
 		}
 	}
