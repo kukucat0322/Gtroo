@@ -87,11 +87,12 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:paddingRight="5dp"/>
 
+            <!-- ZHJ01YL -->
             <EditText
                 android:id="@+id/barcodeET"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="108238C702586"
+                android:text="AS001BL"
                 android:layout_weight="0.9"
                 android:singleLine="true"
                 android:imeOptions="actionSearch"/>

@@ -1,35 +1,31 @@
 package cn.burgeon.core.ui.check;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+
+import mexxen.mx5010.barcode.BarcodeEvent;
+import mexxen.mx5010.barcode.BarcodeListener;
+import mexxen.mx5010.barcode.BarcodeManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ListView;
-import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import mexxen.mx5010.barcode.BarcodeEvent;
-import mexxen.mx5010.barcode.BarcodeListener;
-import mexxen.mx5010.barcode.BarcodeManager;
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
 import cn.burgeon.core.adapter.CheckScanLVAdapter;
@@ -49,7 +45,7 @@ public class CheckScanActivity extends BaseActivity {
     private CheckScanLVAdapter mAdapter;
 
     private CustomDialogForCheck customDialogForCheck;
-    private String selfNo = "01";
+    private String shelfNo = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +79,6 @@ public class CheckScanActivity extends BaseActivity {
         TextView currTimeTV = (TextView) findViewById(R.id.currTimeTV);
         currTimeTV.setText(getCurrDate());
         shelfET = (EditText) findViewById(R.id.shelfET);
-        shelfET.setOnFocusChangeListener(l);
         barcodeET = (EditText) findViewById(R.id.barcodeET);
         barcodeET.setOnEditorActionListener(editorActionListener);
 
@@ -139,25 +134,56 @@ public class CheckScanActivity extends BaseActivity {
             c.close();
     }
 
-    private void generateProductList(Product currProduct) {
-        if (products.size() > 0) {
-            boolean isFlag = false;
-            for (Product product : products) {
-                // 同一件
-                if (currProduct.getBarCode().equals(product.getBarCode())) {
-                    isFlag = true;
-                    product.setCount(String.valueOf(Integer.valueOf(product.getCount()) + 1));
-                }
-            }
+	private void generateProductList(Product currProduct) {
+		if (products.size() > 0) {
+			// 货架改变
+			if (!currProduct.getShelf().equals(shelfNo)) {
+				// 保存至数据库
+				if (products.size() > 0) {
+		            for (Product product : products) {
+		                // 插入数据
+		                updateCheckTable(product);
+		            }
+				}
+				
+				// 清空products
+				products.clear();
+				
+				// 重新赋值products
+				shelfNo = currProduct.getShelf();
+				products.add(currProduct);
+			}
+			// 货架未改变
+			else {
+				for (Product product : products) {
+					// 同一个条码
+					if (product.getBarCode().equals(currProduct.getBarCode())) {
+						product.setCount(String.valueOf(Integer.valueOf(product.getCount()) + 1));
+					} else {
+						// 该条码已存在
+						if (!isExsitBarCode(currProduct.getBarCode())) {
+							products.add(currProduct);
+						}
+					}
+				}
+			}
+		} else {
+			shelfNo = currProduct.getShelf();
+			products.add(currProduct);
+		}
+	}
 
-            if (!isFlag) {
-                products.add(currProduct);
-            }
-        } else {
-            products.add(currProduct);
-        }
-    }
-
+	private boolean isExsitBarCode(String barCode) {
+		boolean isFlag = false;
+		for (Product product : products) {
+			if (barCode.equals(product.getBarCode())) {
+				isFlag = true;
+				break;
+			}
+		}
+		return isFlag;
+	}
+	
     private void upateBottomBarInfo() {
         int count = 0;
         for (Product pro : products) {
@@ -282,7 +308,7 @@ public class CheckScanActivity extends BaseActivity {
             db.execSQL("insert into c_check('checkTime','checkno','count','type','orderEmployee','status','isChecked','checkUUID')" +
                             " values(?,?,?,?,?,?,?,?)",
                     new Object[]{
-                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(currentTime),
+                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(currentTime),
                             getNo(),
                             getCount(products),
                             customDialogForCheck.getCheckType(),
@@ -324,13 +350,8 @@ public class CheckScanActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        // 若有未审核的数据，则存入数据库
-        /*if (products.size() > 0) {
-            for (Product product : products) {
-                // 插入数据
-                updateCheckTable(product);
-            }
-        }*/
+        bm.removeListener(barcodeListener);
+    	bm.dismiss();
     }
 
     private void updateCheckTable(Product currProduct) {
@@ -344,7 +365,7 @@ public class CheckScanActivity extends BaseActivity {
                     new Object[]{
                             currProduct.getBarCode(),
                             shelfET.getText().toString(),
-                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(currentTime),
+                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(currentTime),
                             getNo(), // IV305152 + 日期 + 流水号
                             currProduct.getCount(),
                             "未知类型",
@@ -363,7 +384,7 @@ public class CheckScanActivity extends BaseActivity {
     private String getNo() {
         StringBuffer sb = new StringBuffer();
         sb.append("IV305152");
-        sb.append(new SimpleDateFormat("yyMMdd").format(new Date()));
+        sb.append(new SimpleDateFormat("yyMMdd", Locale.getDefault()).format(new Date()));
 
         // 保存checkNo至SP
         int checkNo = App.getPreferenceUtils().getPreferenceInt("checkNo");
@@ -383,22 +404,6 @@ public class CheckScanActivity extends BaseActivity {
         sb.append(finalCheckNo.toString());
         return sb.toString();
     }
-    
-    OnFocusChangeListener l = new OnFocusChangeListener() {
-		
-		@Override
-		public void onFocusChange(View view, boolean hasFocus) {
-			// TODO Auto-generated method stub
-			if(!hasFocus){
-				if(shelfET.getText().length() > 0){
-					if(!selfNo.equals(shelfET.getText().toString())){
-						Log.d("check", "=========");
-						products.clear();
-					}
-				}
-			}
-		}
-	};
     
     /*@Override
     public void onClick(View v) {
