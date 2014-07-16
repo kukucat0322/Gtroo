@@ -140,10 +140,8 @@ public class CheckScanActivity extends BaseActivity {
 			if (!currProduct.getShelf().equals(shelfNo)) {
 				// 保存至数据库
 				if (products.size() > 0) {
-		            for (Product product : products) {
-		                // 插入数据
-		                updateCheckTable(product);
-		            }
+					// 插入数据
+					updateCheckTable(products);
 				}
 				
 				// 清空products
@@ -234,11 +232,11 @@ public class CheckScanActivity extends BaseActivity {
                     }
                     break;
                 case R.id.gatherBtn:
-                	db.beginTransaction();
-                	db.execSQL("delete from c_check");
-                	db.execSQL("delete from c_check_detail");
-                	db.setTransactionSuccessful();
-                	db.endTransaction();
+					// db.beginTransaction();
+					// db.execSQL("delete from c_check");
+					// db.execSQL("delete from c_check_detail");
+					// db.setTransactionSuccessful();
+					// db.endTransaction();
                     break;
                 case R.id.reviewBtn:
                     // 若有数据
@@ -300,7 +298,6 @@ public class CheckScanActivity extends BaseActivity {
     }
 
     private void updateState(List<Product> products) {
-    	Log.d("check", "updateState===" + products.size());
         db.beginTransaction();
         try {
             String uuid = UUID.randomUUID().toString();
@@ -354,26 +351,37 @@ public class CheckScanActivity extends BaseActivity {
     	bm.dismiss();
     }
 
-    private void updateCheckTable(Product currProduct) {
+    private void updateCheckTable(List<Product> products) {
         db.beginTransaction();
         try {
             String uuid = UUID.randomUUID().toString();
             Date currentTime = new Date();
-            db.execSQL("insert into c_check('barcode', 'shelf','checkTime','checkno','count','type','orderEmployee',"
-                            + "'status','isChecked','checkUUID')" +
-                            " values(?,?,?,?,?,?,?,?,?,?)",
+            db.execSQL("insert into c_check('checkTime','checkno','count','type','orderEmployee', 'status','isChecked','checkUUID')" +
+            		" values(?,?,?,?,?,?,?,?)",
                     new Object[]{
-                            currProduct.getBarCode(),
-                            shelfET.getText().toString(),
                             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(currentTime),
                             getNo(), // IV305152 + 日期 + 流水号
-                            currProduct.getCount(),
+                            getCount(products),
                             "未知类型",
                             App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key),
                             "未完成",
                             "未上传",
                             uuid}
             );
+		    
+		    for(Product product : products){
+		        db.execSQL("insert into c_check_detail('shelf','barcode','count','color','size','stylename','checkUUID')" +
+		                " values(?,?,?,?,?,?,?)",
+		            new Object[]{
+		                	shelfET.getText().toString(),
+		                    product.getBarCode(),
+		                    product.getCount(),
+		                    product.getColor(),
+		                    product.getSize(),
+		                    product.getName(),
+		                    uuid}
+		        		);
+		    }
             db.setTransactionSuccessful();
         } catch (Exception e) {
         } finally {

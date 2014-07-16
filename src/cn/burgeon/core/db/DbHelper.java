@@ -3,7 +3,6 @@ package cn.burgeon.core.db;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public class DbHelper extends SQLiteOpenHelper {
 	public Context context;
@@ -32,7 +31,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
         // -----------------------------------------------------------------------------------盘点 begin
 		db.execSQL("CREATE TABLE IF NOT EXISTS c_check" +  
-                "(_id INTEGER PRIMARY KEY AUTOINCREMENT, checkno VARCHAR, shelf varchar,"+
+                "(_id INTEGER PRIMARY KEY AUTOINCREMENT, checkno VARCHAR,"+
 				"checkTime VARCHAR, type VARCHAR,count VARCHAR,isChecked VARCHAR,"
 				+ "orderEmployee VARCHAR,employeeID VARCHAR,status VARCHAR,checkUUID VARCHAR)");
 		
