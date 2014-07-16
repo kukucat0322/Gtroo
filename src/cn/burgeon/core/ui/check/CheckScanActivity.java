@@ -314,20 +314,35 @@ public class CheckScanActivity extends BaseActivity {
 			db.execSQL("update c_check set 'type' = ?, 'orderEmployee' = ?, 'status' = ? where checkno = ?", new Object[] {
 					customDialogForCheck.getCheckType(), customDialogForCheck.getChecker(), "已完成", no });
         	
-        	// 增加新纪录
-            Date currentTime = new Date();
-            db.execSQL("insert into c_check('checkTime','checkno','count','type','orderEmployee','status','isChecked','checkUUID')" +
-                            " values(?,?,?,?,?,?,?,?)",
-                    new Object[]{
-                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(currentTime),
-                            no,
-                            getCount(products),
-                            customDialogForCheck.getCheckType(),
-                            customDialogForCheck.getChecker(),
-                            "已完成",
-                            "未上传",
-                            uuid}
-            );
+        	// 查找
+        	String count = null;
+        	Cursor c = db.rawQuery("select count from c_check where checkno = ?", new String[]{no});
+			if (c.moveToFirst()) {
+				count = c.getString(c.getColumnIndex("count"));
+			}
+    		if(c != null && !c.isClosed())
+    			c.close();
+    		
+    		// 更新
+			if (count != null && count.length() > 0) {
+				db.execSQL("update c_check set 'count' = ? where checkno = ?", new Object[] { getCount(products) + Integer.valueOf(count), no });
+			}
+    		// 新增
+    		else {
+    			Date currentTime = new Date();
+    			db.execSQL("insert into c_check('checkTime','checkno','count','type','orderEmployee','status','isChecked','checkUUID')" +
+    					" values(?,?,?,?,?,?,?,?)",
+    					new Object[]{
+    					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(currentTime),
+    					no,
+    					getCount(products),
+    					customDialogForCheck.getCheckType(),
+    					customDialogForCheck.getChecker(),
+    					"已完成",
+    					"未上传",
+    					uuid}
+    					);
+    		}
             
             for(Product product : products) {
 	            db.execSQL("insert into c_check_detail('shelf','barcode','count','color','size','stylename','checkUUID')" +
@@ -368,19 +383,35 @@ public class CheckScanActivity extends BaseActivity {
     private void updateCheckTable(List<Product> products) {
         db.beginTransaction();
         try {
-            Date currentTime = new Date();
-            db.execSQL("insert into c_check('checkTime','checkno','count','type','orderEmployee', 'status','isChecked','checkUUID')" +
-            		" values(?,?,?,?,?,?,?,?)",
-                    new Object[]{
-                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(currentTime),
-                            no, // IV305152 + 日期 + 流水号
-                            getCount(products),
-                            "未知类型",
-                            App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key),
-                            "未完成",
-                            "未上传",
-                            uuid}
-            );
+        	// 查找
+        	String count = null;
+        	Cursor c = db.rawQuery("select count from c_check where checkno = ?", new String[]{no});
+			if (c.moveToFirst()) {
+				count = c.getString(c.getColumnIndex("count"));
+			}
+    		if(c != null && !c.isClosed())
+    			c.close();
+    		
+    		// 更新
+			if (count != null && count.length() > 0) {
+				db.execSQL("update c_check set 'count' = ? where checkno = ?", new Object[] { getCount(products) + Integer.valueOf(count), no });
+			}
+    		// 新增
+    		else {
+    			Date currentTime = new Date();
+    			db.execSQL("insert into c_check('checkTime','checkno','count','type','orderEmployee', 'status','isChecked','checkUUID')" +
+    					" values(?,?,?,?,?,?,?,?)",
+    					new Object[]{
+    					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(currentTime),
+    					no, // IV305152 + 日期 + 流水号
+    					getCount(products),
+    					"未知类型",
+    					App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key),
+    					"未完成",
+    					"未上传",
+    					uuid}
+    					);
+    		}
 		    
 		    for(Product product : products){
 		        db.execSQL("insert into c_check_detail('shelf','barcode','count','color','size','stylename','checkUUID')" +

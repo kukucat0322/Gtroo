@@ -1,12 +1,10 @@
 package cn.burgeon.core.net;
 
+import android.content.Context;
+
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.Volley;
-
-import android.content.Context;
-
-import org.apache.http.client.methods.HttpUriRequest;
 
 /**
  * Manager for the queue
