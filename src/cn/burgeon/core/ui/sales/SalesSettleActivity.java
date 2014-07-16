@@ -231,7 +231,7 @@ public class SalesSettleActivity extends BaseActivity {
 				public void onClick(DialogInterface arg0, int arg1) {
 					if(what == 1) save();
 					else if(what == 2) update();
-					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
 			        UndoBarController.show(SalesSettleActivity.this, "结账成功", new UndoListener() {
 						
 						@Override

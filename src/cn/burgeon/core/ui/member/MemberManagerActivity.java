@@ -1,6 +1,8 @@
 package cn.burgeon.core.ui.member;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +104,7 @@ public class MemberManagerActivity extends BaseActivity {
 			JSONArray rowsJA = resJO.getJSONArray("rows");
 			int len = rowsJA.length();
 			db.beginTransaction();
+			String createTime = new SimpleDateFormat("yyyyMMdd").format(new Date());
 			for (int i = 0; i < len; i++) {
 				/*paramsInTransactions.put("columns", new JSONArray().put("ID")
 						.put("CARDNO").put("C_VIPTYPE_ID").put("C_CUSTOMER_ID")
@@ -126,10 +129,12 @@ public class MemberManagerActivity extends BaseActivity {
 						"name VARCHAR, sex VARCHAR,idno VARCHAR,mobile VARCHAR,birthday VARCHAR,storeID varchar,customerID varchar,"+
 		                "employee VARCHAR,email VARCHAR,createTime VARCHAR,type VARCHAR,discount varchar)");
 				*/
-			    db.execSQL("insert into c_vip(cardno,type,customerID,storeID,name,mobile,sex,status) "
-			    		+ "values(?,?,?,?,?,?,?,?)", 
+			    db.execSQL("insert into c_vip(cardno,type,customerID,storeID,name,mobile,sex,status,createTime) "
+			    		+ "values(?,?,?,?,?,?,?,?,?)", 
 			    		new Object[]{vip.getCardNum(),vip.getType(),vip.getCustomerID(),
-			    				vip.getStoreID(),vip.getName(),vip.getPhoneNum(),vip.getSex(),getString(R.string.sales_settle_hasup)});
+			    				vip.getStoreID(),vip.getName(),vip.getPhoneNum(),
+			    				vip.getSex(),getString(R.string.sales_settle_hasup),
+			    				createTime});
 			}
 			db.setTransactionSuccessful();
 			db.endTransaction();
