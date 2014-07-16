@@ -74,6 +74,7 @@
         <activity android:name="cn.burgeon.core.ui.system.SystemUpdateActivity"/>
         <activity android:name="cn.burgeon.core.ui.system.SystemDataDownloadActivity"/>
         <activity android:name="cn.burgeon.core.ui.system.SystemDataCleanActivity"/>
+        <activity android:name="cn.burgeon.core.ui.check.GatherActivity"/>
     </application>
 
 </manifest>

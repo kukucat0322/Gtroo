@@ -36,7 +36,6 @@ import cn.burgeon.core.utils.ScreenUtils;
 import cn.burgeon.core.widget.CustomDialogForCheck;
 
 public class CheckScanActivity extends BaseActivity {
-    ArrayList<Product> products = new ArrayList<Product>();
     private BarcodeManager bm;
     private ListView checkscanLV;
     private TextView recodeNumTV, totalCountTV;
@@ -46,7 +45,12 @@ public class CheckScanActivity extends BaseActivity {
 
     private CustomDialogForCheck customDialogForCheck;
     private String shelfNo = null;
-
+    
+    private ArrayList<Product> products = new ArrayList<Product>();
+    
+    private String uuid;
+    private String no;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -166,6 +170,8 @@ public class CheckScanActivity extends BaseActivity {
 				}
 			}
 		} else {
+			uuid = UUID.randomUUID().toString();
+			no = getNo();
 			shelfNo = currProduct.getShelf();
 			products.add(currProduct);
 		}
@@ -232,11 +238,15 @@ public class CheckScanActivity extends BaseActivity {
                     }
                     break;
                 case R.id.gatherBtn:
-					// db.beginTransaction();
-					// db.execSQL("delete from c_check");
-					// db.execSQL("delete from c_check_detail");
-					// db.setTransactionSuccessful();
-					// db.endTransaction();
+    				// 保存至数据库
+    				if (products.size() > 0) {
+    					// 插入数据
+    					updateCheckTable(products);
+    				}
+    				// 清空products
+    				products.clear();
+                	
+                	forwardActivity(GatherActivity.class);
                     break;
                 case R.id.reviewBtn:
                     // 若有数据
@@ -283,7 +293,7 @@ public class CheckScanActivity extends BaseActivity {
                                 if (customDialogForCheck.isShowing())
                                     customDialogForCheck.dismiss();
                             }
-                        }).setCheckTypeSpinner(new String[]{"随机盘", "全盘"}).setCheckerSpinner(new String[]{"Rain"}).show();
+                        }).setCheckTypeSpinner(new String[]{"随机盘", "全盘"}).setCheckerSpinner(new String[]{App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key)}).show();
                     }
                 })
                 .setNegativeButton("否", new DialogInterface.OnClickListener() {
@@ -300,13 +310,17 @@ public class CheckScanActivity extends BaseActivity {
     private void updateState(List<Product> products) {
         db.beginTransaction();
         try {
-            String uuid = UUID.randomUUID().toString();
+        	// 更新
+			db.execSQL("update c_check set 'type' = ?, 'orderEmployee' = ?, 'status' = ? where checkno = ?", new Object[] {
+					customDialogForCheck.getCheckType(), customDialogForCheck.getChecker(), "已完成", no });
+        	
+        	// 增加新纪录
             Date currentTime = new Date();
             db.execSQL("insert into c_check('checkTime','checkno','count','type','orderEmployee','status','isChecked','checkUUID')" +
                             " values(?,?,?,?,?,?,?,?)",
                     new Object[]{
                             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(currentTime),
-                            getNo(),
+                            no,
                             getCount(products),
                             customDialogForCheck.getCheckType(),
                             customDialogForCheck.getChecker(),
@@ -315,11 +329,11 @@ public class CheckScanActivity extends BaseActivity {
                             uuid}
             );
             
-            for(Product product : products){
+            for(Product product : products) {
 	            db.execSQL("insert into c_check_detail('shelf','barcode','count','color','size','stylename','checkUUID')" +
 	                    " values(?,?,?,?,?,?,?)",
 		            new Object[]{
-	                    	shelfET.getText().toString(),
+	                    	product.getShelf(),
 		                    product.getBarCode(),
 		                    product.getCount(),
 		                    product.getColor(),
@@ -354,13 +368,12 @@ public class CheckScanActivity extends BaseActivity {
     private void updateCheckTable(List<Product> products) {
         db.beginTransaction();
         try {
-            String uuid = UUID.randomUUID().toString();
             Date currentTime = new Date();
             db.execSQL("insert into c_check('checkTime','checkno','count','type','orderEmployee', 'status','isChecked','checkUUID')" +
             		" values(?,?,?,?,?,?,?,?)",
                     new Object[]{
                             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(currentTime),
-                            getNo(), // IV305152 + 日期 + 流水号
+                            no, // IV305152 + 日期 + 流水号
                             getCount(products),
                             "未知类型",
                             App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key),
@@ -373,14 +386,14 @@ public class CheckScanActivity extends BaseActivity {
 		        db.execSQL("insert into c_check_detail('shelf','barcode','count','color','size','stylename','checkUUID')" +
 		                " values(?,?,?,?,?,?,?)",
 		            new Object[]{
-		                	shelfET.getText().toString(),
-		                    product.getBarCode(),
-		                    product.getCount(),
-		                    product.getColor(),
-		                    product.getSize(),
-		                    product.getName(),
-		                    uuid}
-		        		);
+		        		shelfNo,
+	                    product.getBarCode(),
+	                    product.getCount(),
+	                    product.getColor(),
+	                    product.getSize(),
+	                    product.getName(),
+	                    uuid}
+	        		);
 		    }
             db.setTransactionSuccessful();
         } catch (Exception e) {

@@ -1,5 +1,8 @@
 package cn.burgeon.core.ui.check;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,10 +16,6 @@ import android.widget.HorizontalScrollView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
 import cn.burgeon.core.adapter.CheckQueryLVAdapter;
