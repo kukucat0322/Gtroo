@@ -81,8 +81,7 @@ public class ScreenUtils {
                 (int) res.getDimension(R.dimen.title_height) +
                 (int) res.getDimension(R.dimen.store_height) +
                 (int) res.getDimension(R.dimen.store_height) +
-                (int) res.getDimension(R.dimen.operate_height) +
-                (int) res.getDimension(R.dimen.padding_reserve);
+                (int) res.getDimension(R.dimen.operate_height);
         return ScreenUtils.screenHeight() - allotInHeightNotLV;
     }
 

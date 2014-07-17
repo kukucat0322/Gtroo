@@ -1,5 +1,12 @@
 package cn.burgeon.core.ui;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+
+import org.apache.http.client.methods.HttpUriRequest;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -11,26 +18,18 @@ import android.view.MotionEvent;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
+import cn.burgeon.core.App;
+import cn.burgeon.core.bean.IntentData;
+import cn.burgeon.core.net.RequestManager;
+import cn.burgeon.core.net.SimonHttpStack;
+import cn.burgeon.core.utils.PreferenceUtils;
+import cn.burgeon.core.widget.CustomProgressDialog;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-
-import org.apache.http.client.methods.HttpUriRequest;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
-
-import cn.burgeon.core.App;
-import cn.burgeon.core.bean.IntentData;
-import cn.burgeon.core.db.DbHelper;
-import cn.burgeon.core.net.RequestManager;
-import cn.burgeon.core.net.SimonHttpStack;
-import cn.burgeon.core.utils.PreferenceUtils;
-import cn.burgeon.core.widget.CustomProgressDialog;
 
 /**
  * Created by Simon on 2014/4/16.
@@ -57,7 +56,6 @@ public class BaseActivity extends Activity {
     
     @Override
     protected void onStop() {
-    	// TODO Auto-generated method stub
     	super.onStop();
     	/*if(db != null)
     		db.close();*/
@@ -157,7 +155,7 @@ public class BaseActivity extends Activity {
     }
 
     public String getCurrDate() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         Date curDate = new Date(System.currentTimeMillis());//获取当前时间
         return formatter.format(curDate);
     }

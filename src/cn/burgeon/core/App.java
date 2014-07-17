@@ -28,6 +28,12 @@ public class App extends Application {
     private DbHelper helper;
     protected SQLiteDatabase db;
     private ArrayList<Employee> employees = new ArrayList<Employee>();
+    
+    private static App singleton;
+
+    public static App getInstance() {
+        return singleton;
+    }
 
     private static SimonHttpStack simonHttpStack;
 
@@ -58,6 +64,8 @@ public class App extends Application {
      * Intialize the request manager and the image cache
      */
     private void init() {
+    	singleton = this;
+    	
         simonHttpStack = new SimonHttpStack();
         RequestManager.init(this, simonHttpStack);
 

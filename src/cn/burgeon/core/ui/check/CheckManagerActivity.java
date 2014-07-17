@@ -1,18 +1,26 @@
 package cn.burgeon.core.ui.check;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -30,12 +38,11 @@ import cn.burgeon.core.utils.PreferenceUtils;
 import cn.burgeon.core.widget.UndoBarController;
 import cn.burgeon.core.widget.UndoBarStyle;
 
-import com.android.volley.Response;
-
 public class CheckManagerActivity extends BaseActivity {
 
     private GridView checkGV;
     private CheckManagerAdapter mAdapter;
+    private String lastOrderNo = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,23 +72,26 @@ public class CheckManagerActivity extends BaseActivity {
                 } else if (itemValue != null && Constant.checkManagerTextValues[2].equals(itemValue)) {
                     forwardActivity(CheckQueryActivity.class);
                 } else if (itemValue != null && Constant.checkManagerTextValues[3].equals(itemValue)) {
-                    List<Order> orders = fetchData();
-                    if (orders != null && orders.size() > 0) {
-                        for (Order order : orders) {
-                            uploadSalesOrder(order);
-                        }
-                        UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
-    		        	UndoBarController.show(CheckManagerActivity.this, "盘点上传成功", null, MESSAGESTYLE);
-                    }
+                	ArrayList<Order> orders = fetchData();
+                	int orderSize = orders.size();
+					if (orders != null && orderSize > 0) {
+						lastOrderNo = orders.get(orderSize - 1).getOrderNo();
+						for (Order order : orders) {
+							uploadSalesOrder(order);
+						}
+					} else {
+						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+						UndoBarController.show(CheckManagerActivity.this, "没有数据可以上传", null, MESSAGESTYLE);
+					}
                 }
             }
         });
     }
 
     // 上传已审核的
-    private List<Order> fetchData() {
+    private ArrayList<Order> fetchData() {
         Order order = null;
-        List<Order> data = new ArrayList<Order>();
+        ArrayList<Order> data = new ArrayList<Order>();
         Cursor c = db.rawQuery("select * from c_check where isChecked = ? and status = '已完成'", new String[]{getString(R.string.sales_settle_noup)});
         while (c.moveToNext()) {
             order = new Order();
@@ -98,28 +108,7 @@ public class CheckManagerActivity extends BaseActivity {
         return data;
     }
 
-    /*
-    {
-        "masterobj":{
-            "table":"M_INVENTORY",
-            "BILLDATE":"20120427 00:00:00",
-            "DOCTYPE":"INF",
-             "C_STORE_ID__NAME":"苏州001"
-        },
-        "detailobjs":{
-            "reftables":[319],
-            "refobjs":[{
-                "table":"M_INVENTORYITEM",
-                "addList":[{
-                    "M_PRODUCT_ID__NAME":"108234A091-18",
-                    "QTYCOUNT":100,
-                }]
-            }]
-        },
-        "submit":"true"
-    }
-    */
-    private void uploadSalesOrder(final Order order) {
+    private void uploadSalesOrder(Order order) {
         if (!"未知类型".equals(order.getOrderType())) {
             Map<String, String> params = new HashMap<String, String>();
             JSONArray array;
@@ -158,7 +147,7 @@ public class CheckManagerActivity extends BaseActivity {
 
                 List<Product> detailsItems = getDetailsData(order.getUuid());
     			if(detailsItems != null && detailsItems.size() > 0){
-    				Log.d("check", "========明细=========");
+    				// Log.d("check", "========明细=========");
     				for(Product product : detailsItems){
     					JSONObject item = new JSONObject();
     					item.put("QTYCOUNT", product.getCount());
@@ -176,7 +165,7 @@ public class CheckManagerActivity extends BaseActivity {
 
                 List<Product> shelfDetailsItems = getDetailsData(order.getUuid());
     			if(shelfDetailsItems != null && shelfDetailsItems.size() > 0){
-    				Log.d("check", "========按货架扫描明细=========");
+    				// Log.d("check", "========按货架扫描明细=========");
     				for(Product product : shelfDetailsItems){
     					JSONObject item2 = new JSONObject();
     					item2.put("SHELFNO", product.getShelf());
@@ -194,70 +183,179 @@ public class CheckManagerActivity extends BaseActivity {
 
                 transactions.put("params", paramsInTransactions);
                 array.put(transactions);
-                Log.d("check", array.toString());
+                // Log.d("check", array.toString());
                 params.put("transactions", array.toString());
-                sendRequest(params, new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                    	Log.d("check", response);
-                    	if(!TextUtils.isEmpty(response)){
-	                        RequestResult result = parseResult(response);
-	                        //请求成功，更新记录状态和销售单号
-	                        if ("0".equals(result.getCode())) {
-	                            updateOrderStatus(result, order);
-	                        }
-                    	}
-                        // 取消进度条
-                        stopProgressDialog();
-                    }
-                });
+                
+                String tt = App.getInstance().getSDF().format(new Date());
+                //appKey,时间戳,MD5签名
+                params.put("sip_appkey", App.getSipkey());
+                params.put("sip_timestamp", tt);
+                params.put("sip_sign", App.getInstance().MD5(App.getSipkey() + tt + App.getInstance().getSIPPSWDMD5()));
+
+                // 执行请求
+                UploadTask uploadTask = new UploadTask(order, params);
+                uploadTask.execute(App.getHosturl());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
     }
+	
+    // 总params
+	/*
+	{
+		sip_sign=06fa087cff61659baef64235b4c0e786, 
+		transactions=[{
+			"command":"ProcessOrder",
+			"id":112,
+			"params":{
+				"submit":"true",
+				"detailobjs":{
+					"refobjs":[{
+						"addList":[{
+							"M_PRODUCT_ID__NAME":"AS001BL",
+							"QTYCOUNT":"1"
+						}],
+						"table":12255
+					}, {
+						"addList":[{
+							"M_PRODUCT_ID__NAME":"AS001BL",
+							"QTYCOUNT":"1",
+							"SHELFNO":"01"
+						}],
+						"table":15743
+					}],
+					"reftables":[319]
+				},
+				"masterobj":{
+					"C_STORE_ID__NAME":"LILY门店001",
+					"DIFFREASON":"缺货",
+					"table":12254,
+					"DOCTYPE":"INR",
+					"BILLDATE":"20140717 09:48:34"
+				}
+			}
+		}], 
+		sip_timestamp=2014-07-17 09:53:37.587, 
+		sip_appkey=nea@burgeon.com.cn
+	}
+	*/
+	// Params 启动任务执行的输入参数，比如HTTP请求的URL。
+    // Progress 后台任务执行的百分比。
+    // Result 后台执行任务最终返回的结果，比如String。
+	// 设置三种类型参数分别为String,Integer,String
+	class UploadTask extends AsyncTask<String, Integer, String> {
+		
+		Order currOrder;
+		
+		List<NameValuePair> pars = null;
+		HttpPost httpRequest = null;
+		HttpResponse httpResponse;
 
-    private RequestResult parseResult(String response) {
-        RequestResult result = null;
-        try {
-            JSONArray resJA = new JSONArray(response);
-            JSONObject resJO = resJA.getJSONObject(0);
-            result = new RequestResult(resJO.getString("code"), resJO.getString("message"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
+		public UploadTask(Order order, Map<String, String> params) {
+			this.currOrder = order;
+			
+			/* Post运作传送变数必须用NameValuePair[]阵列储存 */
+			pars = new ArrayList<NameValuePair>();
 
-    private void updateOrderStatus(RequestResult result, Order order) {
-        db.beginTransaction();
-        try {
-            db.execSQL("update c_check set isChecked = ? where checkno = ?",
-                    new Object[]{getResources().getString(R.string.sales_settle_hasup),
-                            order.getOrderNo()}
-            );
-            db.setTransactionSuccessful();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            db.endTransaction();
-        }
-    }
+			for (Map.Entry<String, String> entry : params.entrySet()) {
+				pars.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+			}
+		}
+
+		// 任务启动，可以在这里显示一个对话框，这里简单处理
+		@Override
+		protected void onPreExecute() {
+			CheckManagerActivity.this.startProgressDialog();
+		}
+
+		// 可变长的输入参数，与AsyncTask.exucute()对应
+		@Override
+		protected String doInBackground(String... params) {
+			/* 建立HttpPost连接 */
+			httpRequest = new HttpPost(params[0]);
+			try {
+				// 发出HTTP request
+				httpRequest.setEntity(new UrlEncodedFormEntity(pars, HTTP.UTF_8));
+				// 取得HTTP response
+				httpResponse = new DefaultHttpClient().execute(httpRequest);
+				// 若状态码为200
+				if (httpResponse.getStatusLine().getStatusCode() == 200) {
+					// 得到返回字串
+					String response = EntityUtils.toString(httpResponse.getEntity());
+					RequestResult result = parseResult(response);
+                    //请求成功，更新记录状态和销售单号
+					if ("0".equals(result.getCode())) {
+						updateOrderStatus(result, currOrder);
+					}
+				}
+			} catch (Exception e) {
+			}
+			return null;
+		}
+
+		// 返回HTML页面的内容
+		@Override
+		protected void onPostExecute(String result) {
+			// 判断是否是最后一个, 是则提示上传成功信息
+			if (lastOrderNo.equals(currOrder.getOrderNo())) {
+				CheckManagerActivity.this.stopProgressDialog();
+
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+				UndoBarController.show(CheckManagerActivity.this, "盘点上传成功", null, MESSAGESTYLE);
+			}
+		}
+
+		// 更新进度
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+		}
+
+		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+		}
+	}
+	
+	private RequestResult parseResult(String response) {
+		RequestResult result = null;
+		try {
+			JSONArray resJA = new JSONArray(response);
+			JSONObject resJO = resJA.getJSONObject(0);
+			result = new RequestResult(resJO.getString("code"), resJO.getString("message"));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	private void updateOrderStatus(RequestResult result, Order order) {
+		db.beginTransaction();
+		try {
+			db.execSQL("update c_check set isChecked = ? where checkno = ?",
+					new Object[] { getResources().getString(R.string.sales_settle_hasup), order.getOrderNo() });
+			db.setTransactionSuccessful();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			db.endTransaction();
+		}
+	}
     
 	private List<Product> getDetailsData(String primaryKey) {
 		List<Product> details = new ArrayList<Product>();
-		Cursor c = db.rawQuery("select barcode, count,  shelf from c_check_detail where checkUUID = ?", new String[]{primaryKey});
+		Cursor c = db.rawQuery("select barcode, count,  shelf from c_check_detail where checkUUID = ?", new String[] { primaryKey });
 		Product product = null;
-		while(c.moveToNext()){
+		while (c.moveToNext()) {
 			product = new Product();
 			product.setBarCode(c.getString(c.getColumnIndex("barcode")));
 			product.setCount(c.getString(c.getColumnIndex("count")));
 			product.setShelf(c.getString(c.getColumnIndex("shelf")));
 			details.add(product);
 		}
-		if(c != null && !c.isClosed())
+		if (c != null && !c.isClosed())
 			c.close();
 		return details;
-    }
-
+	}
+	
 }

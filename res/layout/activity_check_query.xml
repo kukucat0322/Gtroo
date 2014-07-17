@@ -139,7 +139,7 @@
                 <ListView
                     android:id="@+id/checkQueryLV"
                     android:layout_width="match_parent"
-                    android:layout_height="265dp" />
+                    android:layout_height="wrap_content" />
             </LinearLayout>
         </HorizontalScrollView>
     </LinearLayout>
@@ -179,9 +179,9 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/operate_height"
             android:orientation="horizontal"
-            android:gravity="center_horizontal">
+            android:gravity="center">
 
             <Button
                 android:id="@+id/queryBtn"
