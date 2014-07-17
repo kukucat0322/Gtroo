@@ -1,5 +1,7 @@
 package cn.burgeon.core.ui.member;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -7,6 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,6 +24,8 @@ import com.android.volley.Response;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -30,8 +40,11 @@ import cn.burgeon.core.adapter.MemberManagerAdapter;
 import cn.burgeon.core.bean.Employee;
 import cn.burgeon.core.bean.Member;
 import cn.burgeon.core.bean.Order;
+import cn.burgeon.core.bean.PayWay;
+import cn.burgeon.core.bean.Product;
 import cn.burgeon.core.bean.RequestResult;
 import cn.burgeon.core.ui.BaseActivity;
+import cn.burgeon.core.ui.sales.SalesManagerActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
 import cn.burgeon.core.widget.UndoBarController;
 import cn.burgeon.core.widget.UndoBarStyle;
@@ -68,14 +81,16 @@ public class MemberManagerActivity extends BaseActivity {
 				} else if (itemValue != null && Constant.memberManagerTextValues[1].equals(itemValue)) {
 					forwardActivity(MemberListActivity.class);
 				} else if (itemValue != null && Constant.memberManagerTextValues[2].equals(itemValue)) {
+					startProgressDialog();
 					List<Member> vips = query();
+//					if(vips != null && vips.size() > 0){
+//						for(Member vip : vips){
+//							upload(vip);
+//						}
+//					}
 					if(vips != null && vips.size() > 0){
-						for(Member vip : vips){
-							upload(vip);
-						}
+						new Thread(new RequestRunable(vips)).start();
 					}
-					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
-		        	UndoBarController.show(MemberManagerActivity.this, "会员上传成功", null, MESSAGESTYLE);
 				}else if (itemValue != null && Constant.memberManagerTextValues[3].equals(itemValue)) {
 					downloadVips();
 				}
@@ -84,14 +99,23 @@ public class MemberManagerActivity extends BaseActivity {
 	}
 	
 	private void downloadVips(){
+		startProgressDialog();
 		String storeNo = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey);
 		sendRequest(constructParams(storeNo), new Response.Listener<String>() {
 			@Override
 			public void onResponse(String response) {
 				Log.d(TAG, response);
 				if(!TextUtils.isEmpty(response)){
-					parseVips(response);
-					stopProgressDialog();
+					RequestResult result = parseResult(response);
+					if("0".equals(result.getCode())){
+						parseVips(response);
+						stopProgressDialog();
+						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+			        	UndoBarController.show(MemberManagerActivity.this, "下载会员成功", null, MESSAGESTYLE);
+					}else{
+						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+			        	UndoBarController.show(MemberManagerActivity.this, "下载会员失败", null, MESSAGESTYLE);
+					}
 				}
 			}
 		});
@@ -263,4 +287,126 @@ public class MemberManagerActivity extends BaseActivity {
 		c.close();
 		return data;
 	}
+	
+	class RequestRunable implements Runnable {
+		
+		private List<Member> vips = new ArrayList<Member>();
+		
+		public RequestRunable(List<Member> vips) {
+			this.vips = vips;
+		}
+
+		@Override
+		public void run() {
+			ArrayList<String> failures = new ArrayList<String>();
+			for(Member vip : vips){
+				App mApp = ((App)getApplication());
+				String tt = mApp.getSDF().format(new Date());
+		        String uriAPI = App.getHosturl();
+		        HttpPost httpRequest = new HttpPost(uriAPI);
+		        httpRequest.addHeader("Content-Type", getBodyContentType());
+		        Map<String,String> map = construct(vip);
+		        map.put("sip_appkey", App.getSipkey());
+		        map.put("sip_timestamp", tt);
+		        map.put("sip_sign", mApp.MD5(App.getSipkey() + tt + mApp.getSIPPSWDMD5()));
+		        
+		        try{
+		          HttpEntity entity = new ByteArrayEntity(encodeParameters(map, "UTF-8"));
+		          httpRequest.setEntity(entity);
+		          HttpResponse httpResponse = new DefaultHttpClient().execute(httpRequest);
+		          if(httpResponse.getStatusLine().getStatusCode() == 200){
+		            String response = EntityUtils.toString(httpResponse.getEntity());
+		            Log.d(TAG, "====" + response);
+		            if(!TextUtils.isEmpty(response)){
+						RequestResult result = parseResult(response);
+						//请求成功，更新记录状态
+						if("0".equals(result.getCode())){
+							updateOrderStatus(vip);
+						}else{
+							failures.add(vip.getCardNum() +":"+result.getMessage());
+					}}
+		          }
+	            } catch(Exception e) {
+	               e.printStackTrace();
+	            }	
+			}
+			Message msg = handler.obtainMessage();
+			msg.what = 1;
+			msg.obj = failures;
+			handler.sendMessage(msg);
+		}
+
+		private Map<String,String> construct(Member vip) {
+			Map<String,String> params = new HashMap<String, String>();
+			JSONArray array = null;
+			JSONObject transactions = null;
+			
+			try {
+				array = new JSONArray();
+				transactions = new JSONObject();
+				transactions.put("id", 112);
+				transactions.put("command", "ObjectCreate");
+				
+				//第一个params
+				JSONObject paramsInTransactions = new JSONObject();
+				paramsInTransactions.put("table", 12899);
+				paramsInTransactions.put("CARDNO",vip.getCardNum());
+				paramsInTransactions.put("C_VIPTYPE_ID__NAME",vip.getType());
+				paramsInTransactions.put("C_CUSTOMER_ID__NAME",App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.agency_key));
+				paramsInTransactions.put("C_STORE_ID__NAME",App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
+				paramsInTransactions.put("HR_EMPLOYEE_ID__NAME",vip.getEmployee());
+				paramsInTransactions.put("VIPNAME",vip.getName());
+				//paramsInTransactions.put("MOBIL",vip.getPhoneNum());
+				paramsInTransactions.put("SEX","男".equals(vip.getCardNum())?"M":"W");
+				//paramsInTransactions.put("M_DIM1_ID__ATTRIBNAME","品牌AS0015");
+				
+				transactions.put("params", paramsInTransactions);
+				array.put(transactions);
+				Log.d(TAG, array.toString());
+				params.put("transactions", array.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			return params;
+		}
+		
+	    private byte[] encodeParameters(Map<String, String> params, String paramsEncoding) {
+	        StringBuilder encodedParams = new StringBuilder();
+	        try {
+	            for (Map.Entry<String, String> entry : params.entrySet()) {
+	                encodedParams.append(URLEncoder.encode(entry.getKey(), paramsEncoding));
+	                encodedParams.append('=');
+	                encodedParams.append(URLEncoder.encode(entry.getValue(), paramsEncoding));
+	                encodedParams.append('&');
+	            }
+	            return encodedParams.toString().getBytes(paramsEncoding);
+	        } catch (UnsupportedEncodingException uee) {
+	            throw new RuntimeException("Encoding not supported: " + paramsEncoding, uee);
+	        }
+	    }
+	    
+	    private String getBodyContentType() {
+	        return "application/x-www-form-urlencoded; charset=UTF-8";
+	    }
+	};
+	
+    Handler handler = new Handler(){
+
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+			stopProgressDialog();
+			ArrayList<String> falures = (ArrayList<String>) msg.obj;
+			if(falures.size() > 0){
+				StringBuilder sb = new StringBuilder();
+				for(String str : falures)
+					sb.append(str).append("\n");
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+	        	UndoBarController.show(MemberManagerActivity.this, sb.toString(), null, MESSAGESTYLE);
+			}else{
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+				UndoBarController.show(MemberManagerActivity.this, "上传成功", null, MESSAGESTYLE);
+			}
+		}
+    };
 }

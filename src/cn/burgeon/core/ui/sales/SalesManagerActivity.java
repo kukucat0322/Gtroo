@@ -134,12 +134,13 @@ import com.android.volley.Response;
 	
 	private List<Product> getDetailsData(String primaryKey) {
 		List<Product> details = new ArrayList<Product>();
-		Cursor c = db.rawQuery("select barcode, count from c_settle_detail where settleUUID = ?", new String[]{primaryKey});
+		Cursor c = db.rawQuery("select money,barcode, count from c_settle_detail where settleUUID = ?", new String[]{primaryKey});
 		Product product = null;
 		while(c.moveToNext()){
 			product = new Product();
 			product.setBarCode(c.getString(c.getColumnIndex("barcode")));
 			product.setCount(c.getString(c.getColumnIndex("count")));
+			product.setMoney(c.getString(c.getColumnIndex("money")));
 			details.add(product);
 		}
 		if(c != null && !c.isClosed())
@@ -252,6 +253,8 @@ import com.android.volley.Response;
 						JSONObject item = new JSONObject();
 						item.put("QTY", product.getCount());
 						item.put("M_PRODUCT_ID__NAME", product.getBarCode());
+						item.put("PRICEACTUAL", product.getMoney());
+						item.put("TOT_AMT_ACTUAL", Float.parseFloat(product.getMoney()) * Integer.parseInt(product.getCount()));
 						addList.put(item);
 					}
 				}
@@ -291,27 +294,27 @@ import com.android.volley.Response;
 			}
 			return params;
 		}
+		
+	    private byte[] encodeParameters(Map<String, String> params, String paramsEncoding) {
+	        StringBuilder encodedParams = new StringBuilder();
+	        try {
+	            for (Map.Entry<String, String> entry : params.entrySet()) {
+	                encodedParams.append(URLEncoder.encode(entry.getKey(), paramsEncoding));
+	                encodedParams.append('=');
+	                encodedParams.append(URLEncoder.encode(entry.getValue(), paramsEncoding));
+	                encodedParams.append('&');
+	            }
+	            return encodedParams.toString().getBytes(paramsEncoding);
+	        } catch (UnsupportedEncodingException uee) {
+	            throw new RuntimeException("Encoding not supported: " + paramsEncoding, uee);
+	        }
+	    }
+	    
+	    private String getBodyContentType() {
+	        return "application/x-www-form-urlencoded; charset=UTF-8";
+	    }
 	};
 	
-    private byte[] encodeParameters(Map<String, String> params, String paramsEncoding) {
-        StringBuilder encodedParams = new StringBuilder();
-        try {
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-                encodedParams.append(URLEncoder.encode(entry.getKey(), paramsEncoding));
-                encodedParams.append('=');
-                encodedParams.append(URLEncoder.encode(entry.getValue(), paramsEncoding));
-                encodedParams.append('&');
-            }
-            return encodedParams.toString().getBytes(paramsEncoding);
-        } catch (UnsupportedEncodingException uee) {
-            throw new RuntimeException("Encoding not supported: " + paramsEncoding, uee);
-        }
-    }
-	
-    public String getBodyContentType() {
-        return "application/x-www-form-urlencoded; charset=UTF-8";
-    }
-    
     Handler handler = new Handler(){
 
 		@Override
@@ -323,10 +326,10 @@ import com.android.volley.Response;
 				StringBuilder sb = new StringBuilder();
 				for(String str : falures)
 					sb.append(str).append("\n");
-				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
 	        	UndoBarController.show(SalesManagerActivity.this, sb.toString(), null, MESSAGESTYLE);
 			}else{
-				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
 				UndoBarController.show(SalesManagerActivity.this, "上传成功", null, MESSAGESTYLE);
 			}
 		}

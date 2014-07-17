@@ -164,7 +164,7 @@ public class MemberRegistActivity extends BaseActivity {
 				
 				if(-1 != _id){
 					update();
-					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
 		        	UndoBarController.show(MemberRegistActivity.this, "更新会员成功", null, MESSAGESTYLE);
 				}else{
 					save();
@@ -213,23 +213,23 @@ public class MemberRegistActivity extends BaseActivity {
 	
 	private boolean validate(){
 		if(!isRequired(cardNOET.getText())){   
-			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
         	UndoBarController.show(MemberRegistActivity.this, "卡号不能为空", null, MESSAGESTYLE);
         	return false;
 		}else if(!isRequired(nameET.getText())){
-			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
         	UndoBarController.show(MemberRegistActivity.this, "姓名不能为空", null, MESSAGESTYLE);
         	return false;
 		}else if(!Pattern.compile(phoneRegExp).matcher(mobilePhoneET.getText()).find()){
-			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
         	UndoBarController.show(MemberRegistActivity.this, "手机号码不正确", null, MESSAGESTYLE);
         	return false;
 		}else if(!isRequired(identityET.getText())){
-			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
         	UndoBarController.show(MemberRegistActivity.this, "身份证号码不正确", null, MESSAGESTYLE);
         	return false;
 		}else if(!isVerifyed){
-			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
         	UndoBarController.show(MemberRegistActivity.this, "卡号尚未验证通过", null, MESSAGESTYLE);
         	return false;
 		}
@@ -272,7 +272,7 @@ public class MemberRegistActivity extends BaseActivity {
 	        if("search".equals(from)){
 	        		uploadV1ip(vip);
 	        }else{
-		        	UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+		        	UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
 		    		UndoBarController.show(MemberRegistActivity.this, "注册会员成功", new UndoListener() {
 					@Override
 					public void onUndo(Parcelable token) {
@@ -449,23 +449,23 @@ public class MemberRegistActivity extends BaseActivity {
 				stopProgressDialog();
 				if(parseResult(response)){
 					isVerifyed = false;
-					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
 		        	UndoBarController.show(MemberRegistActivity.this, "对不起，此卡号已被使用", null, MESSAGESTYLE);
 				}else{
 					if(verifyLocal()){
 						isVerifyed = false;
-						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
 			        	UndoBarController.show(MemberRegistActivity.this, "对不起，此卡号已被使用", null, MESSAGESTYLE);
 					}else{
 						isVerifyed = true;
-						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
 			        	UndoBarController.show(MemberRegistActivity.this, "此卡号可以使用", null, MESSAGESTYLE);
 					}
 				}
 				break;
 			case 2:
 				RequestResult result =  (RequestResult) msg.obj;
-				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
 	    	    UndoBarController.show(MemberRegistActivity.this, result.getMessage(), new UndoListener() {
 				@Override
 				public void onUndo(Parcelable token) {

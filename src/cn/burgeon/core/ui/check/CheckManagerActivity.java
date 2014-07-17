@@ -80,7 +80,7 @@ public class CheckManagerActivity extends BaseActivity {
 							uploadSalesOrder(order);
 						}
 					} else {
-						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
 						UndoBarController.show(CheckManagerActivity.this, "没有数据可以上传", null, MESSAGESTYLE);
 					}
                 }
@@ -294,14 +294,13 @@ public class CheckManagerActivity extends BaseActivity {
 			return null;
 		}
 
-		// 返回HTML页面的内容
 		@Override
 		protected void onPostExecute(String result) {
 			// 判断是否是最后一个, 是则提示上传成功信息
 			if (lastOrderNo.equals(currOrder.getOrderNo())) {
 				CheckManagerActivity.this.stopProgressDialog();
 
-				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
 				UndoBarController.show(CheckManagerActivity.this, "盘点上传成功", null, MESSAGESTYLE);
 			}
 		}
