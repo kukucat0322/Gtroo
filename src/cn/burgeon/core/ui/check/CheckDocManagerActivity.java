@@ -205,15 +205,29 @@ public class CheckDocManagerActivity extends BaseActivity {
         return super.onContextItemSelected(item);
     }
 
-    private void delWithNo(String no) {
-        db.beginTransaction();
-        try {
-            db.execSQL("delete from c_check where checkno = ?", new String[]{no});
-            db.setTransactionSuccessful();
-        } catch (Exception e) {
-        } finally {
-            db.endTransaction();
-        }
-    }
+	private void delWithNo(String no) {
+		db.beginTransaction();
+		try {
+			// 查找
+			String uuid = null;
+			Cursor c = db.rawQuery("select checkUUID from c_check where checkno = ?", new String[] { no });
+			if (c.moveToFirst()) {
+				uuid = c.getString(c.getColumnIndex("checkUUID"));
+			}
+			if (c != null && !c.isClosed())
+				c.close();
+
+			// 删除
+			db.execSQL("delete from c_check where checkno = ?", new String[] { no });
+			
+			// 删除
+			db.execSQL("delete from c_check_detail where checkUUID = ?", new String[] { uuid });
+			
+			db.setTransactionSuccessful();
+		} catch (Exception e) {
+		} finally {
+			db.endTransaction();
+		}
+	}
 
 }
