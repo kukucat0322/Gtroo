@@ -8,21 +8,28 @@ import java.util.Map;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.Window;
+import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import cn.burgeon.core.App;
+import cn.burgeon.core.R;
 import cn.burgeon.core.bean.IntentData;
 import cn.burgeon.core.net.RequestManager;
 import cn.burgeon.core.net.SimonHttpStack;
+import cn.burgeon.core.ui.check.CheckScanActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
+import cn.burgeon.core.widget.CustomDialogForCheck;
 import cn.burgeon.core.widget.CustomProgressDialog;
 
 import com.android.volley.AuthFailureError;
@@ -184,6 +191,21 @@ public class BaseActivity extends Activity {
     // 初始化门店和用户信息
     public void initStoreData(TextView tv) {
         tv.setText("门店：" + App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
+    }
+    
+    public void showAlertMsg(int message){
+    	AlertDialog dialog = null;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.systemtips))
+                .setMessage(message)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        dialog = builder.create();
+        dialog.show();
     }
     
 	@Override

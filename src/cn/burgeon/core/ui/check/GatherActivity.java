@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -16,13 +18,17 @@ import cn.burgeon.core.ui.BaseActivity;
 
 public class GatherActivity extends BaseActivity {
 
+	private String uuid;
 	private LinkedHashMap<String, ArrayList<ShelfData>> shelfDataMap = new LinkedHashMap<String, ArrayList<ShelfData>>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_gather);
-
+		
+		Intent intent = getIntent();
+		if(intent != null)
+			uuid = intent.getStringExtra("uuid");
 		getShelfData();
 
 		for (Map.Entry<String, ArrayList<ShelfData>> entry : shelfDataMap.entrySet()) {
@@ -48,8 +54,9 @@ public class GatherActivity extends BaseActivity {
 
 	private void getShelfData() {
 		ArrayList<ShelfData> shelfDatas = new ArrayList<ShelfData>();
-		String sql = "select shelf, barcode, sum(count) as count from c_check_detail group by shelf, barcode";
-		Cursor c = db.rawQuery(sql, null);
+		String sql = "select shelf, barcode, sum(count) as count "
+				+ "from c_check_detail where checkUUID = ? group by shelf, barcode";
+		Cursor c = db.rawQuery(sql, new String[]{uuid});
 		while (c.moveToNext()) {
 			ShelfData shelfData = new ShelfData();
 			shelfData.setShelf(c.getString(c.getColumnIndex("shelf")));

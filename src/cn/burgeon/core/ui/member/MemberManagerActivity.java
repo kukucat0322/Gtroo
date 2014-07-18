@@ -356,7 +356,8 @@ public class MemberManagerActivity extends BaseActivity {
 				paramsInTransactions.put("C_STORE_ID__NAME",App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
 				paramsInTransactions.put("HR_EMPLOYEE_ID__NAME",vip.getEmployee());
 				paramsInTransactions.put("VIPNAME",vip.getName());
-				//paramsInTransactions.put("MOBIL",vip.getPhoneNum());
+				paramsInTransactions.put("MOBIL",vip.getPhoneNum());
+				paramsInTransactions.put("IDNO",vip.getiDentityCardNum());
 				paramsInTransactions.put("SEX","男".equals(vip.getCardNum())?"M":"W");
 				//paramsInTransactions.put("M_DIM1_ID__ATTRIBNAME","品牌AS0015");
 				

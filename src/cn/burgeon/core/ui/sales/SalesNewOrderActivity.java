@@ -321,6 +321,10 @@ public class SalesNewOrderActivity extends BaseActivity {
 					+" where a.sku = ?";
 		Cursor c = db.rawQuery(sql, new String[]{barcode});
 		Log.d(TAG, "result size = " + c.getCount());
+        if(c.getCount() == 0){
+        	showAlertMsg(R.string.nothatbarcode);
+        	return;
+        }
 		if(c.moveToFirst()){
 			List<Product> list = parseSQLResult(c,barcode);
 			data.addAll(list);
