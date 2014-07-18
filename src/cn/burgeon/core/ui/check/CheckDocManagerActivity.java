@@ -5,7 +5,6 @@ import java.util.List;
 
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -137,16 +136,17 @@ public class CheckDocManagerActivity extends BaseActivity {
         String endDay = endTime.substring(6, 8);
         String finalEndTime = endYear + "-" + endMonth + "-" + endDay + " 23:59:59";
 
-        String sql = "select * from c_check where " +
-                "checkno = " + ((customDialogForCheckQuery.getCheckNo().length() > 0) ? ("'" + customDialogForCheckQuery.getCheckNo() + "'") : "''") + " and " +
-                "checkTime between " + "'" + finalStartTime + "'" + " and " + "'" + finalEndTime + "'";
+        String sql = "select * from c_check where checkTime between " + "'" + finalStartTime + "'" + " and " + "'" + finalEndTime + "'";
+        String checkno = customDialogForCheckQuery.getCheckNo();
+        if(checkno != null && checkno.length() > 0) {
+        	sql += " and checkno = '" + checkno + "'";
+        }
         if (!"所有".equals(customDialogForCheckQuery.getCheckType())) {
             sql += " and type = " + "'" + customDialogForCheckQuery.getCheckType() + "'";
         }
         if (!"所有".equals(customDialogForCheckQuery.getState())) {
             sql += " and isChecked = " + "'" + customDialogForCheckQuery.getState() + "'";
         }
-        Log.i("zhang.h", sql);
 
         Cursor c = db.rawQuery(sql, null);
         List<Order> data = new ArrayList<Order>();

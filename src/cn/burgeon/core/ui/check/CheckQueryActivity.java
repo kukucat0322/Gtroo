@@ -1,18 +1,16 @@
 package cn.burgeon.core.ui.check;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
 import cn.burgeon.core.adapter.CheckQueryLVAdapter;
@@ -132,16 +130,18 @@ public class CheckQueryActivity extends BaseActivity {
         String endDay = endTime.substring(6, 8);
         String finalEndTime = endYear + "-" + endMonth + "-" + endDay + " 23:59:59";
 
-        String sql = "select * from c_check where " +
-                "checkno = " + ((customDialogForCheckQuery.getCheckNo().length() > 0) ? ("'" + customDialogForCheckQuery.getCheckNo() + "'") : "''") + " and " +
-                "checkTime between " + "'" + finalStartTime + "'" + " and " + "'" + finalEndTime + "'";
+        String sql = "select * from c_check where checkTime between " + "'" + finalStartTime + "'" + " and " + "'" + finalEndTime + "'";
+        String checkno = customDialogForCheckQuery.getCheckNo();
+        if(checkno != null && checkno.length() > 0) {
+        	sql += " and checkno = '" + checkno + "'";
+        }
         if (!"所有".equals(customDialogForCheckQuery.getCheckType())) {
             sql += " and type = " + "'" + customDialogForCheckQuery.getCheckType() + "'";
         }
         if (!"所有".equals(customDialogForCheckQuery.getState())) {
             sql += " and isChecked = " + "'" + customDialogForCheckQuery.getState() + "'";
         }
-        Log.i("zhang.h", sql);
+        // Log.i("zhang.h", sql);
 
         Cursor c = db.rawQuery(sql, null);
         List<Order> data = new ArrayList<Order>();
