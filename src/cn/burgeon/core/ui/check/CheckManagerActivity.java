@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -283,6 +284,7 @@ public class CheckManagerActivity extends BaseActivity {
 				if (httpResponse.getStatusLine().getStatusCode() == 200) {
 					// 得到返回字串
 					String response = EntityUtils.toString(httpResponse.getEntity());
+					Log.d("check", response);
 					RequestResult result = parseResult(response);
                     //请求成功，更新记录状态和销售单号
 					if ("0".equals(result.getCode())) {

@@ -59,6 +59,9 @@ public class CheckScanActivity extends BaseActivity {
         init();
         bm = new BarcodeManager(this);
 		bm.addListener(barcodeListener);
+		
+		uuid = UUID.randomUUID().toString();
+		no = getNo();
     }
     
     BarcodeListener barcodeListener = new BarcodeListener() {
@@ -69,8 +72,9 @@ public class CheckScanActivity extends BaseActivity {
  			if (event.getOrder().equals("SCANNER_READ")) {
  				// 调用 getBarcode()方法读取条码信息
  				Log.d("check", "=======barcode========" + bm.getBarcode());
- 				barcodeET.setText(bm.getBarcode());
- 				verifyBarCode(bm.getBarcode());
+ 				String barcode = bm.getBarcode() == null?"":bm.getBarcode().trim();
+ 				barcodeET.setText(barcode);
+ 				verifyBarCode(barcode);
  			}
  		}
  	};
@@ -126,6 +130,10 @@ public class CheckScanActivity extends BaseActivity {
                 + " on a.style = e.style"
                 + " where a.sku = ?";
         Cursor c = db.rawQuery(sql, new String[]{barcodeText});
+        if(c.getCount() == 0){
+        	showAlertMsg(R.string.nothatbarcode);
+        	return;
+        }
         if (c.moveToFirst()) {
             Product currProduct = parseSQLResult(c);
             // 生成ProductList
@@ -150,7 +158,6 @@ public class CheckScanActivity extends BaseActivity {
 				
 				// 清空products
 				products.clear();
-				
 				// 重新赋值products
 				shelfNo = currProduct.getShelf();
 				products.add(currProduct);
@@ -170,8 +177,6 @@ public class CheckScanActivity extends BaseActivity {
 				}
 			}
 		} else {
-			uuid = UUID.randomUUID().toString();
-			no = getNo();
 			shelfNo = currProduct.getShelf();
 			products.add(currProduct);
 		}
@@ -246,7 +251,7 @@ public class CheckScanActivity extends BaseActivity {
     				// 清空products
     				products.clear();
                 	
-                	forwardActivity(GatherActivity.class);
+                	forwardActivity(GatherActivity.class,"uuid",uuid);
                     break;
                 case R.id.reviewBtn:
                     // 若有数据
