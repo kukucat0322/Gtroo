@@ -161,7 +161,7 @@ public class SalesDailyReportActivity extends BaseActivity {
 					+ " and settleTime between " + "'" + finalStartTime + "'" + " and " + "'" + finalEndTime + "' group by settleDate";
 		else
 			sql = "select settleDate, sum(count) as totalCount,sum(money) as totalMoney from c_settle"
-					+ "where settleTime between " + "'" + finalStartTime + "'" + " and " + "'" + finalEndTime + "' group by settleDate";
+					+ " where settleTime between " + "'" + finalStartTime + "'" + " and " + "'" + finalEndTime + "' group by settleDate";
         if (!"所有".equals(dialog.getState())) {//上传、未上传
             sql += " and status = " + "'" + dialog.getState() + "'";
         }

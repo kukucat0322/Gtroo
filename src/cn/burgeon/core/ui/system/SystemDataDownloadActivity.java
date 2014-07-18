@@ -467,7 +467,8 @@ public class SystemDataDownloadActivity extends BaseActivity{
     
 	//用户所有选择同时下载
 	private void startDownload(){	
-		
+		delExistFiles();
+		delExistDatabase();
 		//开始下载系统参数
 		if(systemParamChecked && !fileExist(systemParamDownloadFileNames) && !systemParamDownloading){ 
 			//干活线程
@@ -529,6 +530,33 @@ public class SystemDataDownloadActivity extends BaseActivity{
 		}
 	}
 	
+	private void delExistDatabase() {
+		db.beginTransaction();
+		for(int i = 0; i < productDataDownloadFileNames.length; i++){
+			String temp = productDataDownloadFileNames[i].substring(productDataDownloadFileNames[i].lastIndexOf('/') + 1);
+			db.execSQL("delete from " + temp.substring(0,temp.indexOf('.')));
+		}
+		/*for(int i = 0; i < userDataDownloadFileNames.length; i++){
+			db.execSQL("delete from " + userDataDownloadFileNames[i].substring(0,productDataDownloadFileNames[i].indexOf('.')));
+		}*/
+		db.execSQL("delete from tc_vip");
+		for(int i = 0; i < itemStrategyDownloadFileNames.length; i++){
+			String temp = itemStrategyDownloadFileNames[i].substring(itemStrategyDownloadFileNames[i].lastIndexOf('/') + 1);
+			db.execSQL("delete from " + temp.substring(0,temp.indexOf('.')));
+		}
+		/*for(int i = 0; i < systemParamDownloadFileNames.length; i++){
+			db.execSQL("delete from " + systemParamDownloadFileNames[i].substring(0,productDataDownloadFileNames[i].indexOf('.')));
+		}*/
+		db.setTransactionSuccessful();
+		db.endTransaction();
+	}
+
+	private void delExistFiles() {
+		File f = new File(downloadPath);
+		for(File ff :f.listFiles())
+				ff.delete();
+	}
+
 	//DownLoad File Runnable
 	class downloadFileRunnable implements Runnable{
 		private String[]url;

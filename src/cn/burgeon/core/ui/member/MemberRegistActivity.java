@@ -205,7 +205,7 @@ public class MemberRegistActivity extends BaseActivity {
     }
 	
     String phoneRegExp = "^[1]([3][0-9]{1}|59|58|88|89)[0-9]{8}$";
-    String identityRegExp = "(\\d{14}\\w)|\\d{17}\\w";
+    String identityRegExp = "^[1-9]\\d{5}[1-9]\\d{3}((0\\d)|(1[0-2]))(([0|1|2]\\d)|3[0-1])\\d{4}$";
 	
 	private boolean isRequired(Editable src){
 		return src.length() > 0;
@@ -224,7 +224,7 @@ public class MemberRegistActivity extends BaseActivity {
 			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
         	UndoBarController.show(MemberRegistActivity.this, "手机号码不正确", null, MESSAGESTYLE);
         	return false;
-		}else if(!isRequired(identityET.getText())){
+		}else if(!Pattern.compile(identityRegExp).matcher(identityET.getText()).find()){
 			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
         	UndoBarController.show(MemberRegistActivity.this, "身份证号码不正确", null, MESSAGESTYLE);
         	return false;
@@ -236,51 +236,59 @@ public class MemberRegistActivity extends BaseActivity {
 		return true;
 	}
 	
+	Member vip = null;
 	public void save(){
 		if(validate()){
-			db.beginTransaction();
-	        try {
-	        	db.execSQL("insert into c_vip('cardno','name','idno','mobile','sex','email','birthday','createTime','employee','type','status','discount')"+
-	        				" values(?,?,?,?,?,?,?,?,?,?,?,?)",
-						new Object[]{cardNOET.getText().toString().trim(),
-									nameET.getText().toString().trim(),
-									identityET.getText().toString().trim(),
-									mobilePhoneET.getText().toString().trim(),
-									radioGroup.getCheckedRadioButtonId()==R.id.radioMale?getResources().getString(R.string.male):getResources().getString(R.string.female),
-									emailET.getText().toString().trim(),
-									birthdayET.getText().toString().trim(),
-									new SimpleDateFormat("yyyyMMdd").format(new Date()),
-									employeeSP.getText().toString().trim(),
-									((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("key"),
-									"search".equals(from)?getString(R.string.sales_settle_hasup):getString(R.string.sales_settle_noup),
-									((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("value")
-									});
-	            db.setTransactionSuccessful();
-	        } finally {  
-	            db.endTransaction();
-	        }
-	        Member vip = new Member();
+			vip = new Member();
 	        vip.setCardNum(cardNOET.getText().toString().trim());
 	        vip.setName(nameET.getText().toString().trim());
 	        vip.setiDentityCardNum(identityET.getText().toString().trim());
 	        vip.setPhoneNum(mobilePhoneET.getText().toString().trim());
 	        vip.setSex(radioGroup.getCheckedRadioButtonId()==R.id.radioMale?getResources().getString(R.string.male):getResources().getString(R.string.female));
 	        vip.setEmail(emailET.getText().toString().trim());
-	        vip.setEmployee(employeeSP.getText().toString().trim());
+	        vip.setEmployee(employeeSP.getText().toString().trim());   
 	        vip.setBirthday(birthdayET.getText().toString().trim());
 	        vip.setType(((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("key"));
-	        if("search".equals(from)){
-	        		uploadV1ip(vip);
-	        }else{
-		        	UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
-		    		UndoBarController.show(MemberRegistActivity.this, "注册会员成功", new UndoListener() {
-					@Override
-					public void onUndo(Parcelable token) {
-			        		forwardActivity(MemberListActivity.class);
-					}
-				}, MESSAGESTYLE);
-	        }
+	        vip.setDiscount(((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("value"));
+			if("search".equals(from)){
+				vip.setStatus(getString(R.string.sales_settle_hasup));
+		        startProgressDialog();
+	        	uploadV1ip(vip);
+			}else{
+				vip.setStatus(getString(R.string.sales_settle_noup));
+				insert(vip);
+		        UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+	    		UndoBarController.show(MemberRegistActivity.this, "注册会员成功", new UndoListener() {
+											@Override
+											public void onUndo(Parcelable token) {
+									        		forwardActivity(MemberListActivity.class);
+											}
+										}, MESSAGESTYLE);
+			}
 		}
+	}
+	
+	private void insert(Member vip){
+		try {
+			db.beginTransaction();
+        	db.execSQL("insert into c_vip('cardno','name','idno','mobile','sex','email','birthday','createTime','employee','type','status','discount')"+
+        				" values(?,?,?,?,?,?,?,?,?,?,?,?)",
+					new Object[]{vip.getCardNum(),
+								vip.getName(),
+								vip.getiDentityCardNum(),
+								vip.getPhoneNum(),
+								vip.getSex(),
+								vip.getEmail(),
+								vip.getBirthday(),
+								new SimpleDateFormat("yyyyMMdd").format(new Date()),
+								vip.getEmployee(),
+								vip.getType(),
+								vip.getStatus(),
+								vip.getDiscount()});
+            db.setTransactionSuccessful();
+        } finally {  
+            db.endTransaction();
+        }
 	}
 	
 	private void uploadV1ip(Member vip){
@@ -302,10 +310,9 @@ public class MemberRegistActivity extends BaseActivity {
 			paramsInTransactions.put("C_STORE_ID__NAME",App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
 			paramsInTransactions.put("HR_EMPLOYEE_ID__NAME",vip.getEmployee());
 			paramsInTransactions.put("VIPNAME",vip.getName());
-			//paramsInTransactions.put("MOBIL",vip.getPhoneNum());
-			paramsInTransactions.put("SEX","男".equals(vip.getCardNum())?"M":"W");
-			//paramsInTransactions.put("M_DIM1_ID__ATTRIBNAME","品牌AS0015");
-			
+			paramsInTransactions.put("MOBIL",vip.getPhoneNum());
+			paramsInTransactions.put("IDNO",vip.getiDentityCardNum());
+			paramsInTransactions.put("SEX",vip.getSex());
 			transactions.put("params", paramsInTransactions);
 			array.put(transactions);
 			Log.d(TAG, array.toString());
@@ -321,9 +328,11 @@ public class MemberRegistActivity extends BaseActivity {
 						msg.obj = result;
 						msg.what = 2;
 						handler.dispatchMessage(msg);
+					}else{
+						stopProgressDialog();
+						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+			        	UndoBarController.show(MemberRegistActivity.this, result.getMessage(), null, MESSAGESTYLE);
 					}
-					// 取消进度条
-                    stopProgressDialog();
 				}
 			});
 		} catch (JSONException e) {}
@@ -464,6 +473,8 @@ public class MemberRegistActivity extends BaseActivity {
 				}
 				break;
 			case 2:
+				insert(vip);
+                stopProgressDialog();
 				RequestResult result =  (RequestResult) msg.obj;
 				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
 	    	    UndoBarController.show(MemberRegistActivity.this, result.getMessage(), new UndoListener() {

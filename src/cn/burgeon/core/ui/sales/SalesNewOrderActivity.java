@@ -302,6 +302,11 @@ public class SalesNewOrderActivity extends BaseActivity {
 	private void verifyBarCode(String barcode) {
 		//从本地获取
 		varLocal(barcode);
+	/*	try {
+			Thread.sleep(1000);
+		} catch (Exception e) {
+		}
+		styleBarcodeET.setText("");*/
 		//从网络获取
 		//varNet();
 	}

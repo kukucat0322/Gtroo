@@ -130,14 +130,21 @@ public class MemberManagerActivity extends BaseActivity {
 			db.beginTransaction();
 			String createTime = new SimpleDateFormat("yyyyMMdd").format(new Date());
 			for (int i = 0; i < len; i++) {
-				/*paramsInTransactions.put("columns", new JSONArray().put("ID")
-						.put("CARDNO").put("C_VIPTYPE_ID").put("C_CUSTOMER_ID")
-						.put("C_STORE_ID").put("VIPNAME")
-						.put("MOBIL").put("SEX"));*/
-			    // [288,"12345678",67,448,597,"陈立立",null,"女"]
+				/*[
+	                288,
+	                "12345678",
+	                67,
+	                448,
+	                597,
+	                "陈立立",
+	                null,
+	                null,
+	                "女",
+	                "320982198807236455"
+	            ]*/
 			    String currRow = rowsJA.get(i).toString();
 			    String[] currRows = currRow.split(",");
-
+			    
 			    Member vip = new Member();
 			    vip.setId(Integer.parseInt(currRows[0].substring(1)));
 			    vip.setCardNum(currRows[1].substring(1, currRows[1].length() - 1));
@@ -145,20 +152,20 @@ public class MemberManagerActivity extends BaseActivity {
 			    vip.setCustomerID(Integer.parseInt(currRows[3]));
 			    vip.setStoreID(Integer.parseInt(currRows[4]));
 			    vip.setName(currRows[5].substring(1, currRows[5].length() - 1));
-			    vip.setPhoneNum("null".equals(currRows[6])?"":currRows[6].substring(1, currRows[6].length() - 1));
-			    vip.setSex(currRows[7].substring(1, currRows[7].length() - 2));
-
-				/*db.execSQL("CREATE TABLE IF NOT EXISTS c_vip" +  
-		                "(_id INTEGER PRIMARY KEY, cardno VARCHAR,status varchar,"+
-						"name VARCHAR, sex VARCHAR,idno VARCHAR,mobile VARCHAR,birthday VARCHAR,storeID varchar,customerID varchar,"+
-		                "employee VARCHAR,email VARCHAR,createTime VARCHAR,type VARCHAR,discount varchar)");
-				*/
-			    db.execSQL("insert into c_vip(cardno,type,customerID,storeID,name,mobile,sex,status,createTime) "
-			    		+ "values(?,?,?,?,?,?,?,?,?)", 
+			    vip.setEmail("null".equals(currRows[6])?"":currRows[6].substring(1, currRows[6].length() - 1));
+			    vip.setPhoneNum("null".equals(currRows[7])?"":currRows[7].substring(1, currRows[7].length() - 1));
+			    vip.setSex(currRows[8].substring(1, currRows[8].length() - 1));
+			    vip.setiDentityCardNum("null".equals(currRows[9])?"":currRows[9].substring(1, currRows[9].length() - 1));
+			    String temp = "null".equals(currRows[10])?"":currRows[10].substring(0, currRows[10].length() - 1);
+			    vip.setDiscount(temp.length() == 3?temp + "0":temp);
+			    //insert into c_vip('cardno','name','idno','mobile','sex',
+			    //'email','birthday','createTime','employee','type','status','discount
+			    db.execSQL("insert into c_vip(cardno,type,customerID,storeID,name,mobile,email,sex,status,discount,createTime) "
+			    		+ "values(?,?,?,?,?,?,?,?,?,?,?)", 
 			    		new Object[]{vip.getCardNum(),vip.getType(),vip.getCustomerID(),
-			    				vip.getStoreID(),vip.getName(),vip.getPhoneNum(),
+			    				vip.getStoreID(),vip.getName(),vip.getPhoneNum(),vip.getEmail(),
 			    				vip.getSex(),getString(R.string.sales_settle_hasup),
-			    				createTime});
+			    				vip.getDiscount(),createTime});
 			}
 			db.setTransactionSuccessful();
 			db.endTransaction();
@@ -181,7 +188,7 @@ public class MemberManagerActivity extends BaseActivity {
 			paramsInTransactions.put("columns", new JSONArray().put("ID")
 					.put("CARDNO").put("C_VIPTYPE_ID").put("C_CUSTOMER_ID")
 					.put("C_STORE_ID").put("VIPNAME").put("EMAIL")
-					.put("MOBIL").put("SEX").put("IDNO"));
+					.put("MOBIL").put("SEX").put("IDNO").put("C_VIPTYPE_ID:DISCOUNT"));
 			
 			//查询条件的params
 			JSONObject queryParams = new JSONObject();
@@ -358,7 +365,7 @@ public class MemberManagerActivity extends BaseActivity {
 				paramsInTransactions.put("VIPNAME",vip.getName());
 				paramsInTransactions.put("MOBIL",vip.getPhoneNum());
 				paramsInTransactions.put("IDNO",vip.getiDentityCardNum());
-				paramsInTransactions.put("SEX","男".equals(vip.getCardNum())?"M":"W");
+				paramsInTransactions.put("SEX",vip.getSex());
 				//paramsInTransactions.put("M_DIM1_ID__ATTRIBNAME","品牌AS0015");
 				
 				transactions.put("params", paramsInTransactions);
