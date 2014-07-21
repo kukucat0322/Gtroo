@@ -3,9 +3,9 @@ package cn.burgeon.core.ui.check;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Locale;
-import java.util.UUID;
+import java.util.Map;
 
 import mexxen.mx5010.barcode.BarcodeEvent;
 import mexxen.mx5010.barcode.BarcodeListener;
@@ -44,11 +44,9 @@ public class CheckScanActivity extends BaseActivity {
     private CheckScanLVAdapter mAdapter;
 
     private CustomDialogForCheck customDialogForCheck;
-    private String shelfNo = null;
+    private String shelfNo = "01";
     
-    private ArrayList<Product> products = new ArrayList<Product>();
-    
-    private String uuid;
+    private HashMap<String, ArrayList<Product>> productMap = new HashMap<String, ArrayList<Product>>();
     private String no;
     
     @Override
@@ -60,7 +58,6 @@ public class CheckScanActivity extends BaseActivity {
         bm = new BarcodeManager(this);
 		bm.addListener(barcodeListener);
 		
-		uuid = UUID.randomUUID().toString();
 		no = getNo();
     }
     
@@ -95,7 +92,7 @@ public class CheckScanActivity extends BaseActivity {
         params.height = (int) ScreenUtils.getAllotInLVHeight(this);
 
         checkscanLV = (ListView) findViewById(R.id.checkscanLV);
-        mAdapter = new CheckScanLVAdapter(products, this);
+        mAdapter = new CheckScanLVAdapter(productMap.get(shelfNo), this);
         checkscanLV.setAdapter(mAdapter);
         recodeNumTV = (TextView) findViewById(R.id.recodeNumTV);
         totalCountTV = (TextView) findViewById(R.id.totalCountTV);
@@ -139,31 +136,54 @@ public class CheckScanActivity extends BaseActivity {
             // 生成ProductList
             generateProductList(currProduct);
             // 刷新列表
-            mAdapter.notifyDataSetChanged();
+            mAdapter.setList(productMap.get(shelfNo));
             upateBottomBarInfo();
         }
         if (c != null && !c.isClosed())
             c.close();
     }
 
+    private Product parseSQLResult(Cursor c) {
+        Product pro = new Product();
+        pro.setShelf(shelfET.getText().toString());
+        pro.setBarCode(barcodeET.getText().toString());
+        pro.setName(c.getString(c.getColumnIndex("style_name")));
+        pro.setPrice(c.getString(c.getColumnIndex("fprice")));
+        pro.setColor(c.getString(c.getColumnIndex("clrname")));
+        pro.setSize(c.getString(c.getColumnIndex("sizename")));
+        pro.setDiscount("0");
+        pro.setCount("1");
+        return pro;
+    }
+
 	private void generateProductList(Product currProduct) {
-		if (products.size() > 0) {
+		if (productMap.size() > 0) {
 			// 货架改变
 			if (!currProduct.getShelf().equals(shelfNo)) {
-				// 保存至数据库
-				if (products.size() > 0) {
-					// 插入数据
-					updateCheckTable(products);
-				}
-				
-				// 清空products
-				products.clear();
-				// 重新赋值products
 				shelfNo = currProduct.getShelf();
-				products.add(currProduct);
+
+				ArrayList<Product> products = productMap.get(shelfNo);
+				if (products == null) {
+					ArrayList<Product> list = new ArrayList<Product>();
+					list.add(currProduct);
+					productMap.put(shelfNo, list);
+				} else {
+					for (Product product : products) {
+						// 同一个条码
+						if (product.getBarCode().equals(currProduct.getBarCode())) {
+							product.setCount(String.valueOf(Integer.valueOf(product.getCount()) + 1));
+						} else {
+							// 该条码已存在
+							if (!isExsitBarCode(currProduct.getBarCode())) {
+								products.add(currProduct);
+							}
+						}
+					}
+				}
 			}
 			// 货架未改变
 			else {
+				ArrayList<Product> products = productMap.get(shelfNo);
 				for (Product product : products) {
 					// 同一个条码
 					if (product.getBarCode().equals(currProduct.getBarCode())) {
@@ -178,13 +198,16 @@ public class CheckScanActivity extends BaseActivity {
 			}
 		} else {
 			shelfNo = currProduct.getShelf();
-			products.add(currProduct);
+
+			ArrayList<Product> list = new ArrayList<Product>();
+			list.add(currProduct);
+			productMap.put(shelfNo, list);
 		}
 	}
 
 	private boolean isExsitBarCode(String barCode) {
 		boolean isFlag = false;
-		for (Product product : products) {
+		for (Product product : productMap.get(shelfNo)) {
 			if (barCode.equals(product.getBarCode())) {
 				isFlag = true;
 				break;
@@ -195,24 +218,11 @@ public class CheckScanActivity extends BaseActivity {
 	
     private void upateBottomBarInfo() {
         int count = 0;
-        for (Product pro : products) {
+        for (Product pro : productMap.get(shelfNo)) {
             count += Integer.parseInt(pro.getCount());
         }
         totalCountTV.setText("总数量：" + count + "件");
-        recodeNumTV.setText("当前货架：" + products.size() + "件");
-    }
-
-    private Product parseSQLResult(Cursor c) {
-        Product pro = new Product();
-        pro.setShelf(shelfET.getText().toString());
-        pro.setBarCode(barcodeET.getText().toString());
-        pro.setName(c.getString(c.getColumnIndex("style_name")));
-        pro.setPrice(c.getString(c.getColumnIndex("fprice")));
-        pro.setColor(c.getString(c.getColumnIndex("clrname")));
-        pro.setSize(c.getString(c.getColumnIndex("sizename")));
-        pro.setDiscount("0");
-        pro.setCount("1");
-        return pro;
+        recodeNumTV.setText("当前货架：" + productMap.get(shelfNo).size() + "件");
     }
 
     OnEditorActionListener editorActionListener = new OnEditorActionListener() {
@@ -243,19 +253,16 @@ public class CheckScanActivity extends BaseActivity {
                     }
                     break;
                 case R.id.gatherBtn:
-    				// 保存至数据库
-    				if (products.size() > 0) {
-    					// 插入数据
-    					updateCheckTable(products);
-    				}
-    				// 清空products
-    				products.clear();
+                	// 入库
+					if (productMap.size() > 0) {
+						updateCheckTable("未知类型", App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key), "未完成");
+					}
                 	
-                	forwardActivity(GatherActivity.class,"uuid",uuid);
+                	forwardActivity(GatherActivity.class, "checkno", no);
                     break;
                 case R.id.reviewBtn:
                     // 若有数据
-                    if (products.size() > 0) {
+                    if (productMap.size() > 0) {
                         showTips();
                     }
                     break;
@@ -280,14 +287,14 @@ public class CheckScanActivity extends BaseActivity {
                             @Override
                             public void onClick(View v) {
                                 // 批量更新数据库
-                                updateState(products);
+                                updateCheckTable(customDialogForCheck.getCheckType(), customDialogForCheck.getChecker(), "已完成");
 
                                 // 关闭对话框
                                 if (customDialogForCheck.isShowing())
                                     customDialogForCheck.dismiss();
 
                                 // 清除
-                                products.clear();
+                                productMap.clear();
 
                                 // 退出页面
                                 finish();
@@ -312,131 +319,87 @@ public class CheckScanActivity extends BaseActivity {
         dialog.show();
     }
 
-    private void updateState(List<Product> products) {
+    private void updateCheckTable(String type, String employee, String status) {
         db.beginTransaction();
         try {
-        	// 更新
-			db.execSQL("update c_check set 'type' = ?, 'orderEmployee' = ?, 'status' = ? where checkno = ?", new Object[] {
-					customDialogForCheck.getCheckType(), customDialogForCheck.getChecker(), "已完成", no });
-        	
         	// 查找
-        	String count = null;
-        	Cursor c = db.rawQuery("select count from c_check where checkno = ?", new String[]{no});
+			boolean isExsit = false;
+			Cursor c = db.rawQuery("select count from c_check where checkno = ?", new String[] { no });
 			if (c.moveToFirst()) {
-				count = c.getString(c.getColumnIndex("count"));
+				isExsit = true;
 			}
-    		if(c != null && !c.isClosed())
-    			c.close();
+			if (c != null && !c.isClosed())
+				c.close();
     		
     		// 更新
-			if (count != null && count.length() > 0) {
-				db.execSQL("update c_check set 'count' = ? where checkno = ?", new Object[] { getCount(products) + Integer.valueOf(count), no });
+			if (isExsit) {
+				db.execSQL("update c_check set 'count' = ?, 'type' = ?, 'orderEmployee' = ?, 'status' = ? where checkno = ?", new Object[] { getCount(), type, employee, status, no });
 			}
     		// 新增
     		else {
     			Date currentTime = new Date();
-    			db.execSQL("insert into c_check('checkTime','checkno','count','type','orderEmployee','status','isChecked','checkUUID')" +
-    					" values(?,?,?,?,?,?,?,?)",
-    					new Object[]{
-    					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(currentTime),
-    					no,
-    					getCount(products),
-    					customDialogForCheck.getCheckType(),
-    					customDialogForCheck.getChecker(),
-    					"已完成",
-    					"未上传",
-    					uuid}
-    					);
-    		}
-            
-            for(Product product : products) {
-	            db.execSQL("insert into c_check_detail('shelf','barcode','count','color','size','stylename','checkUUID')" +
-	                    " values(?,?,?,?,?,?,?)",
-		            new Object[]{
-	                    	product.getShelf(),
-		                    product.getBarCode(),
-		                    product.getCount(),
-		                    product.getColor(),
-		                    product.getSize(),
-		                    product.getName(),
-		                    uuid}
-	            		);
-            }
-            db.setTransactionSuccessful();
-        } catch (Exception e) {e.printStackTrace();
-        } finally {
-            db.endTransaction();
-        }
-    }
-    
-    private int getCount(List<Product> products){
-    	int count = 0;
-    	for(Product pro : products){
-    		count += Integer.parseInt(pro.getCount());
-    	}
-    	return count;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        bm.removeListener(barcodeListener);
-    	bm.dismiss();
-    }
-
-    private void updateCheckTable(List<Product> products) {
-        db.beginTransaction();
-        try {
-        	// 查找
-        	String count = null;
-        	Cursor c = db.rawQuery("select count from c_check where checkno = ?", new String[]{no});
-			if (c.moveToFirst()) {
-				count = c.getString(c.getColumnIndex("count"));
-			}
-    		if(c != null && !c.isClosed())
-    			c.close();
-    		
-    		// 更新
-			if (count != null && count.length() > 0) {
-				db.execSQL("update c_check set 'count' = ? where checkno = ?", new Object[] { getCount(products) + Integer.valueOf(count), no });
-			}
-    		// 新增
-    		else {
-    			Date currentTime = new Date();
-    			db.execSQL("insert into c_check('checkTime','checkno','count','type','orderEmployee', 'status','isChecked','checkUUID')" +
-    					" values(?,?,?,?,?,?,?,?)",
-    					new Object[]{
+    			db.execSQL("insert into c_check('checkTime','checkno','count','type','orderEmployee','status','isChecked')" +
+    					" values(?,?,?,?,?,?,?)",
+   					new Object[]{
     					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(currentTime),
     					no, // IV305152 + 日期 + 流水号
-    					getCount(products),
-    					"未知类型",
-    					App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key),
-    					"未完成",
-    					"未上传",
-    					uuid}
-    					);
+    					getCount(),
+    					type,
+    					employee,
+    					status,
+    					"未上传"}
+    				);
     		}
 		    
-		    for(Product product : products){
-		        db.execSQL("insert into c_check_detail('shelf','barcode','count','color','size','stylename','checkUUID')" +
-		                " values(?,?,?,?,?,?,?)",
-		            new Object[]{
-		        		shelfNo,
-	                    product.getBarCode(),
-	                    product.getCount(),
-	                    product.getColor(),
-	                    product.getSize(),
-	                    product.getName(),
-	                    uuid}
-	        		);
-		    }
+			for(Map.Entry<String, ArrayList<Product>> entry : productMap.entrySet()) {
+				String shelf = entry.getKey();
+				ArrayList<Product> products = entry.getValue();
+				for(Product product : products){
+					// 查找
+					boolean isExsitDetail = false;
+					Cursor cDetail = db.rawQuery("select count from c_check_detail where checkno = ? and shelf = ? and barcode = ?", new String[] { no, shelf, product.getBarCode() });
+					if (cDetail.moveToFirst()) {
+						isExsitDetail = true;
+					}
+					if (cDetail != null && !cDetail.isClosed())
+						cDetail.close();
+
+		    		// 更新
+					if (isExsitDetail) {
+						db.execSQL("update c_check_detail set 'count' = ? where checkno = ? and shelf = ? and barcode = ?", new Object[] { product.getCount(), no, shelf, product.getBarCode() });
+					}
+		    		// 新增
+					else {
+						db.execSQL("insert into c_check_detail('shelf','barcode','count','color','size','stylename','checkno')" +
+								" values(?,?,?,?,?,?,?)",
+							new Object[]{
+								shelf,
+								product.getBarCode(),
+								product.getCount(),
+								product.getColor(),
+								product.getSize(),
+								product.getName(),
+								no}
+							);
+					}
+				}
+			}
             db.setTransactionSuccessful();
         } catch (Exception e) {
         } finally {
             db.endTransaction();
         }
     }
+    
+	private int getCount() {
+		int count = 0;
+		for (Map.Entry<String, ArrayList<Product>> entry : productMap.entrySet()) {
+			for (Product pro : entry.getValue()) {
+				count += Integer.parseInt(pro.getCount());
+			}
+		}
+		return count;
+	}
 
     private String getNo() {
         StringBuffer sb = new StringBuffer();
@@ -460,6 +423,14 @@ public class CheckScanActivity extends BaseActivity {
         finalCheckNo.append(i);
         sb.append(finalCheckNo.toString());
         return sb.toString();
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        bm.removeListener(barcodeListener);
+    	bm.dismiss();
     }
     
     /*@Override
