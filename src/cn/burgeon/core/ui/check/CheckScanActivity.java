@@ -48,6 +48,7 @@ public class CheckScanActivity extends BaseActivity {
     
     private HashMap<String, ArrayList<Product>> productMap = new HashMap<String, ArrayList<Product>>();
     private String no;
+    private boolean hasDataNotSave = false;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,6 +158,8 @@ public class CheckScanActivity extends BaseActivity {
     }
 
 	private void generateProductList(Product currProduct) {
+		hasDataNotSave = true;
+		
 		if (productMap.size() > 0) {
 			// 货架改变
 			if (!currProduct.getShelf().equals(shelfNo)) {
@@ -320,6 +323,8 @@ public class CheckScanActivity extends BaseActivity {
     }
 
     private void updateCheckTable(String type, String employee, String status) {
+    	hasDataNotSave = false;
+    	
         db.beginTransaction();
         try {
         	// 查找
@@ -432,6 +437,42 @@ public class CheckScanActivity extends BaseActivity {
         bm.removeListener(barcodeListener);
     	bm.dismiss();
     }
+    
+    @Override
+	public void onBackPressed() {
+		if (hasDataNotSave) {
+			// 显示对话框
+			AlertDialog dialog = null;
+			AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(getString(R.string.systemtips))
+					.setMessage(R.string.hasdata).setPositiveButton("是", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							// 入库
+							if (productMap.size() > 0) {
+								updateCheckTable("未知类型", App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key), "未完成");
+							}
+
+							// 关闭对话框
+							dialog.dismiss();
+
+							// 清除
+							productMap.clear();
+
+							// 退出页面
+							finish();
+						}
+					}).setNegativeButton("否", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+						}
+					});
+			dialog = builder.create();
+			dialog.show();
+		} else {
+			super.onBackPressed();
+		}
+	}
     
     /*@Override
     public void onClick(View v) {

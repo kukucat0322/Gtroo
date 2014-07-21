@@ -29,6 +29,7 @@
     <string name="checkQuery">盘点查询</string>
     <string name="checktips">确认审核该盘点单据吗？审核后本单将不能续盘！</string>
     <string name="nothatbarcode">不存在该条码数据！</string>
+    <string name="hasdata">有数据未保存，是否保存数据？</string>
     <string name="allotOutIn">调拨出入库</string>
     <string name="allotIn">调入界面</string>
     <string name="docno">单据编号</string>
