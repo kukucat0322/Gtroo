@@ -285,6 +285,7 @@
     <string name="currentURLAddress">当前配置的服务器地址:</string>
     <string name="tipsServerTesting">正在测试中！</string>
     <string name="tipsNeedConfigure">请先进行配置再登录！</string>
+    <string name="pswderror">密码错误无法登录！</string>
     
     <string name="add">新增</string>
     <string name="query">查询</string>

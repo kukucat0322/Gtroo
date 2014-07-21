@@ -144,10 +144,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 break;
             case R.id.loginBtn:
             	if(hasConfigured()){
-            	 // 存入本地
-                App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.store_key, storeSpinner.getText().toString());
-                App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.user_key, userSpinner.getSelectedItem().toString());
-                forwardActivity(SystemActivity.class);
+	            	 // 存入本地
+	                App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.store_key, storeSpinner.getText().toString());
+	                App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.user_key, userSpinner.getSelectedItem().toString());
+	                if(pswET.getText().length() > 0){
+	                	showAlertMsg(R.string.pswderror);
+	                }else{
+	                	forwardActivity(SystemActivity.class);
+	                }
             	}else{
             		showTips(R.string.tipsNeedConfigure);
             	}
