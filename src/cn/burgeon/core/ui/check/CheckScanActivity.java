@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
@@ -85,6 +86,20 @@ public class CheckScanActivity extends BaseActivity {
         TextView currTimeTV = (TextView) findViewById(R.id.currTimeTV);
         currTimeTV.setText(getCurrDate());
         shelfET = (EditText) findViewById(R.id.shelfET);
+        shelfET.setOnFocusChangeListener(new OnFocusChangeListener() {
+        	@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				// 失去焦点
+				if (!hasFocus) {
+					String currShelfET = shelfET.getText().toString();
+					// 有值但值变了
+					if (currShelfET.length() > 0 && !shelfNo.equals(currShelfET)) {
+						// 清空列表，productMap值不变
+						mAdapter.setList(null);
+					}
+				}
+			}
+        });
         barcodeET = (EditText) findViewById(R.id.barcodeET);
         barcodeET.setOnEditorActionListener(editorActionListener);
 
@@ -464,7 +479,14 @@ public class CheckScanActivity extends BaseActivity {
 					}).setNegativeButton("否", new DialogInterface.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
+							// 关闭对话框
 							dialog.dismiss();
+
+							// 清除
+							productMap.clear();
+							
+							// 退出页面
+							finish();
 						}
 					});
 			dialog = builder.create();
