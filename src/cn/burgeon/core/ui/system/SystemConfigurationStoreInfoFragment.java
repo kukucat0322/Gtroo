@@ -1,50 +1,39 @@
 package cn.burgeon.core.ui.system;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.http.client.methods.HttpUriRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.app.AlertDialog;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import cn.burgeon.core.App;
+import cn.burgeon.core.R;
+import cn.burgeon.core.bean.Employee;
+import cn.burgeon.core.net.RequestManager;
+import cn.burgeon.core.utils.PreferenceUtils;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-
-import cn.burgeon.core.App;
-import cn.burgeon.core.R;
-import cn.burgeon.core.bean.Employee;
-import cn.burgeon.core.bean.RequestResult;
-import cn.burgeon.core.net.RequestManager;
-import cn.burgeon.core.net.SimonHttpStack;
-import cn.burgeon.core.ui.BaseActivity;
-import cn.burgeon.core.utils.PreferenceUtils;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.IntentSender.SendIntentException;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.os.Bundle;
-import android.os.Message;
-import android.support.v4.app.Fragment;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
 public class SystemConfigurationStoreInfoFragment extends Fragment {
     private static final String TAG = "SystemConfigurationStoreInfoFragment";
@@ -313,7 +302,7 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
 			    db.execSQL("insert into employee(id,name,agency,store) values(?,?,?,?)", 
 			    		new Object[]{employee.getId(),employee.getName(),employee.getAgency(),employee.getStore()});
 			}
-			App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.agency_key, employee.getAgency());
+			App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.agency_key, employee == null? "":employee.getAgency());
 			db.setTransactionSuccessful();
 			db.endTransaction();
 		} catch (JSONException e) {

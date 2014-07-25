@@ -160,12 +160,14 @@ public class MemberManagerActivity extends BaseActivity {
 			    vip.setDiscount(temp.length() == 3?temp + "0":temp);
 			    //insert into c_vip('cardno','name','idno','mobile','sex',
 			    //'email','birthday','createTime','employee','type','status','discount
+			    if(!isExist(vip)){
 			    db.execSQL("insert into c_vip(cardno,type,customerID,storeID,name,mobile,email,sex,status,discount,createTime) "
 			    		+ "values(?,?,?,?,?,?,?,?,?,?,?)", 
 			    		new Object[]{vip.getCardNum(),vip.getType(),vip.getCustomerID(),
 			    				vip.getStoreID(),vip.getName(),vip.getPhoneNum(),vip.getEmail(),
 			    				vip.getSex(),getString(R.string.sales_settle_hasup),
 			    				vip.getDiscount(),createTime});
+			    }
 			}
 			db.setTransactionSuccessful();
 			db.endTransaction();
@@ -174,7 +176,12 @@ public class MemberManagerActivity extends BaseActivity {
 		}
 	}
 	
-    private Map<String, String> constructParams(String storeNo) {
+    private boolean isExist(Member vip) {
+		Cursor c = db.rawQuery("select * from c_vip where cardno = ? and customerID = ?", new String[]{vip.getCardNum(),String.valueOf(vip.getCustomerID())});
+		return c.getCount() > 0;
+	}
+
+	private Map<String, String> constructParams(String storeNo) {
     	Map<String,String> params = new HashMap<String, String>();
 		JSONArray array;
 		JSONObject transactions;

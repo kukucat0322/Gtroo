@@ -3,34 +3,49 @@ package cn.burgeon.core.ui.allot;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
 import cn.burgeon.core.adapter.AllotOutApplyLVAdapter;
+import cn.burgeon.core.bean.AllotOutApply;
 import cn.burgeon.core.bean.Product;
 import cn.burgeon.core.ui.BaseActivity;
+import cn.burgeon.core.ui.system.SystemConfigurationActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
 import cn.burgeon.core.utils.ScreenUtils;
+
+import com.android.volley.Response;
 
 public class AllotOutApplyActivity extends BaseActivity implements OnClickListener {
 
     private ListView allotoutapplyLV;
     private TextView recodeNumTV, totalCountTV;
-    private EditText shipperET;
+    private Spinner shipperET;
     private EditText descET, barcodeET;
     private Button uploadBtn, okBtn;
 
@@ -55,7 +70,11 @@ public class AllotOutApplyActivity extends BaseActivity implements OnClickListen
         TextView currTimeTV = (TextView) findViewById(R.id.currTimeTV);
         currTimeTV.setText(getCurrDate());
         
-        shipperET = (EditText) findViewById(R.id.shipperET);
+        shipperET = (Spinner) findViewById(R.id.shipperET);
+        ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_dropdown_item_1line, fetchData());
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        shipperET.setAdapter(adapter);
+        
         descET = (EditText) findViewById(R.id.descET);
 
         barcodeET = (EditText) findViewById(R.id.barcodeET);
@@ -78,7 +97,18 @@ public class AllotOutApplyActivity extends BaseActivity implements OnClickListen
         okBtn.setOnClickListener(this);
     }
 
-    private void initLVData() {
+    private List<String> fetchData() {
+    	List<String> stores = new ArrayList<String>();
+    	SQLiteDatabase db = ((App)getApplication()).getDB();
+    	Cursor c = db.rawQuery("select st_name from tc_store", null);
+    	while(c.moveToNext()){
+    		stores.add(c.getString(c.getColumnIndex("st_name")));
+    	}
+    	if(c !=null && !c.isClosed()) c.close();
+		return stores;  
+	}
+
+	private void initLVData() {
         // nothing
     }
 
@@ -189,7 +219,7 @@ public class AllotOutApplyActivity extends BaseActivity implements OnClickListen
                                     "已上传",
                                     "已完成",
                                     new SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(currentTime),
-                                    shipperET.getText(),
+                                    shipperET.getSelectedItem().toString(),
                                     data.size(),//数量count
                                     uuid
                             }
@@ -197,7 +227,7 @@ public class AllotOutApplyActivity extends BaseActivity implements OnClickListen
                     for (Product pro : data) {
                         db.execSQL("insert into c_allot_out_detail('checkUUID','fahuofang','remark','barcode','num','color','size','price','style') " +
                                         "values (?,?,?,?,?,?,?,?,?)",
-                                new Object[]{uuid, shipperET.getText(), descET.getText(), pro.getBarCode(), pro.getCount(), pro.getColor(), pro.getSize(), pro.getPrice(), pro.getStyle()}
+                                new Object[]{uuid, shipperET.getSelectedItem().toString(), descET.getText(), pro.getBarCode(), pro.getCount(), pro.getColor(), pro.getSize(), pro.getPrice(), pro.getStyle()}
                         );
                     }
                     db.setTransactionSuccessful();
@@ -319,7 +349,7 @@ public class AllotOutApplyActivity extends BaseActivity implements OnClickListen
                                 "未上传",
                                 "未完成",
                                 new SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(currentTime),
-                                shipperET.getText(),
+                                shipperET.getSelectedItem().toString(),
                                 data.size(),//数量count
                                 uuid
                         }
@@ -327,7 +357,7 @@ public class AllotOutApplyActivity extends BaseActivity implements OnClickListen
                 for (Product pro : data) {
                     db.execSQL("insert into c_allot_out_detail('checkUUID','fahuofang','remark','barcode','num','color','size','price','style') " +
                                     "values (?,?,?,?,?,?,?,?,?)",
-                            new Object[]{uuid, shipperET.getText(), descET.getText(), pro.getBarCode(), pro.getCount(), pro.getColor(), pro.getSize(), pro.getPrice(), pro.getStyle()}
+                            new Object[]{uuid, shipperET.getSelectedItem().toString(), descET.getText(), pro.getBarCode(), pro.getCount(), pro.getColor(), pro.getSize(), pro.getPrice(), pro.getStyle()}
                     );
                 }
                 db.setTransactionSuccessful();
