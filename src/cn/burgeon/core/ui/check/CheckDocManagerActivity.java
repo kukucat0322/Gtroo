@@ -26,7 +26,7 @@ import cn.burgeon.core.widget.CustomDialogForCheckQuery;
 
 public class CheckDocManagerActivity extends BaseActivity {
 
-    private TextView totalOutCountTV, recordCountTV;
+    private TextView recordCountTV;
     private Button queryBtn;
     CheckQueryLVAdapter mAdapter;
     ListView mList;
@@ -52,10 +52,6 @@ public class CheckDocManagerActivity extends BaseActivity {
     }
 
     private void upateBottomBarInfo(List<Order> data) {
-        int count = 0;
-        for (Order pro : data) {
-            count += Integer.parseInt(pro.getOrderCount());
-        }
         recordCountTV.setText(String.format(getResources().getString(R.string.sales_new_common_record), data.size()));
     }
 
@@ -94,7 +90,6 @@ public class CheckDocManagerActivity extends BaseActivity {
 
         mList = (ListView) findViewById(R.id.docManagerLV);
         recordCountTV = (TextView) findViewById(R.id.recordCountTV);
-        totalOutCountTV = (TextView) findViewById(R.id.totalOutCountTV);
 
         queryBtn = (Button) findViewById(R.id.queryBtn);
         queryBtn.setOnClickListener(new View.OnClickListener() {
@@ -188,7 +183,10 @@ public class CheckDocManagerActivity extends BaseActivity {
                 // 续盘操作
                 if ("已完成".equals(currOrder.getOrderState())) {
                     Toast.makeText(this, "单据已经审核，不能续盘！", Toast.LENGTH_SHORT).show();
-                }
+				} else {
+					forwardActivity(CheckScanActivity.class, "checkNo", currOrder.getOrderNo());
+					finish();
+				}
                 break;
             case 1:
                 // 更新数据库

@@ -12,6 +12,7 @@ import mexxen.mx5010.barcode.BarcodeListener;
 import mexxen.mx5010.barcode.BarcodeManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -56,11 +57,44 @@ public class CheckScanActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_scan);
 
+        Intent intent = getIntent();
+		if (intent != null) {
+			no = intent.getStringExtra("checkNo");
+
+			// 查数据
+			ArrayList<Product> products = new ArrayList<Product>();
+			String sql = "select shelf, count, stylename, barcode, color, size from c_check_detail where checkno = ? group by shelf, barcode";
+			Cursor c = db.rawQuery(sql, new String[] { no });
+			while (c.moveToNext()) {
+				Product pro = new Product();
+				pro.setShelf(c.getString(c.getColumnIndex("shelf")));
+				pro.setCount(c.getString(c.getColumnIndex("count")));
+				pro.setName(c.getString(c.getColumnIndex("stylename")));
+				pro.setBarCode(c.getString(c.getColumnIndex("barcode")));
+				pro.setColor(c.getString(c.getColumnIndex("color")));
+				pro.setSize(c.getString(c.getColumnIndex("size")));
+				products.add(pro);
+			}
+			if (c != null && !c.isClosed())
+				c.close();
+
+			for (Product product : products) {
+				// 含有当前key
+				if (productMap.containsKey(product.getShelf())) {
+					productMap.get(product.getShelf()).add(product);
+				} else {
+					ArrayList<Product> list = new ArrayList<Product>();
+					list.add(product);
+					productMap.put(product.getShelf(), list);
+				}
+			}
+		} else {
+			no = getNo();
+		}
+        
         init();
         bm = new BarcodeManager(this);
 		bm.addListener(barcodeListener);
-		
-		no = getNo();
     }
     
     BarcodeListener barcodeListener = new BarcodeListener() {
