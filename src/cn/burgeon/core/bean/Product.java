@@ -16,8 +16,16 @@ public class Product implements Parcelable {
     private String size;
     private String shelf;
     private String style;
+    private int salesType;
+    public int getSalesType() {
+		return salesType;
+	}
 
-    public String getShelf() {
+	public void setSalesType(int salesType) {
+		this.salesType = salesType;
+	}
+
+	public String getShelf() {
         return shelf;
     }
 
@@ -126,6 +134,11 @@ public class Product implements Parcelable {
         dest.writeString(this.discount);
         dest.writeString(this.count);
         dest.writeString(this.money);
+        dest.writeString(this.uuid);
+        dest.writeString(this.style);
+        dest.writeString(this.color);
+        dest.writeString(this.size);
+        dest.writeInt(this.salesType);
     }
 
     public Product() {
@@ -138,6 +151,11 @@ public class Product implements Parcelable {
         this.discount = in.readString();
         this.count = in.readString();
         this.money = in.readString();
+        this.uuid = in.readString();
+        this.style = in.readString();
+        this.color = in.readString();
+        this.size = in.readString();
+        this.salesType = in.readInt();
     }
 
     public static Parcelable.Creator<Product> CREATOR = new Parcelable.Creator<Product>() {

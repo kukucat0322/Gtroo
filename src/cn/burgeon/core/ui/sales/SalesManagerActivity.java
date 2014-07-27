@@ -125,6 +125,7 @@ import com.android.volley.Response;
 			order.setOrderType(c.getString(c.getColumnIndex("type")));
 			order.setOrderMoney(c.getString(c.getColumnIndex("money")));
 			order.setSaleAsistant(c.getString(c.getColumnIndex("orderEmployee")));
+			order.setVipCardno(c.getString(c.getColumnIndex("vipCardno")));
 			data.add(order);
 		}
 		if(c != null && !c.isClosed())
@@ -150,12 +151,13 @@ import com.android.volley.Response;
 	
 	private List<PayWay> getPayWayDetailsData(String primaryKey) {
 		List<PayWay> details = new ArrayList<PayWay>();
-		Cursor c = db.rawQuery("select name, money from c_payway_detail where settleUUID = ?", new String[]{primaryKey});
+		Cursor c = db.rawQuery("select name, money,salesType from c_payway_detail where settleUUID = ?", new String[]{primaryKey});
 		PayWay payway = null;
 		while(c.moveToNext()){
 			payway = new PayWay();
 			payway.setPayWay(c.getString(c.getColumnIndex("name")));
 			payway.setPayMoney(c.getString(c.getColumnIndex("money")));
+			payway.setSalesType(c.getInt(c.getColumnIndex("salesType")));
 			details.add(payway);
 		}
 		if(c != null && !c.isClosed())
@@ -236,7 +238,8 @@ import com.android.volley.Response;
 				masterObj.put("table", 12964);
 				masterObj.put("BILLDATE", order.getOrderDate());
 				masterObj.put("C_RETAILTYPE_ID__NAME", order.getOrderType());
-				paramsInTransactions.put("masterobj", masterObj);
+				masterObj.put("C_VIP_ID__CARDNO", order.getVipCardno());
+				paramsInTransactions.put("masterobj", masterObj);  
 				
 				//detailobjs
 				JSONObject detailObjs = new JSONObject();
@@ -252,9 +255,10 @@ import com.android.volley.Response;
 					for(Product product : detailsItems){
 						JSONObject item = new JSONObject();
 						item.put("QTY", product.getCount());
+						item.put("TYPE", product.getSalesType());
 						item.put("M_PRODUCT_ID__NAME", product.getBarCode());
 						item.put("PRICEACTUAL", product.getMoney());
-						item.put("TOT_AMT_ACTUAL", Float.parseFloat(product.getMoney()) * Integer.parseInt(product.getCount()));
+						item.put("TOT_AMT_ACTUAL", String.format("%.2f", (Float.parseFloat(product.getMoney()) * Integer.parseInt(product.getCount()))));
 						addList.put(item);
 					}
 				}

@@ -19,15 +19,15 @@ public class DbHelper extends SQLiteOpenHelper {
                 "employee VARCHAR,email VARCHAR,createTime VARCHAR,type VARCHAR,discount varchar)");
 		
 		db.execSQL("CREATE TABLE IF NOT EXISTS c_settle" +  
-                "(_id INTEGER PRIMARY KEY AUTOINCREMENT, orderno VARCHAR,"+
+                "(_id INTEGER PRIMARY KEY AUTOINCREMENT, orderno VARCHAR,vipCardno VARCHAR,"+
 				"settleTime VARCHAR, type VARCHAR,count VARCHAR,money VARCHAR,"
 				+ "orderEmployee VARCHAR,employeeID VARCHAR,status VARCHAR,settleDate VARCHAR,"
 				+ "settleMonth VARCHAR,settleUUID VARCHAR)");
 		
 		db.execSQL("CREATE TABLE IF NOT EXISTS c_settle_detail" +  
-                "(_id INTEGER PRIMARY KEY AUTOINCREMENT, settleUUID VARCHAR,"+
+                "(_id INTEGER PRIMARY KEY AUTOINCREMENT, settleUUID VARCHAR,style VARCHAR,"+
 				"price VARCHAR, discount VARCHAR,count VARCHAR,money VARCHAR,settleDate VARCHAR,"
-				+ "pdtname VARCHAR,barcode VARCHAR,color VARCHAR,size VARCHAR,settleType VARCHAR)");
+				+ "pdtname VARCHAR,barcode VARCHAR,color VARCHAR,size VARCHAR,salesType INTEGER,settleType VARCHAR)");
 
         // -----------------------------------------------------------------------------------盘点 begin
 		db.execSQL("CREATE TABLE IF NOT EXISTS c_check" +  

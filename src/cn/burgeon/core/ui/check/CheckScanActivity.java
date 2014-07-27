@@ -107,7 +107,7 @@ public class CheckScanActivity extends BaseActivity {
  				// 调用 getBarcode()方法读取条码信息
  				Log.d("check", "=======barcode========" + bm.getBarcode());
  				String barcode = bm.getBarcode() == null?"":bm.getBarcode().trim();
- 				barcodeET.setText(barcode);
+ 				//barcodeET.setText(barcode);
  				verifyBarCode(barcode);
  			}
  		}
@@ -179,6 +179,7 @@ public class CheckScanActivity extends BaseActivity {
                 + " where a.sku = ?";
         Cursor c = db.rawQuery(sql, new String[]{barcodeText});
         if(c.getCount() == 0){
+        	barcodeET.setText(barcodeText);
         	showAlertMsg(R.string.nothatbarcode);
         	return;
         }

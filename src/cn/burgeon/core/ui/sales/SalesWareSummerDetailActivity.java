@@ -47,7 +47,7 @@ public class SalesWareSummerDetailActivity extends BaseActivity {
 
 
 	private void query() {
-		Cursor c = db.rawQuery("select * from c_settle_detail where barcode = ? and settleDate between '"+startDate+"' and '"+endDate+"'", new String[]{barCode});
+		Cursor c = db.rawQuery("select * from c_settle_detail where style = ? and settleDate between '"+startDate+"' and '"+endDate+"'", new String[]{barCode});
 		Log.d("zhang.h", "result size:" + c.getCount());
 		Product product = null;
 		while(c.moveToNext()){

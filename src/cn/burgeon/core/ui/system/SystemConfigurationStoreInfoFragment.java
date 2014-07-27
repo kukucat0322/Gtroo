@@ -78,8 +78,8 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
     public void onResume() {
     	super.onResume();
     	Log.d(TAG, "=====onResume====");
-	    	adapter = new ArrayAdapter(getActivity(),android.R.layout.simple_dropdown_item_1line, ((SystemConfigurationActivity)getActivity()).getStoreData());
-	    	mStoreNoEditor.setAdapter(adapter);
+    	adapter = new ArrayAdapter(getActivity(),android.R.layout.simple_dropdown_item_1line, ((SystemConfigurationActivity)getActivity()).getStoreData());
+    	mStoreNoEditor.setAdapter(adapter);
     }
 
 
@@ -102,7 +102,7 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
 				checkToSave();
 			}
 		});
-        
+        mStoreNoEditor.setText(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
 
         return view;
 
@@ -189,7 +189,7 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
     	//保存门店编号
     	if(!TextUtils.isEmpty(storeNo)){
     		String store = getStoreNo(storeNo);
-			sendRequest(constructParams(store),new Response.Listener<String>() {
+/*			sendRequest(constructParams(store),new Response.Listener<String>() {
 				@Override
 				public void onResponse(String response) {
 					Log.d(TAG, response);
@@ -197,7 +197,7 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
 						parseResult(response);
 					}
 				}
-			});
+			});*/
 			App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.storeNumberKey, store);
 			App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.store_key, storeNo);
     	}

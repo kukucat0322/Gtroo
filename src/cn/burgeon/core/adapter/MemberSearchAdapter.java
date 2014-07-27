@@ -51,7 +51,6 @@ public class MemberSearchAdapter extends BaseAdapter {
 			holder.textView1 = (TextView) convertView.findViewById(R.id.membersearch_cardno);
 			holder.textView2 = (TextView) convertView.findViewById(R.id.membersearch_name);
 			holder.textView3 = (TextView) convertView.findViewById(R.id.membersearch_discount);
-			holder.textView4 = (TextView) convertView.findViewById(R.id.membersearch_money);
 			holder.textView5 = (TextView) convertView.findViewById(R.id.membersearch_birthday);
 			convertView.setTag(holder);
 		}else{
@@ -62,7 +61,6 @@ public class MemberSearchAdapter extends BaseAdapter {
 		holder.textView1.setText(member.getCardNum());
 		holder.textView2.setText(member.getName());
 		holder.textView3.setText(member.getDiscount());
-		holder.textView4.setText(member.getYue());
 		holder.textView5.setText(member.getBirthday());
 		return convertView;
 	}

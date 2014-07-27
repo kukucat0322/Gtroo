@@ -1,6 +1,7 @@
 package cn.burgeon.core.ui;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,10 +10,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -26,10 +34,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
+import cn.burgeon.core.bean.Employee;
+import cn.burgeon.core.bean.RequestResult;
 import cn.burgeon.core.ui.system.SystemConfigurationActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
 
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
  
@@ -45,9 +56,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         setupFullscreen();
         setContentView(R.layout.activity_login);
 
-        // 初始化门店
-        //initStoreData();
-
         // 初始化布局控件
         init();
         
@@ -56,13 +64,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     @Override
     protected void onResume() {
     	super.onResume();
+    	// 初始化门店
+        initStoreData();
     	if(!"".equals(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key)))
     		storeSpinner.setText(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
     	Log.d(TAG, "employee size:"+mApp.getEmployees().size());
-    	ArrayAdapter<String> adapter = new ArrayAdapter<String>(LoginActivity.this, android.R.layout.simple_spinner_item, getEmployees());
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        userSpinner.setAdapter(adapter);
-        //userSpinner.setSelection(position);
     }
 
     private String[] getEmployees() {
@@ -89,240 +95,132 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         loginBtn = (ImageView) findViewById(R.id.loginBtn);
         loginBtn.setOnClickListener(this);
     }
-
+	
     private void initStoreData() {
-        Map<String, String> params = new HashMap<String, String>();
-        JSONArray array;
-        JSONObject transactions;
-        try {
-            array = new JSONArray();
-            transactions = new JSONObject();
-            transactions.put("id", 112);
-            transactions.put("command", "Query");
-
-            JSONObject paramsInTransactions = new JSONObject();
-            paramsInTransactions.put("table", "C_V_RESTORE");
-            paramsInTransactions.put("columns", new JSONArray().put("NAME"));
-            transactions.put("params", paramsInTransactions);
-
-            array.put(transactions);
-            params.put("transactions", array.toString());
-
-            sendRequest(params, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    // 取消进度条
-                    stopProgressDialog();
-
-                    try {
-                        String[] stores = resJAToList(response);
-                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(LoginActivity.this, android.R.layout.simple_spinner_item, stores);
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        //storeSpinner.setAdapter(adapter);
-
-                        // 初始化门店名
-                        String storeInDBVal = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key);
-                        if (storeInDBVal != null && storeInDBVal.length() > 0) {
-                            int position = adapter.getPosition(storeInDBVal);
-                            //storeSpinner.setSelection(position, true);
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    	String store = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey);
+    	if(!TextUtils.isEmpty(store)){
+    		//检测网络状态
+    		if(!networkReachable()){
+    			ArrayAdapter<String> adapter = new ArrayAdapter<String>(LoginActivity.this, android.R.layout.simple_spinner_item, getEmployees());
+		        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		        userSpinner.setAdapter(adapter);
+    		}else{
+	    		startProgressDialog();
+		    	sendRequest(constructParams(store),new Response.Listener<String>() {
+					@Override
+					public void onResponse(String response) {
+						Log.d(TAG, response);
+						if(!TextUtils.isEmpty(response)){
+							RequestResult result = parseResult(response);
+							//请求成功，更新记录状态
+							if("0".equals(result.getCode())){
+								parseResponse(response);
+								mHandler.sendEmptyMessage(1);
+							}
+						}
+					}
+				},new Response.ErrorListener() {
+					@Override
+					public void onErrorResponse(VolleyError error) {
+						Log.d(TAG, "error response======="+error.networkResponse.statusCode+"");
+					}
+				});
+    		}
+    	}
     }
+    
+	private RequestResult parseResult(String response) {
+		RequestResult result = null;
+	    try {
+			JSONArray resJA = new JSONArray(response);
+			JSONObject resJO = resJA.getJSONObject(0);
+			result = new RequestResult(resJO.getString("code"), resJO.getString("message"));
+		} catch (JSONException e) {}
+		return result;
+	}
+    
+	private void parseResponse(String response) {
+		SQLiteDatabase db = mApp.getDB();
+        try {
+			JSONArray resJA = new JSONArray(response);
+			JSONObject resJO = resJA.getJSONObject(0);
+			JSONArray rowsJA = resJO.getJSONArray("rows");
+			int len = rowsJA.length();
+			db.beginTransaction();
+			db.execSQL("delete from employee");
+			Employee employee = null;
+			for (int i = 0; i < len; i++) {
+			    // ["BURGEON1108001","权威全额","苏州经销商","苏州001"]
+			    String currRow = rowsJA.get(i).toString();
+			    String[] currRows = currRow.split(",");
+
+			    employee = new Employee();
+			    employee.setId(currRows[0].substring(2, currRows[0].length() - 1));
+			    employee.setName(currRows[1].substring(1, currRows[1].length() - 1));
+			    employee.setAgency(currRows[2].substring(1, currRows[2].length() - 1));
+			    employee.setStore(currRows[3].substring(1, currRows[3].length() - 2));
+
+			    db.execSQL("insert into employee(id,name,agency,store) values(?,?,?,?)", 
+			    		new Object[]{employee.getId(),employee.getName(),employee.getAgency(),employee.getStore()});
+			}
+			App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.agency_key, employee == null? "":employee.getAgency());
+			db.setTransactionSuccessful();
+			db.endTransaction();
+		} catch (JSONException e) {
+			Log.d(TAG, e.toString());
+		}
+	}
+    
+    private Map<String, String> constructParams(String storeNo) {
+    	Map<String,String> params = new HashMap<String, String>();
+		JSONArray array;
+		JSONObject transactions;
+		try {
+			array = new JSONArray();
+			transactions = new JSONObject();
+			transactions.put("id", 112);
+			transactions.put("command", "Query");
+			JSONObject paramsInTransactions = new JSONObject();
+			paramsInTransactions.put("table", 14630);
+			paramsInTransactions.put("columns", new JSONArray().put("no")
+					.put("name").put("C_CUSTOMER_ID:name").put("C_STORE_ID:name"));
+			
+			//查询条件的params
+			JSONObject queryParams = new JSONObject();
+			queryParams.put("column", "C_STORE_ID");
+			queryParams.put("condition", "=" + storeNo);
+			paramsInTransactions.put("params", queryParams);
+			
+			transactions.put("params", paramsInTransactions);
+			array.put(transactions);
+			Log.d(TAG, array.toString());
+			params.put("transactions", array.toString());
+			
+		} catch (JSONException e) {}
+		return params;
+	}
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.configBtn:
-            	forwardActivity(SystemConfigurationActivity.class);
+            	//forwardActivity(SystemConfigurationActivity.class);
+            	showTips(0);
                 break;
             case R.id.loginBtn:
             	if(hasConfigured()){
 	            	 // 存入本地
 	                App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.store_key, storeSpinner.getText().toString());
+	                if(userSpinner.getAdapter().getCount() > 0)
 	                App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.user_key, userSpinner.getSelectedItem().toString());
-	                if(pswET.getText().length() > 0){
+	                if(pswET.getText().length() > 0 || userSpinner.getAdapter().getCount() == 0){
 	                	showAlertMsg(R.string.pswderror);
 	                }else{
 	                	forwardActivity(SystemActivity.class);
 	                }
             	}else{
-            		showTips(R.string.tipsNeedConfigure);
+            		showAlertMsg(R.string.tipsNeedConfigure);
             	}
-                // 跳转并传递数据
-                //IntentData intentData = new IntentData();
-                //intentData.setStore(storeSpinner.getSelectedItem().toString());
-                //intentData.setUser(userET.getText().toString());
-                
-                /*
-                new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							InputStream is = getResources().openRawResource(R.raw.tc_sku);;
-							BufferedReader br = new BufferedReader(new InputStreamReader(is,"gbk"));
-							String line = null;
-							String[] temp = null;
-							db.beginTransaction();
-							while((line = br.readLine()) != null){
-								temp = line.split(",");
-								db.execSQL("insert into tc_sku(sku,style,clr,sizeid,pname) values (?,?,?,?,?)", 
-										new Object[]{temp[0],temp[1].substring(2),temp[2].substring(2),
-										temp[3].substring(2),temp[4].substring(2)});	
-								
-							}
-							db.setTransactionSuccessful();
-							db.endTransaction();
-							Log.d(TAG, "tc_sku done");
-						} catch (Exception e) {
-						}
-					}
-				}).start();;
-               
-                new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							InputStream is = getResources().openRawResource(R.raw.tc_style);;
-							BufferedReader br = new BufferedReader(new InputStreamReader(is,"gbk"));
-							String line = null;
-							while((line = br.readLine()) != null){
-								String[] temp = line.split(",");
-								db.execSQL("insert into tc_style(style,style_name,attrib1,attrib2,attrib3,attrib4,attrib5,attrib6,attrib7,attrib8,attrib9,attrib10) "
-										+ "values (?,?,?,?,?,?,?,?,?,?,?,?)", 
-										new Object[]{temp[0],temp[1].substring(2),temp[2].substring(2),
-										temp[3].substring(2),temp[4].substring(2),temp[5].substring(2)
-										,temp[6].substring(2),temp[7].substring(2),temp[8].substring(2)
-										,temp[9].substring(2),temp[10].substring(2),temp[11].substring(2)});	
-							}
-							Log.d(TAG, "tc_style done");
-						} catch (Exception e) {
-						}
-					}
-				}).start();;
-				
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							InputStream is = getResources().openRawResource(R.raw.tc_styleprice);;
-							BufferedReader br = new BufferedReader(new InputStreamReader(is,"gbk"));
-							String line = null;
-							while((line = br.readLine()) != null){
-								String[] temp = line.split(",");
-								db.execSQL("insert into tc_styleprice(style,store,fprice) values (?,?,?)", 
-										new Object[]{temp[0],temp[1].substring(2),temp[2].substring(2)});	
-							}
-							Log.d(TAG, "tc_styleprice done");
-						} catch (Exception e) {
-						}
-					}
-				}).start();;
-				
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							InputStream is = getResources().openRawResource(R.raw.tdefclr);;
-							BufferedReader br = new BufferedReader(new InputStreamReader(is,"gbk"));
-							String line = null;
-							while((line = br.readLine()) != null){
-								String[] temp = line.split(",");
-								db.execSQL("insert into tdefclr(clr,clrname) values (?,?)", 
-										new Object[]{temp[0],temp[1].substring(2)});	
-							}
-							Log.d(TAG, "tdefclr done");
-						} catch (Exception e) {
-						}
-					}
-				}).start();;
-				
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							InputStream is = getResources().openRawResource(R.raw.tdefsize);;
-							BufferedReader br = new BufferedReader(new InputStreamReader(is,"gbk"));
-							String line = null;
-							while((line = br.readLine()) != null){
-								String[] temp = line.split(",");
-								db.execSQL("insert into tdefsize(sizeid,sizename) values (?,?)", 
-										new Object[]{temp[0],temp[1].substring(2)});
-							}
-							Log.d(TAG, "tdefsize done");
-						} catch (Exception e) {
-						}
-					}
-				}).start();;*/
-				
-                /*
-                try {
-                    Map<String, String> params = new HashMap<String, String>();
-                    JSONArray array = new JSONArray();
-
-                    JSONObject transactions = new JSONObject();
-                    transactions.put("id", 112);
-                    transactions.put("command", "Query");
-
-                    JSONObject paramsTable = new JSONObject();
-                    paramsTable.put("table", "14630");
-                    paramsTable.put("columns", new JSONArray().put("name").put("C_STORE_ID"));
-                    JSONObject paramsCombine = new JSONObject();
-                    paramsCombine.put("combine", "and");
-                    JSONObject expr1JO = new JSONObject();
-                    expr1JO.put("column", "name");
-                    expr1JO.put("condition", userET.getText());
-
-
-                    paramsCombine.put("expr1", expr1JO);
-                    JSONObject expr2JO = new JSONObject();
-                    expr2JO.put("column", "C_STORE_ID");
-                    expr2JO.put("condition", "3890");
-                    paramsCombine.put("expr2", expr2JO);
-                    paramsTable.put("params", paramsCombine);
-
-                    transactions.put("params", paramsTable);
-                    array.put(transactions);
-                    params.put("transactions", array.toString());
-                    sendRequest(params, new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            // 取消进度条
-                            stopProgressDialog();
-
-                            try {
-                                JSONArray resJA = new JSONArray(response);
-                                JSONObject resJO = resJA.getJSONObject(0);
-                                JSONArray rowsJA = resJO.getJSONArray("rows");
-                                int len = rowsJA.length();
-                                // 有效用户
-                                if (len > 0) {
-                                    // 跳转并传递数据
-                                    IntentData intentData = new IntentData();
-                                    intentData.setStore(storeSpinner.getSelectedItem().toString());
-                                    intentData.setUser(userET.getText().toString());
-                                    forwardActivity(SystemActivity.class, intentData);
-                                } else {
-                                    // 提示用户不存在
-                                    // Toast.makeText(LoginActivity.this, "用户不存在", Toast.LENGTH_LONG).show();
-                                    UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 3000);
-                                    UndoBarController.show(LoginActivity.this, "用户不存在", null, MESSAGESTYLE);
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                */
                 break;
         }
     }
@@ -332,6 +230,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     	if (!f.exists()) {
 	    	return false;
 	    }
+    	if (userSpinner.getAdapter().getCount() == 0) return false;
 		return true;
 	}
 
@@ -359,7 +258,20 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            isExit = false;
+            switch (msg.what) {
+			case 0:
+				isExit = false;
+				break;
+			case 1:
+		    	ArrayAdapter<String> adapter = new ArrayAdapter<String>(LoginActivity.this, android.R.layout.simple_spinner_item, getEmployees());
+		        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		        userSpinner.setAdapter(adapter);
+		        stopProgressDialog();
+				break;
+			default:
+				break;
+			}
+            
         }
     };
 
@@ -387,18 +299,50 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     //显示对话框
     private void showTips(int whichTips){
     	LayoutInflater inflater = getLayoutInflater();
-    	//布局文件待添加！！！！！！！！！！
-    	View tipsLayout = inflater.inflate(R.layout.inventory_refresh_tips, 
-    			(ViewGroup)findViewById(R.id.inventoryRefreshTipsLayout));
-    	TextView tipsText = (TextView) tipsLayout.findViewById(R.id.inventoryRefreshingTipsText);
-    	tipsText.setText(whichTips);
-    	
-    	new AlertDialog.Builder(LoginActivity.this)
-    		.setTitle(getString(R.string.tipsDataDownload))
+    	View tipsLayout = inflater.inflate(R.layout.configure_pswd_tips, 
+    			(ViewGroup)findViewById(R.id.configureTipsLayout));
+    	final EditText tipsText = (EditText) tipsLayout.findViewById(R.id.configureTipsText);
+    	AlertDialog dialog = null;
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this)
+    	.setTitle("系统提示")
     		.setView(tipsLayout)
-    		.setPositiveButton(getString(R.string.confirm),null)
-    		.show();
-    	
+    		.setPositiveButton(getString(R.string.confirm),new OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int arg1) {
+					String configPswd = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.config_pswd);
+					String editText = tipsText.getText().length() == 0?"":tipsText.getText().toString();
+					if(editText.equals(configPswd)){
+						forwardActivity(SystemConfigurationActivity.class);
+						try {
+				    		Field field = dialog.getClass().getSuperclass().getDeclaredField("mShowing");
+				    	    field.setAccessible(true);
+				    	    field.set(dialog,true);
+				    	    dialog.dismiss();
+				         }catch (Exception e){}
+					}else{
+						tipsText.setError("密码错误");
+				    	try {
+				    		Field field = dialog.getClass().getSuperclass().getDeclaredField("mShowing");
+				    	    field.setAccessible(true);
+				    	    field.set(dialog, false);
+				         }catch (Exception e){}
+					}
+				}
+			}).setNegativeButton(getString(R.string.cancel), new OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int arg1) {
+					try {
+			    		Field field = dialog.getClass().getSuperclass().getDeclaredField("mShowing");
+			    	    field.setAccessible(true);
+			    	    field.set(dialog,true);
+			    	    dialog.dismiss();
+			         }catch (Exception e){}
+				}
+			});
+    	dialog = builder.create();
+    	dialog.show();
     }
 
 }

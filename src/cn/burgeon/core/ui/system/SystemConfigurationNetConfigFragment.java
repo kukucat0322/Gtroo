@@ -89,7 +89,10 @@ public class SystemConfigurationNetConfigFragment extends Fragment {
         mChangePassword.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-	
+				Intent intent = new Intent();
+				intent.setClass(SystemConfigurationNetConfigFragment.this.getActivity(), 
+						SystemConfigurePswdActivity.class);
+				startActivity(intent);
 			}
 		});
         
@@ -140,13 +143,14 @@ public class SystemConfigurationNetConfigFragment extends Fragment {
     	return false;
     }
 
-
+    //http://g.burgeon.cn:2080/xepospda/DownloadFiles
+    //http://g.burgeon.cn:290/servlets/binserv/Rest
     private void saveToMemory(){
     	if( !TextUtils.isEmpty(interactiveURLAddress)){
-    		App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.interactiveURLAddressKey, interactiveURLAddress);
+    		App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.interactiveURLAddressKey, interactiveURLAddress + "/servlets/binserv/Rest");
     	}
     	if( !TextUtils.isEmpty(downloadURLAddress)){
-    		App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.downloadURLAddressKey, downloadURLAddress);
+    		App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.downloadURLAddressKey, downloadURLAddress + "/DownloadFiles");
     	}
     	showTips(R.string.tipsSaveSucess);
     }

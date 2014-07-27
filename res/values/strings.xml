@@ -196,7 +196,7 @@
     <string name="tipsDataDownload">温馨提示</string>
     <string name="tipsIAmAlreadyDownloadingFuckYou">我已经在下载了！！！</string>
     <string name="tipsCanYouChooseOne$_$">亲，请至少选择一项！</string>
-    <string name="tipsNetworkUnReachable$_$">亲，检查下网络！</string>
+    <string name="tipsNetworkUnReachable$_$">亲，检查下网络是否可用！</string>
     <string name="tipsBatteryNotEnough$_$">亲，这点电量不敢下载！</string>
     <string name="tipsServerUnReachable$_$">亲，服务器歇菜了！</string>
     <string name="tipsMemoryNotEnough$_$">亲，设备存储空间不够了！</string>
@@ -285,7 +285,10 @@
     <string name="currentURLAddress">当前配置的服务器地址:</string>
     <string name="tipsServerTesting">正在测试中！</string>
     <string name="tipsNeedConfigure">请先进行配置再登录！</string>
-    <string name="pswderror">密码错误无法登录！</string>
+    <string name="pswderror">用户名或密码错误无法登录！</string>
+    <string name="oldpswderror">旧密码错误！</string>
+    <string name="newpswderror">新密码与确认密码不同！</string>
+    <string name="configpswdsuccess">配置密码修改成功！</string>
     
     <string name="add">新增</string>
     <string name="query">查询</string>

@@ -58,7 +58,7 @@ public class SalesWareSummerAdapter extends BaseAdapter {
 		}
 		
 		Order order = list.get(position);
-		holder.textView1.setText(order.getBarCode());
+		holder.textView1.setText(order.getStyle());
 		holder.textView2.setText(order.getOrderCount());
 		holder.textView3.setText(order.getOrderMoney());
 		holder.textView4.setText(order.getName());

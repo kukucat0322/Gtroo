@@ -18,6 +18,14 @@ public class Order {
 	private String orderMoney;
 	private String isChecked;
 	private String shelfNO;
+	private String vipCardno;
+	private String style;
+	public String getStyle() {
+		return style;
+	}
+	public void setStyle(String style) {
+		this.style = style;
+	}
 	public Order() {
 		super();
 	}
@@ -31,6 +39,12 @@ public class Order {
 		this.saleAsistant = saleAsistant;
 		this.orderDate = orderDate;
 		this.orderState = orderState;
+	}
+	public String getVipCardno() {
+		return vipCardno;
+	}
+	public void setVipCardno(String vipCardno) {
+		this.vipCardno = vipCardno;
 	}
 	public String getSaleAsistantID() {
 		return saleAsistantID;

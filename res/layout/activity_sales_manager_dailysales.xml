@@ -199,6 +199,7 @@
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <Button
+                android:visibility="gone"
                 android:id="@+id/sales_daily_btn_delete"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

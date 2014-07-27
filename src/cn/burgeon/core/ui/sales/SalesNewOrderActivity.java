@@ -23,7 +23,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -31,12 +30,11 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -48,22 +46,20 @@ import cn.burgeon.core.bean.IntentData;
 import cn.burgeon.core.bean.Member;
 import cn.burgeon.core.bean.Product;
 import cn.burgeon.core.ui.BaseActivity;
+import cn.burgeon.core.ui.LoginActivity;
 import cn.burgeon.core.ui.member.MemberSearchActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
 import cn.burgeon.core.utils.ScreenUtils;
-import cn.burgeon.core.widget.UndoBarController;
-import cn.burgeon.core.widget.UndoBarStyle;
-import cn.burgeon.core.widget.UndoBarController.UndoListener;
 
 public class SalesNewOrderActivity extends BaseActivity {
 	
 	private static final String TAG = "SalesNewOrderActivity";
 	private BarcodeManager bm;
 	Button vipBtn, accountBtn;
-	EditText cardNoET, styleBarcodeET,newSalesOrderDateET,salesAssistantET;
+	EditText cardNoET, styleBarcodeET,newSalesOrderDateET;
 	TextView commonRecordnum,commonCount,commonMoney;
 	ListView mListView;
-	Spinner salesTypeSP;
+	Spinner salesTypeSP,salesAssistantSP;
 	SalesNewOrderAdapter mAdapter;
 	ArrayList<Product> data = new ArrayList<Product>();
 	String updateID = "unknow";
@@ -92,7 +88,7 @@ public class SalesNewOrderActivity extends BaseActivity {
         	searchedMember = bundle.getParcelable("searchedMember");
         	Log.d(TAG, "searchedMember = " + searchedMember ==null?"null" : searchedMember + "");
         	if(searchedMember != null){
-        		cardNoET.setText(searchedMember.getCardNum() + "\\" + searchedMember.getDiscount().substring(2));
+        		cardNoET.setText(searchedMember.getCardNum() + "\\" + searchedMember.getDiscount());
         		if(data.size() > 0){
         			for(int i = 0; i < mAdapter.getCount(); i++){
         				Product pro = (Product) mAdapter.getItem(i);
@@ -101,7 +97,7 @@ public class SalesNewOrderActivity extends BaseActivity {
         				float proDiscount = Float.parseFloat(pro.getDiscount()) / 100;
         				//会员折扣
         				float vipDiscount = 0.0f;
-        				if(cardNoET.getText().length() > 0)
+        				if(cardNoET.getText().length() > 0) 
         					vipDiscount = Float.parseFloat(searchedMember.getDiscount());
         				pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
         				mAdapter.notifyDataSetChanged();
@@ -126,7 +122,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 				// 调用 getBarcode()方法读取条码信息
 				Log.d(TAG, "=======barcode========" + bm.getBarcode());
 				String baString = bm.getBarcode() != null?bm.getBarcode().trim():"";
-				styleBarcodeET.setText(baString);
+				//styleBarcodeET.setText(baString);
 				verifyBarCode(baString);
 			}
 		}
@@ -140,6 +136,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 		Product product = null;
 		while(c.moveToNext()){
 			product = new Product();
+			product.setId(c.getInt(c.getColumnIndex("_id")));
 			product.setUuid(updateID);
 			product.setBarCode(c.getString(c.getColumnIndex("barcode")));
 			product.setName(c.getString(c.getColumnIndex("pdtname")));
@@ -205,8 +202,11 @@ public class SalesNewOrderActivity extends BaseActivity {
 			@Override
 			public void onNothingSelected(AdapterView<?> arg0) {}
 		});*/
-        salesAssistantET = (EditText) findViewById(R.id.salesAssistantET);
-        salesAssistantET.setText(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key));
+        salesAssistantSP = (Spinner) findViewById(R.id.salesAssistantET);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(SalesNewOrderActivity.this, android.R.layout.simple_spinner_item, getEmployees());
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        salesAssistantSP.setAdapter(adapter);
+        
         commonRecordnum = (TextView) findViewById(R.id.sales_common_recordnum);
         commonCount = (TextView) findViewById(R.id.sales_common_count);
         commonMoney = (TextView) findViewById(R.id.sales_common_money);
@@ -220,7 +220,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 		newSalesOrderDateET.setText(getCurrDate());
 		styleBarcodeET = (EditText) findViewById(R.id.styleBarcodeET);
 		styleBarcodeET.setOnEditorActionListener(editorActionListener);
-		//styleBarcodeET.setText("1351600237S");
+		styleBarcodeET.setText("AS001BL");
 		mListView = (ListView) findViewById(R.id.newOrderLV);
 		mAdapter = new SalesNewOrderAdapter(data, this);
 		mListView.setAdapter(mAdapter);
@@ -249,6 +249,8 @@ public class SalesNewOrderActivity extends BaseActivity {
                 IntentData intentData = new IntentData();
                 intentData.setProducts(data);
             	intentData.setCommand(updateID);
+            	intentData.setEmployee(salesAssistantSP.getSelectedItem().toString());
+            	intentData.setVipCardno(searchedMember != null?searchedMember.getCardNum():"");
                 forwardActivity(SalesSettleActivity.class, intentData,SALESSETTLE);
 				break;
 /*			case R.id.verifyBarCodeBtn:
@@ -327,6 +329,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 		Cursor c = db.rawQuery(sql, new String[]{barcode});
 		Log.d(TAG, "result size = " + c.getCount());
         if(c.getCount() == 0){
+        	styleBarcodeET.setText(barcode);
         	showAlertMsg(R.string.nothatbarcode);
         	return;
         }
@@ -362,6 +365,8 @@ public class SalesNewOrderActivity extends BaseActivity {
 //		Log.d(TAG, "proDiscount=" + proDiscount + "      vipDiscount=" + vipDiscount);
 //		Log.d(TAG, "salesTypeSP=" + salesTypeSP.getSelectedItemPosition());
 //		Log.d(TAG, "price=" + pro.getPrice());
+		//   1:正常零售,2:退货,
+		//   3:赠品,4:全额,
 		switch (salesTypeSP.getSelectedItemPosition()) {
 			case 0://正常
 				if(cardNoET.getText().length() > 0){
@@ -383,12 +388,18 @@ public class SalesNewOrderActivity extends BaseActivity {
 				break;
 			case 3://退货
 				pro.setCount("-1");
-				pro.setMoney(pro.getPrice());
+				if(cardNoET.getText().length() > 0){
+					pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
+				}else{
+					//策略
+					if(!isFitPolicy(pro))
+					pro.setMoney(String.format("%.2f",price * proDiscount));
+				}
 				break;
 			default:
 				break;
 		}
-		
+		pro.setSalesType(salesTypeSP.getSelectedItemPosition() + 1);
 		items.add(pro);
 		return items;
 	}
@@ -567,5 +578,19 @@ public class SalesNewOrderActivity extends BaseActivity {
     	dialog = builder.create();
     	dialog.show();
     }
+    
+    private String[] getEmployees() {
+		Cursor c = db.rawQuery("select name from employee",null);
+		if(c!=null){
+			int i = 0;
+			String[] employees = new String[c.getCount()];
+			while(c.moveToNext()){
+				employees[i++] = c.getString(c.getColumnIndex("name"));
+			}
+			if(!c.isClosed()) c.close();
+			return employees;
+		}
+		return new String[]{};
+	}
 
 }

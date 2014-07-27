@@ -408,14 +408,6 @@ public class SystemDataDownloadActivity extends BaseActivity{
 					||itemStrategyChecked || systemParamChecked);
 	}
 	
-	//检测网络状态
-	private boolean networkReachable(){
-		ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(CONNECTIVITY_SERVICE);
-		NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-		if(networkInfo != null && networkInfo.isConnected())  return true;
-		return false;	
-	}
-	
 	//检测电池电量
 	private boolean batteryEnough(){
 		//即将添加，敬请期待！

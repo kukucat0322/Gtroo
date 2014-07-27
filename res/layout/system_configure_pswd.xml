@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ffffff" >
+           
+
+    <TextView
+        android:id="@+id/oldepswdTextView"
+        android:layout_width="90dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="20dp"
+        android:layout_height="wrap_content"
+        android:text="旧  密  码："
+        android:gravity="left"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/oldpswdEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/oldepswdTextView"
+        android:layout_alignBaseline="@+id/oldepswdTextView"
+        android:layout_marginLeft="20dp"
+        android:hint=""
+        android:minEms="12"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/newpswdTextView"
+        android:layout_width="90dp"
+        android:layout_below="@+id/oldepswdTextView"
+        android:layout_alignLeft="@+id/oldepswdTextView"
+        android:layout_marginTop="100dp"
+        android:layout_height="wrap_content"
+        android:text="新  密  码："
+        android:gravity="left"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/newpswdEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/newpswdTextView"
+        android:layout_alignLeft="@+id/oldpswdEditText"
+        android:hint=""
+        android:minEms="12"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/confirmpswdTextView"
+        android:layout_width="90dp"
+        android:layout_below="@+id/newpswdTextView"
+        android:layout_alignLeft="@+id/newpswdTextView"
+        android:layout_marginTop="100dp"
+        android:layout_height="wrap_content"
+        android:text="确认密码："
+        android:gravity="left"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/confirmpswdEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/confirmpswdTextView"
+        android:layout_alignLeft="@+id/newpswdEditText"
+        android:inputType="numberPassword"
+        android:hint=""
+        android:minEms="12"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:textSize="14sp" />
+	    	    
+    <Button
+        android:id="@+id/savePswd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="@string/btn_save"/>
+</RelativeLayout>

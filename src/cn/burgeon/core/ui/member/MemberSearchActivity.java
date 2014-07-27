@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -30,10 +31,14 @@ import cn.burgeon.core.R;
 import cn.burgeon.core.adapter.MemberSearchAdapter;
 import cn.burgeon.core.bean.IntentData;
 import cn.burgeon.core.bean.Member;
+import cn.burgeon.core.bean.RequestResult;
 import cn.burgeon.core.ui.BaseActivity;
 import cn.burgeon.core.ui.sales.SalesNewOrderActivity;
+import cn.burgeon.core.ui.sales.SalesSettleActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
 import cn.burgeon.core.utils.ScreenUtils;
+import cn.burgeon.core.widget.UndoBarController;
+import cn.burgeon.core.widget.UndoBarStyle;
 
 import com.android.volley.Response;
 
@@ -106,8 +111,8 @@ public class MemberSearchActivity extends BaseActivity {
 	};
 
 	private void postRequest() {
-		viaLocal();
-		//viaNet();
+		//viaLocal();
+		viaNet();
 	}
 	
 	public List<Member> query(){
@@ -151,6 +156,11 @@ public class MemberSearchActivity extends BaseActivity {
 	}
 
 	private void viaNet() {
+		if(!networkReachable()){
+			showAlertMsg(R.string.tipsNetworkUnReachable$_$);
+			return;
+		}
+		startProgressDialog();
 		try {
 			Map<String, String> params = new HashMap<String, String>();
             JSONArray array = new JSONArray();
@@ -161,36 +171,75 @@ public class MemberSearchActivity extends BaseActivity {
 
             JSONObject paramsTable = new JSONObject();
             paramsTable.put("table", "12899");
-            paramsTable.put("columns", new JSONArray().put("cardno").put("vipname").put("birthday"));
+            paramsTable.put("columns", new JSONArray().put("cardno").put("vipname")
+            		.put("C_VIPTYPE_ID:DISCOUNT").put("birthday"));
             JSONObject paramsCombine = new JSONObject();
-            paramsCombine.put("combine", "or");
-            JSONObject expr1JO = new JSONObject();
-            expr1JO.put("column", "cardno");
-            expr1JO.put("condition", cardNoET.getText());
+            
+            if(cardNoET.getText().length() > 0 && mobileET.getText().length() == 0){
+	            paramsCombine.put("combine", "and");
+	            JSONObject expr1JO = new JSONObject();
+	            expr1JO.put("column", "cardno");
+	            expr1JO.put("condition", "="+cardNoET.getText());
+	            paramsCombine.put("expr1", expr1JO);
+	            
+	            JSONObject expr2JO = new JSONObject();
+	            expr2JO.put("column", "C_CUSTOMER_ID:name");
+	            expr2JO.put("condition", "="+App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.agency_key));
+	            paramsCombine.put("expr2", expr2JO);
+            }
 
-
-            paramsCombine.put("expr1", expr1JO);
-            JSONObject expr2JO = new JSONObject();
-            expr2JO.put("column", "mobil");
-            expr2JO.put("condition", mobileET.getText());
-            paramsCombine.put("expr2", expr2JO);
+            if(mobileET.getText().length() > 0 && cardNoET.getText().length() == 0){
+            	paramsCombine.put("combine", "and");
+            	JSONObject expr1JO = new JSONObject();
+	            expr1JO.put("column", "mobil");
+	            expr1JO.put("condition", "="+mobileET.getText());
+	            paramsCombine.put("expr1", expr1JO);
+	            
+	            JSONObject expr2JO = new JSONObject();
+	            expr2JO.put("column", "C_CUSTOMER_ID:name");
+	            expr2JO.put("condition", "="+App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.agency_key));
+	            paramsCombine.put("expr2", expr2JO);
+            }
+            
             paramsTable.put("params", paramsCombine);
-
             transactions.put("params", paramsTable);
             array.put(transactions);
+            Log.d("MemberSearch", array.toString());
             params.put("transactions", array.toString());
 			sendRequest(params,new Response.Listener<String>() {
 				@Override
 				public void onResponse(String response) {
 					Log.d("zhang.h", response);
-					mAdapter = new MemberSearchAdapter(parseResult(response), MemberSearchActivity.this);
-					mListView.setAdapter(mAdapter);
+					if(!TextUtils.isEmpty(response)){
+						RequestResult result = parseResult(response);
+						//请求成功，更新记录状态
+						if("0".equals(result.getCode())){
+							mAdapter = new MemberSearchAdapter(parseResponse(response), MemberSearchActivity.this);
+							mListView.setAdapter(mAdapter);
+							stopProgressDialog();
+						}else{
+							stopProgressDialog();
+							UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+					        UndoBarController.show(MemberSearchActivity.this, "找不到该会员", null, MESSAGESTYLE);
+						}
+					}
+
 				}
 			});
 		} catch (JSONException e) {}
 	}
 	
-	private List<Member> parseResult(String result){
+	private RequestResult parseResult(String response) {
+		RequestResult result = null;
+	    try {
+			JSONArray resJA = new JSONArray(response);
+			JSONObject resJO = resJA.getJSONObject(0);
+			result = new RequestResult(resJO.getString("code"), resJO.getString("message"));
+		} catch (JSONException e) {}
+		return result;
+	}
+	
+	private List<Member> parseResponse(String result){
 		List<Member> data = new ArrayList<Member>();
 		try {
 			JSONArray array = new JSONArray(result);
@@ -200,15 +249,16 @@ public class MemberSearchActivity extends BaseActivity {
 			for(int i = 0; i < rows.length(); i++){
 				String row = rows.get(i).toString();
 				String[] rowArr = row.split(",");
-				
+				//["7877638","hhhv",0.5,19850311]
 				member = new Member();
 				member.setCardNum(rowArr[0].substring(2,rowArr[0].length()-1));
-				member.setName(rowArr[1].replace("\"", ""));
-				member.setBirthday(rowArr[2].substring(1,rowArr[2].length()-2));
-				
-				intentValue = member.getCardNum()+ "\\100";
+				member.setName(rowArr[1].substring(1,rowArr[1].length()-1));
+				member.setDiscount(rowArr[2]);
+				member.setBirthday("null".equals(rowArr[3].substring(0,rowArr[3].length()-1))?"":rowArr[3].substring(0,rowArr[3].length()-1));
 				data.add(member);
 			}
+			if(member != null)
+				selectedMember = member;
 		} catch (JSONException e) {
 			Log.d("MemberListActivity", e.toString());
 		}

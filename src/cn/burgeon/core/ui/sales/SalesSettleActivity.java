@@ -3,8 +3,8 @@ package cn.burgeon.core.ui.sales;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -22,10 +22,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
-import cn.burgeon.core.adapter.SalesNewOrderAdapter;
 import cn.burgeon.core.bean.IntentData;
-import cn.burgeon.core.bean.Product;
 import cn.burgeon.core.bean.PayWay;
+import cn.burgeon.core.bean.Product;
 import cn.burgeon.core.ui.BaseActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
 import cn.burgeon.core.widget.UndoBarController;
@@ -40,7 +39,7 @@ public class SalesSettleActivity extends BaseActivity {
 	TextView payTV, counTV;
 	EditText orginET, disCounET, realityET;
 	ArrayList<Product> products;
-	String command;
+	String command, vipCardno,employee;
 	LinearLayout mPaywayLayout;
 	
 	public EditText getOrginET() {
@@ -87,11 +86,14 @@ public class SalesSettleActivity extends BaseActivity {
 	float pay = 0;
 	int count = 0;
 	float discount = 0;
+	String regex = "^[\\d]\\.[\\d]{1,2}$";
 
 	private void settle() {
 		IntentData iData = (IntentData) getIntent().getParcelableExtra(PAR_KEY);
 		products = iData.getProducts();
 		command = iData.getCommand();
+		vipCardno = iData.getVipCardno();
+		employee = iData.getEmployee();
 		Log.d("zhang.h", "command=" + command);
 		for(Product pro : products){
 			pay += Float.parseFloat(pro.getMoney()) * Integer.parseInt(pro.getCount());
@@ -105,9 +107,30 @@ public class SalesSettleActivity extends BaseActivity {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
 				if(!hasFocus){
-					if(!"".equals(disCounET.getText())){
-						discount = Float.parseFloat(disCounET.getText().toString())/100;
-						realityET.setText(String.format("%.2f", pay * discount));
+					if(disCounET.getText().length() > 0){
+						
+						if(Pattern.compile(regex).matcher(disCounET.getText().toString()).find()){
+							discount = Float.parseFloat(disCounET.getText().toString());
+							float other = 0.0f;
+							float total = pay * discount;
+							realityET.setText(String.format("%.2f", pay * discount));
+							EditText cashET = null;
+							for(int i = 0; i < mPaywayLayout.getChildCount(); i++){
+								LinearLayout item = (LinearLayout) mPaywayLayout.getChildAt(i);
+								EditText value = (EditText) item.getChildAt(2);
+								TextView name = (TextView) item.getChildAt(0);
+								if(!"现金".equals(name.getText().toString())){
+									if(value.getText().length() > 0)
+										other += Float.parseFloat(value.getText().toString());
+								}else{
+									cashET = value;
+								}
+							}
+							cashET.setText(String.format("%.2f", total-other));
+						}else{
+							//提示折扣不正确
+							disCounET.setError("折扣错误");
+						}
 					}
 				}
 			}
@@ -115,27 +138,16 @@ public class SalesSettleActivity extends BaseActivity {
 		realityET.setText(String.format("%.2f", pay));
 		ArrayList<PayWay> pays = new ArrayList<PayWay>();
 		if("unknow".equals(command) || null == command){
-			Cursor c = db.rawQuery("select * from tc_payway", null);
+			Cursor c = db.rawQuery("select * from tc_payway where _id != ?", new String[]{"26"});
 			while(c.moveToNext()){
 				if(27 == c.getInt(0))
 					pays.add(new PayWay(c.getInt(0), c.getString(1), String.format("%.2f",pay)));
 				else
-					pays.add(new PayWay(c.getInt(0), c.getString(1), String.format("%.2f",0.00f)));
+					pays.add(new PayWay(c.getInt(0), c.getString(1), ""/*String.format("%.2f",0.00f)*/));
 			}
-//			pays.add(new PayWay(27, getResources().getString(R.string.sales_settle_cash), String.format("%.2f",pay)));
-//			pays.add(new PayWay(26,getResources().getString(R.string.sales_settle_auto), String.format("%.2f",0.00f)));
-//			pays.add(new PayWay(28,getResources().getString(R.string.sales_settle_bank), String.format("%.2f",0.00f)));
 		}else{
 			Cursor c = db.rawQuery("select * from c_payway_detail where settleUUID = ?", new String[]{command});
 			while(c.moveToNext()){
-				//paywayID INTEGER,name varchar,money varchar
-				/*if(27 == c.getInt(c.getColumnIndex("paywayID"))){
-					pays.add(new PayWay(27, getResources().getString(R.string.sales_settle_cash), String.format("%.2f",Float.parseFloat(c.getString(c.getColumnIndex("money"))))));
-				}else if(26 == c.getInt(c.getColumnIndex("paywayID"))){
-					pays.add(new PayWay(26, getResources().getString(R.string.sales_settle_auto), String.format("%.2f",Float.parseFloat(c.getString(c.getColumnIndex("money"))))));
-				}else if(28 == c.getInt(c.getColumnIndex("paywayID"))){
-					pays.add(new PayWay(28, getResources().getString(R.string.sales_settle_bank), String.format("%.2f",Float.parseFloat(c.getString(c.getColumnIndex("money"))))));
-				}*/
 				pays.add(new PayWay(c.getInt(c.getColumnIndex("paywayID")), c.getString(c.getColumnIndex("name")), String.format("%.2f",Float.parseFloat(c.getString(c.getColumnIndex("money"))))));
 			}
 			if(c != null && !c.isClosed())
@@ -153,11 +165,11 @@ public class SalesSettleActivity extends BaseActivity {
 		}
 	}
 	
+	
 	View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
 		
 		@Override
 		public void onFocusChange(View view, boolean hasFocus) {
-			((EditText)view).setSelection(((EditText)view).getText().length());
 			if(hasFocus){
 				Log.d(TAG, "view tag = " + view.getTag());
 				float total = 0.0f;
@@ -172,20 +184,10 @@ public class SalesSettleActivity extends BaseActivity {
 				}
 				if(realityET.getText().length() > 0)
 					total = Float.parseFloat(realityET.getText().toString());
-				((EditText)view).setText(String.format("%.2f", total - other));
+				((EditText)view).setText("0.00".equals(String.format("%.2f", total - other))?"":String.format("%.2f", total - other));
 			}
 		}
 	};
-	
-	private List<PayWay> getPayWay(){
-		PayWay pway = null;
-		List<PayWay> list = new ArrayList<PayWay>();
-		Cursor c = db.rawQuery("select * from tc_payway", null);
-		while(c.moveToNext()){
-			//pway = new PayWay(c.getInt(c.getColumnIndex("_id")),c.getInt(c.getColumnIndex("payway")));
-		}
-		return list;
-	}
 
 	private void init() {
         // 初始化门店信息
@@ -210,6 +212,11 @@ public class SalesSettleActivity extends BaseActivity {
 		
 		@Override
 		public void onClick(View v) {
+			if(!validate()){
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+		        UndoBarController.show(SalesSettleActivity.this, "金额不正确", null, MESSAGESTYLE);
+		        return;
+			}
 			if("unknow".equals(command) || null == command){
 				showTips(1);
 			}
@@ -229,8 +236,11 @@ public class SalesSettleActivity extends BaseActivity {
 
 				@Override
 				public void onClick(DialogInterface arg0, int arg1) {
-					if(what == 1) save();
-					else if(what == 2) update();
+					discoutDetail();
+					if(what == 1){
+						save();
+					}
+					else if(what == 2)update();
 					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
 			        UndoBarController.show(SalesSettleActivity.this, "结账成功", new UndoListener() {
 						
@@ -251,6 +261,28 @@ public class SalesSettleActivity extends BaseActivity {
     	dialog = builder.create();
     	dialog.show();
     }
+    
+    private void discoutDetail(){
+    	if(Pattern.compile(regex).matcher(disCounET.getText().toString()).find()){
+    		for(Product pro : products){
+    			pro.setMoney(String.format("%.2f", Float.parseFloat(pro.getMoney()) * Float.parseFloat(disCounET.getText().toString())));
+    		}
+    	}
+    }
+    
+    private boolean validate(){
+    	float money = 0.0f;
+    	for(int i = 0; i < mPaywayLayout.getChildCount(); i++){
+    		LinearLayout item = (LinearLayout) mPaywayLayout.getChildAt(i);
+    		EditText editText = (EditText) item.getChildAt(2);
+    		if(editText.getText().length() > 0){
+    			money += Float.parseFloat(editText.getText().toString());
+    		}
+    	}
+    	Log.d(TAG, "====validate money" + money);
+    	Log.d(TAG, "====validate realityET" + realityET.getText().toString());
+    	return money == Float.parseFloat(realityET.getText().toString());
+    }
 	
 	public void save(){
 		db.beginTransaction();
@@ -258,26 +290,28 @@ public class SalesSettleActivity extends BaseActivity {
         	String uuid = UUID.randomUUID().toString();
         	Date currentTime = new Date();
         	db.execSQL("insert into c_settle('settleTime','type','count','money','employeeID','orderEmployee',"
-        			+ "'status','settleDate','settleMonth','orderno','settleUUID')"+
-        				" values(?,?,?,?,?,?,?,?,?,?,?)",
+        			+ "'status','settleDate','settleMonth','vipCardno','orderno','settleUUID')"+
+        				" values(?,?,?,?,?,?,?,?,?,?,?,?)",
 					new Object[]{new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(currentTime),
 								getResources().getString(R.string.sales_settle_type),
 								count,
 								realityET.getText(),
-								App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key),
-								App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key),
+								employee,
+								employee,
 								getString(R.string.sales_settle_noup),
 								new SimpleDateFormat("yyyy-MM-dd").format(currentTime),
 								new SimpleDateFormat("yyyy-MM-dd").format(currentTime).substring(0, 7),
+								vipCardno,
 								getNo(),//销售单号
 								uuid});
         	for(Product pro : products){
-        		db.execSQL("insert into c_settle_detail('barcode','price','discount'"
-        				+ ",'count','money','settleUUID','pdtname','color','size','settleDate')"
-        				+ " values(?,?,?,?,?,?,?,?,?,?)",
-    					new Object[]{pro.getBarCode(),pro.getPrice(), pro.getDiscount(),
+        		db.execSQL("insert into c_settle_detail('style','barcode','price','discount'"
+        				+ ",'count','money','settleUUID','pdtname','color','size','settleDate','salesType')"
+        				+ " values(?,?,?,?,?,?,?,?,?,?,?,?)",
+    					new Object[]{pro.getStyle(),pro.getBarCode(),pro.getPrice(), pro.getDiscount(),
         						pro.getCount(), pro.getMoney(), uuid, pro.getName(),
-        						pro.getColor(),pro.getSize(),new SimpleDateFormat("yyyy-MM-dd").format(currentTime)});
+        						pro.getColor(),pro.getSize(),
+        						new SimpleDateFormat("yyyy-MM-dd").format(currentTime),pro.getSalesType()});
         	}
         	for(int i = 0; i < mPaywayLayout.getChildCount(); i++){
         		LinearLayout item = (LinearLayout) mPaywayLayout.getChildAt(i);
@@ -328,17 +362,18 @@ public class SalesSettleActivity extends BaseActivity {
         		if(pro.getUuid() != null){
 	        		db.execSQL("update c_settle_detail "
 	        				+ "set 'price' = ?,'discount' = ?,'settleDate' = ?,"
-	        				+ "'count' = ?,'money' = ? where settleUUID = ?",
+	        				+ "'count' = ?,'money' = ?,'salesType' = ? where settleUUID = ? and _id = ?",
 	    					new Object[]{pro.getPrice(), pro.getDiscount(), 
 	        						new SimpleDateFormat("yyyy-MM-dd").format(currentTime),
-	        						pro.getCount(), pro.getMoney(), command});
+	        						pro.getCount(), pro.getMoney(), pro.getSalesType(),command, pro.getId()});
         		}else{
-            		db.execSQL("insert into c_settle_detail('barcode','price','discount'"
-            				+ ",'count','money','settleUUID','pdtname','color','size','settleDate')"
-            				+ " values(?,?,?,?,?,?,?,?,?,?)",
-        					new Object[]{pro.getBarCode(),pro.getPrice(), pro.getDiscount(),
+            		db.execSQL("insert into c_settle_detail('style','barcode','price','discount'"
+            				+ ",'count','money','settleUUID','pdtname','color','size','settleDate','salesType')"
+            				+ " values(?,?,?,?,?,?,?,?,?,?,?,?)",
+        					new Object[]{pro.getStyle(),pro.getBarCode(),pro.getPrice(), pro.getDiscount(),
             						pro.getCount(), pro.getMoney(), command, pro.getName(),
-            						pro.getColor(),pro.getSize(),new SimpleDateFormat("yyyy-MM-dd").format(currentTime)});
+            						pro.getColor(),pro.getSize(),
+            						new SimpleDateFormat("yyyy-MM-dd").format(currentTime),pro.getSalesType()});
         		}
         	}
         	c = db.rawQuery("select * from c_payway_detail where settleUUID = ?", new String[]{command});

@@ -96,14 +96,14 @@ public class SalesWareSummerActivity extends BaseActivity {
 	private List<Order> fetchData() {
 		Order order = null;
 		List<Order> data = new ArrayList<Order>();
-		Cursor c = db.rawQuery("select barcode, pdtname,sum(count) as totalCount,sum(money) as totalMoney "
+		Cursor c = db.rawQuery("select style, pdtname,sum(count) as totalCount,sum(money) as totalMoney "
 				+ "from c_settle_detail  where settleDate "
 				+ "between '"+starDateET.getText().toString()+"' and '"+endDateET.getText().toString()
-				+ "' group by barcode", null);
+				+ "' group by style", null);
 		Log.d("zhang.h", "cursor size===========" + c.getCount());
 		while(c.moveToNext()){
 			order = new Order();
-			order.setBarCode(c.getString(c.getColumnIndex("barcode")));
+			order.setStyle(c.getString(c.getColumnIndex("style")));
 			order.setName(c.getString(c.getColumnIndex("pdtname")));
 			order.setOrderCount(c.getString(c.getColumnIndex("totalCount")));
 			order.setOrderMoney(c.getString(c.getColumnIndex("totalMoney")));
@@ -139,7 +139,7 @@ public class SalesWareSummerActivity extends BaseActivity {
             	if(currentSelectedOrder != null){
             		Intent intent = new Intent(SalesWareSummerActivity.this,SalesWareSummerDetailActivity.class);
             		Bundle bundle = new Bundle();
-            		bundle.putString("barCode", currentSelectedOrder.getBarCode());
+            		bundle.putString("barCode", currentSelectedOrder.getStyle());
             		bundle.putString("startDate", starDateET.getText().toString());
             		bundle.putString("endDate", endDateET.getText().toString());
             		intent.putExtras(bundle);

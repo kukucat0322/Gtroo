@@ -10,6 +10,7 @@ public class PreferenceUtils {
     public static final String store_key = "storeKey";
     public static final String user_key = "userKey";
     public static final String agency_key = "agencyKey";
+    public static final String config_pswd = "configPswd";
     
 
     //系统配置：网络配置 关键字

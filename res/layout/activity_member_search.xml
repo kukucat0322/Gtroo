@@ -147,18 +147,6 @@
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="@string/sales_detail_jine"
-                        android:textSize="15sp" />
-
-                    <View
-                        android:layout_width="0.5dp"
-                        android:layout_height="match_parent"
-                        android:background="@android:color/black" />
-
-                    <TextView
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
                         android:text="@string/memberRegistBirthday"
                         android:textSize="15sp" />
 

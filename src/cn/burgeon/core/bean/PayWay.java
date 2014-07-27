@@ -4,6 +4,7 @@ public class PayWay {
 	private int id;
 	private String payWay;
 	private String payMoney;
+	private int salesType;
 	public PayWay() {
 		super();
 	}
@@ -12,6 +13,12 @@ public class PayWay {
 		this.id = id;
 		this.payWay = payWay;
 		this.payMoney = payMoney;
+	}
+	public int getSalesType() {
+		return salesType;
+	}
+	public void setSalesType(int salesType) {
+		this.salesType = salesType;
 	}
 	public int getId() {
 		return id;

@@ -6,6 +6,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.http.client.methods.HttpUriRequest;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,6 +17,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -23,6 +28,7 @@ import android.widget.TextView;
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
 import cn.burgeon.core.bean.IntentData;
+import cn.burgeon.core.bean.RequestResult;
 import cn.burgeon.core.net.RequestManager;
 import cn.burgeon.core.net.SimonHttpStack;
 import cn.burgeon.core.utils.PreferenceUtils;
@@ -118,8 +124,12 @@ public class BaseActivity extends Activity {
         intent.putExtras(mBundle);
         startActivity(intent);
     }
-
+    
     public void sendRequest(final Map<String, String> params, Response.Listener<String> successListener) {
+    	sendRequest(params,successListener,null);
+    }
+
+    public void sendRequest(final Map<String, String> params, Response.Listener<String> successListener,Response.ErrorListener errorListener) {
 
         App.getHttpStack().setOnStartListener(new SimonHttpStack.OnStartListener() {
             @Override
@@ -156,6 +166,7 @@ public class BaseActivity extends Activity {
             }
         };
     }
+    
 
     public String getCurrDate() {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -216,5 +227,13 @@ public class BaseActivity extends Activity {
 			}
 		}
 		return true;
+	}
+	
+	//检测网络状态
+	public boolean networkReachable(){
+		ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+		if(networkInfo != null && networkInfo.isConnected())  return true;
+		return false;	
 	}
 }
