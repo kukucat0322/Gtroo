@@ -146,7 +146,7 @@ public class CheckManagerActivity extends BaseActivity {
                 refobj.put("table", 12255);
                 JSONArray addList = new JSONArray();
 
-                List<Product> detailsItems = getDetailsData(order.getUuid());
+                List<Product> detailsItems = getDetailsData(order.getOrderNo());
     			if(detailsItems != null && detailsItems.size() > 0){
     				// Log.d("check", "========明细=========");
     				for(Product product : detailsItems){
@@ -164,7 +164,7 @@ public class CheckManagerActivity extends BaseActivity {
                 refobj2.put("table", 15743);
                 JSONArray addList2 = new JSONArray();
 
-                List<Product> shelfDetailsItems = getDetailsData(order.getUuid());
+                List<Product> shelfDetailsItems = getDetailsData(order.getOrderNo());
     			if(shelfDetailsItems != null && shelfDetailsItems.size() > 0){
     				// Log.d("check", "========按货架扫描明细=========");
     				for(Product product : shelfDetailsItems){
@@ -184,7 +184,7 @@ public class CheckManagerActivity extends BaseActivity {
 
                 transactions.put("params", paramsInTransactions);
                 array.put(transactions);
-                // Log.d("check", array.toString());
+                Log.d("check", array.toString());
                 params.put("transactions", array.toString());
                 
                 String tt = App.getInstance().getSDF().format(new Date());
@@ -345,7 +345,7 @@ public class CheckManagerActivity extends BaseActivity {
     
 	private List<Product> getDetailsData(String primaryKey) {
 		List<Product> details = new ArrayList<Product>();
-		Cursor c = db.rawQuery("select barcode, count,  shelf from c_check_detail where checkUUID = ?", new String[] { primaryKey });
+		Cursor c = db.rawQuery("select barcode, count,  shelf from c_check_detail where checkno = ?", new String[] { primaryKey });
 		Product product = null;
 		while (c.moveToNext()) {
 			product = new Product();
