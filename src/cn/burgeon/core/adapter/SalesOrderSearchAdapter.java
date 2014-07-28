@@ -80,6 +80,7 @@ public class SalesOrderSearchAdapter extends BaseAdapter {
 		TextView textView4;
 		TextView textView5;
 		TextView textView6;
+		TextView textView7;
 	}
 	
     public void setList(List<Order> data) {

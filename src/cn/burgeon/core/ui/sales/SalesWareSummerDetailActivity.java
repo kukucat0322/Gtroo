@@ -96,7 +96,7 @@ public class SalesWareSummerDetailActivity extends BaseActivity {
 		int count = 0;
 		if(data.size() > 0){
 			for(Product pro : data){
-				pay += Float.parseFloat(pro.getMoney());
+				pay += Float.parseFloat(pro.getMoney()) * Integer.parseInt(pro.getCount());
 				count += Integer.parseInt(pro.getCount());
 			}
 		}

@@ -95,7 +95,7 @@
                         android:background="@android:color/black" />
 
                     <TextView
-                        android:layout_width="90dp"
+                        android:layout_width="180dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
@@ -132,7 +132,7 @@
                 <ListView
                     android:id="@+id/salesOrderLV"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="245dp" />
             </LinearLayout>
         </HorizontalScrollView>
     </LinearLayout>

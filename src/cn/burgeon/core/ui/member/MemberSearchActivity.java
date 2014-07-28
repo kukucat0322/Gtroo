@@ -206,7 +206,7 @@ public class MemberSearchActivity extends BaseActivity {
 	            	expr2JO.put("column", "C_STORE_ID");
 			        expr2JO.put("condition", "="+App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey));
 	            }
-	            paramsCombine.put("expr2", expr2JO);
+	            paramsCombine.put("expr2", expr2JO);  
             }
             
             paramsTable.put("params", paramsCombine);

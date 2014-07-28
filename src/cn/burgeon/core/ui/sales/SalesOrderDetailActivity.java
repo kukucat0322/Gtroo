@@ -94,7 +94,7 @@ public class SalesOrderDetailActivity extends BaseActivity {
 		float pay = 0.0f;
 		int count = 0;
 		for(Product pro : data){
-			pay += Float.parseFloat(pro.getMoney());
+			pay += Float.parseFloat(pro.getMoney()) * Integer.parseInt(pro.getCount());
 			count += Integer.parseInt(pro.getCount());
 		}
 		Log.d("zhang.h", "pay=" + pay+",count=" + count);

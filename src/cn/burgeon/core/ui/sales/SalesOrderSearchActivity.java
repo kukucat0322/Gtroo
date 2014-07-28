@@ -83,6 +83,7 @@ public class SalesOrderSearchActivity extends BaseActivity {
 			order.setOrderType(c.getString(c.getColumnIndex("type")));
 			order.setOrderCount(c.getString(c.getColumnIndex("count")));
 			order.setOrderMoney(c.getString(c.getColumnIndex("money")));
+			order.setOrderState(c.getString(c.getColumnIndex("status")));
 			order.setSaleAsistant(c.getString(c.getColumnIndex("orderEmployee")));
 			data.add(order);
 		}

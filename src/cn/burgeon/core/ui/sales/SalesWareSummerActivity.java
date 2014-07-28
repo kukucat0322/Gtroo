@@ -96,7 +96,7 @@ public class SalesWareSummerActivity extends BaseActivity {
 	private List<Order> fetchData() {
 		Order order = null;
 		List<Order> data = new ArrayList<Order>();
-		Cursor c = db.rawQuery("select style, pdtname,sum(count) as totalCount,sum(money) as totalMoney "
+		Cursor c = db.rawQuery("select style, pdtname,sum(count) as totalCount,sum(count*money) as totalMoney "
 				+ "from c_settle_detail  where settleDate "
 				+ "between '"+starDateET.getText().toString()+"' and '"+endDateET.getText().toString()
 				+ "' group by style", null);

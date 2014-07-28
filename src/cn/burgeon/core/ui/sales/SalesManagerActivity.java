@@ -256,9 +256,9 @@ import com.android.volley.Response;
 						JSONObject item = new JSONObject();
 						item.put("QTY", product.getCount());
 						item.put("TYPE", product.getSalesType());
-						if(product.getSalesType() == 2){
-							item.put("ORGDOCNO", order.getOrderNo());
-						}
+//						if(product.getSalesType() == 2){
+//							item.put("ORGDOCNO", order.getOrderNo());
+//						}
 						item.put("M_PRODUCT_ID__NAME", product.getBarCode());
 						item.put("PRICEACTUAL", product.getMoney());
 						item.put("TOT_AMT_ACTUAL", String.format("%.2f", (Float.parseFloat(product.getMoney()) * Integer.parseInt(product.getCount()))));
