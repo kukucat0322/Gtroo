@@ -51,6 +51,7 @@ public class CheckScanActivity extends BaseActivity {
     private HashMap<String, ArrayList<Product>> productMap = new HashMap<String, ArrayList<Product>>();
     private String no;
     private boolean hasDataNotSave = false;
+    private boolean isXuPan = false;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,8 @@ public class CheckScanActivity extends BaseActivity {
 		if (intent != null) {
 			no = intent.getStringExtra("checkNo");
 			if (no != null && no.length() > 0) {
+				isXuPan = true;
+				
 				// 查数据(续盘过来的)
 				ArrayList<Product> products = new ArrayList<Product>();
 				String sql = "select shelf, count, stylename, barcode, color, size from c_check_detail where checkno = ? group by shelf, barcode";
@@ -140,8 +143,9 @@ public class CheckScanActivity extends BaseActivity {
 					String currShelfET = shelfET.getText().toString();
 					// 有值但值变了
 					if (currShelfET.length() > 0 && !shelfNo.equals(currShelfET)) {
-						// 清空列表，productMap值不变
-						shelfNo = currShelfET;
+						if (isXuPan) {
+							shelfNo = currShelfET;
+						}
 						mAdapter.setList(productMap.get(currShelfET));
 					}
 				}
