@@ -290,7 +290,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 		int count = 0;
 		if(data != null && data.size() > 0){
 			for(Product pro : data){
-				pay += Float.parseFloat(pro.getMoney());
+				pay += Float.parseFloat(pro.getMoney()) * Integer.parseInt(pro.getCount());
 				count += Integer.parseInt(pro.getCount());
 			}
 		}
@@ -376,18 +376,22 @@ public class SalesNewOrderActivity extends BaseActivity {
 					if(!isFitPolicy(pro))
 					pro.setMoney(String.format("%.2f",price * proDiscount));
 				}
+				pro.setSalesType(1);
 				break;
 			case 1://全额 
 				if(cardNoET.getText().length() > 0)
 					pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
 				else
 					pro.setMoney(String.format("%.2f",price * proDiscount));
+				pro.setSalesType(4);
 				break;
 			case 2://赠送
 				pro.setMoney("0.00");
+				pro.setSalesType(3);
 				break;
 			case 3://退货
 				pro.setCount("-1");
+				pro.setSalesType(2);
 				if(cardNoET.getText().length() > 0){
 					pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
 				}else{
@@ -399,7 +403,6 @@ public class SalesNewOrderActivity extends BaseActivity {
 			default:
 				break;
 		}
-		pro.setSalesType(salesTypeSP.getSelectedItemPosition() + 1);
 		items.add(pro);
 		return items;
 	}

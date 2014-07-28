@@ -305,10 +305,10 @@ public class SalesSettleActivity extends BaseActivity {
 								getNo(),//销售单号
 								uuid});
         	for(Product pro : products){
-        		db.execSQL("insert into c_settle_detail('style','barcode','price','discount'"
-        				+ ",'count','money','settleUUID','pdtname','color','size','settleDate','salesType')"
-        				+ " values(?,?,?,?,?,?,?,?,?,?,?,?)",
-    					new Object[]{pro.getStyle(),pro.getBarCode(),pro.getPrice(), pro.getDiscount(),
+        		db.execSQL("insert into c_settle_detail('style','barcode','price','discount','orgdocno',"
+        				+ "'count','money','settleUUID','pdtname','color','size','settleDate','salesType')"
+        				+ " values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    					new Object[]{pro.getStyle(),pro.getBarCode(),pro.getPrice(), pro.getDiscount(),orginET.getText().length()==0?"":orginET.getText().toString(),
         						pro.getCount(), pro.getMoney(), uuid, pro.getName(),
         						pro.getColor(),pro.getSize(),
         						new SimpleDateFormat("yyyy-MM-dd").format(currentTime),pro.getSalesType()});
@@ -367,10 +367,10 @@ public class SalesSettleActivity extends BaseActivity {
 	        						new SimpleDateFormat("yyyy-MM-dd").format(currentTime),
 	        						pro.getCount(), pro.getMoney(), pro.getSalesType(),command, pro.getId()});
         		}else{
-            		db.execSQL("insert into c_settle_detail('style','barcode','price','discount'"
-            				+ ",'count','money','settleUUID','pdtname','color','size','settleDate','salesType')"
-            				+ " values(?,?,?,?,?,?,?,?,?,?,?,?)",
-        					new Object[]{pro.getStyle(),pro.getBarCode(),pro.getPrice(), pro.getDiscount(),
+            		db.execSQL("insert into c_settle_detail('style','barcode','price','discount','orgdocno',"
+            				+ "'count','money','settleUUID','pdtname','color','size','settleDate','salesType')"
+            				+ " values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        					new Object[]{pro.getStyle(),pro.getBarCode(),pro.getPrice(), pro.getDiscount(),orginET.getText().length()==0?"":orginET.getText().toString(),
             						pro.getCount(), pro.getMoney(), command, pro.getName(),
             						pro.getColor(),pro.getSize(),
             						new SimpleDateFormat("yyyy-MM-dd").format(currentTime),pro.getSalesType()});

@@ -26,7 +26,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		
 		db.execSQL("CREATE TABLE IF NOT EXISTS c_settle_detail" +  
                 "(_id INTEGER PRIMARY KEY AUTOINCREMENT, settleUUID VARCHAR,style VARCHAR,"+
-				"price VARCHAR, discount VARCHAR,count VARCHAR,money VARCHAR,settleDate VARCHAR,"
+				"price VARCHAR, discount VARCHAR,count VARCHAR,money VARCHAR,settleDate VARCHAR,orgdocno VARCHAR,"
 				+ "pdtname VARCHAR,barcode VARCHAR,color VARCHAR,size VARCHAR,salesType INTEGER,settleType VARCHAR)");
 
         // -----------------------------------------------------------------------------------盘点 begin

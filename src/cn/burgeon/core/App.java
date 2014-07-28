@@ -79,6 +79,7 @@ public class App extends Application {
         
         helper = new DbHelper(this);
         db = helper.getWritableDatabase();
+        App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.config_pswd, "87654321");
     }
 
     public String MD5(String s) {

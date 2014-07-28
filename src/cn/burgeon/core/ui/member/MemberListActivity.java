@@ -80,7 +80,7 @@ public class MemberListActivity extends BaseActivity {
 		updateBtn.setOnClickListener(onClickListener);
 		mListView = (ListView) findViewById(R.id.memberLV);
 		mListView.setOnItemClickListener(OnItemSelectedListener);
-		mAdapter = new MemberListAdapter(query(), this);
+		mAdapter = new MemberListAdapter(new ArrayList<Member>(), this);
 		mListView.setAdapter(mAdapter);
 		commonRecordnum.setText(String.format(getResources().getString(R.string.sales_new_common_record), mAdapter.getCount()));
 

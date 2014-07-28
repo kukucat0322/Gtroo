@@ -135,13 +135,14 @@ import com.android.volley.Response;
 	
 	private List<Product> getDetailsData(String primaryKey) {
 		List<Product> details = new ArrayList<Product>();
-		Cursor c = db.rawQuery("select money,barcode, count from c_settle_detail where settleUUID = ?", new String[]{primaryKey});
+		Cursor c = db.rawQuery("select money,barcode, count,salesType from c_settle_detail where settleUUID = ?", new String[]{primaryKey});
 		Product product = null;
 		while(c.moveToNext()){
 			product = new Product();
 			product.setBarCode(c.getString(c.getColumnIndex("barcode")));
 			product.setCount(c.getString(c.getColumnIndex("count")));
 			product.setMoney(c.getString(c.getColumnIndex("money")));
+			product.setSalesType(c.getInt(c.getColumnIndex("salesType")));
 			details.add(product);
 		}
 		if(c != null && !c.isClosed())
@@ -151,13 +152,12 @@ import com.android.volley.Response;
 	
 	private List<PayWay> getPayWayDetailsData(String primaryKey) {
 		List<PayWay> details = new ArrayList<PayWay>();
-		Cursor c = db.rawQuery("select name, money,salesType from c_payway_detail where settleUUID = ?", new String[]{primaryKey});
+		Cursor c = db.rawQuery("select name, money from c_payway_detail where settleUUID = ?", new String[]{primaryKey});
 		PayWay payway = null;
 		while(c.moveToNext()){
 			payway = new PayWay();
 			payway.setPayWay(c.getString(c.getColumnIndex("name")));
 			payway.setPayMoney(c.getString(c.getColumnIndex("money")));
-			payway.setSalesType(c.getInt(c.getColumnIndex("salesType")));
 			details.add(payway);
 		}
 		if(c != null && !c.isClosed())
@@ -256,6 +256,9 @@ import com.android.volley.Response;
 						JSONObject item = new JSONObject();
 						item.put("QTY", product.getCount());
 						item.put("TYPE", product.getSalesType());
+						if(product.getSalesType() == 2){
+							item.put("ORGDOCNO", order.getOrderNo());
+						}
 						item.put("M_PRODUCT_ID__NAME", product.getBarCode());
 						item.put("PRICEACTUAL", product.getMoney());
 						item.put("TOT_AMT_ACTUAL", String.format("%.2f", (Float.parseFloat(product.getMoney()) * Integer.parseInt(product.getCount()))));
@@ -274,12 +277,12 @@ import com.android.volley.Response;
 				List<PayWay> paydetailsItems = getPayWayDetailsData(order.getUuid());
 				if(detailsItems != null && detailsItems.size() > 0){
 					for(PayWay payway : paydetailsItems){
-						if(Float.parseFloat(payway.getPayMoney()) > 0){
+						//if(Float.parseFloat(payway.getPayMoney()) > 0){
 							JSONObject payitem = new JSONObject();
 							payitem.put("PAYAMOUNT", payway.getPayMoney());
 							payitem.put("C_PAYWAY_ID__NAME", payway.getPayWay());
 							addList2.put(payitem);
-						}
+						//}
 					}
 				}
 				refobj2.put("addList",addList2);

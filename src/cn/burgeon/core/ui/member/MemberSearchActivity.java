@@ -29,12 +29,10 @@ import android.widget.TextView.OnEditorActionListener;
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
 import cn.burgeon.core.adapter.MemberSearchAdapter;
-import cn.burgeon.core.bean.IntentData;
 import cn.burgeon.core.bean.Member;
 import cn.burgeon.core.bean.RequestResult;
 import cn.burgeon.core.ui.BaseActivity;
 import cn.burgeon.core.ui.sales.SalesNewOrderActivity;
-import cn.burgeon.core.ui.sales.SalesSettleActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
 import cn.burgeon.core.utils.ScreenUtils;
 import cn.burgeon.core.widget.UndoBarController;
@@ -183,8 +181,13 @@ public class MemberSearchActivity extends BaseActivity {
 	            paramsCombine.put("expr1", expr1JO);
 	            
 	            JSONObject expr2JO = new JSONObject();
-	            expr2JO.put("column", "C_CUSTOMER_ID:name");
-	            expr2JO.put("condition", "="+App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.agency_key));
+	            if(!"".equals(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.agency_key))){
+		            expr2JO.put("column", "C_CUSTOMER_ID:name");
+		            expr2JO.put("condition", "="+App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.agency_key));
+	            }else{
+	            	expr2JO.put("column", "C_STORE_ID");
+			        expr2JO.put("condition", "="+App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey));
+	            }
 	            paramsCombine.put("expr2", expr2JO);
             }
 
@@ -196,8 +199,13 @@ public class MemberSearchActivity extends BaseActivity {
 	            paramsCombine.put("expr1", expr1JO);
 	            
 	            JSONObject expr2JO = new JSONObject();
-	            expr2JO.put("column", "C_CUSTOMER_ID:name");
-	            expr2JO.put("condition", "="+App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.agency_key));
+	            if(!"".equals(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.agency_key))){
+		            expr2JO.put("column", "C_CUSTOMER_ID:name");
+		            expr2JO.put("condition", "="+App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.agency_key));
+	            }else{
+	            	expr2JO.put("column", "C_STORE_ID");
+			        expr2JO.put("condition", "="+App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey));
+	            }
 	            paramsCombine.put("expr2", expr2JO);
             }
             

@@ -148,25 +148,26 @@ public class MemberManagerActivity extends BaseActivity {
 			    Member vip = new Member();
 			    vip.setId(Integer.parseInt(currRows[0].substring(1)));
 			    vip.setCardNum(currRows[1].substring(1, currRows[1].length() - 1));
-			    vip.setType(currRows[2]);
+			    vip.setType(currRows[2].substring(1, currRows[2].length() - 1));
 			    vip.setCustomerID(Integer.parseInt(currRows[3]));
 			    vip.setStoreID(Integer.parseInt(currRows[4]));
-			    vip.setName(currRows[5].substring(1, currRows[5].length() - 1));
+			    vip.setName("null".equals(currRows[5])?"":currRows[5].substring(1, currRows[5].length() - 1));
 			    vip.setEmail("null".equals(currRows[6])?"":currRows[6].substring(1, currRows[6].length() - 1));
 			    vip.setPhoneNum("null".equals(currRows[7])?"":currRows[7].substring(1, currRows[7].length() - 1));
 			    vip.setSex(currRows[8].substring(1, currRows[8].length() - 1));
 			    vip.setiDentityCardNum("null".equals(currRows[9])?"":currRows[9].substring(1, currRows[9].length() - 1));
-			    String temp = "null".equals(currRows[10])?"":currRows[10].substring(0, currRows[10].length() - 1);
+			    String temp = "null".equals(currRows[10])?"":currRows[10];
 			    vip.setDiscount(temp.length() == 3?temp + "0":temp);
+			    vip.setBirthday("null".equals(currRows[11])?"":currRows[11].substring(0, currRows[11].length() - 1));
 			    //insert into c_vip('cardno','name','idno','mobile','sex',
 			    //'email','birthday','createTime','employee','type','status','discount
 			    if(!isExist(vip)){
-			    db.execSQL("insert into c_vip(cardno,type,customerID,storeID,name,mobile,email,sex,status,discount,createTime) "
-			    		+ "values(?,?,?,?,?,?,?,?,?,?,?)", 
+			    db.execSQL("insert into c_vip(cardno,type,customerID,storeID,name,mobile,email,sex,status,discount,createTime,birthday) "
+			    		+ "values(?,?,?,?,?,?,?,?,?,?,?,?)", 
 			    		new Object[]{vip.getCardNum(),vip.getType(),vip.getCustomerID(),
 			    				vip.getStoreID(),vip.getName(),vip.getPhoneNum(),vip.getEmail(),
 			    				vip.getSex(),getString(R.string.sales_settle_hasup),
-			    				vip.getDiscount(),createTime});
+			    				vip.getDiscount(),createTime,vip.getBirthday()});
 			    }
 			}
 			db.setTransactionSuccessful();
@@ -193,16 +194,29 @@ public class MemberManagerActivity extends BaseActivity {
 			JSONObject paramsInTransactions = new JSONObject();
 			paramsInTransactions.put("table", 12899);
 			paramsInTransactions.put("columns", new JSONArray().put("ID")
-					.put("CARDNO").put("C_VIPTYPE_ID").put("C_CUSTOMER_ID")
+					.put("CARDNO").put("C_VIPTYPE_ID:name").put("C_CUSTOMER_ID")
 					.put("C_STORE_ID").put("VIPNAME").put("EMAIL")
-					.put("MOBIL").put("SEX").put("IDNO").put("C_VIPTYPE_ID:DISCOUNT"));
+					.put("MOBIL").put("SEX").put("IDNO").put("C_VIPTYPE_ID:DISCOUNT").put("birthday"));
 			
 			//查询条件的params
-			JSONObject queryParams = new JSONObject();
-			queryParams.put("column", "C_STORE_ID");
-			queryParams.put("condition", "=" + storeNo);
+		/*	JSONObject queryParams = new JSONObject();
+			queryParams.put("column", "C_CUSTOMER_ID:name");
+			queryParams.put("condition", "=" + App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.agency_key));
 			paramsInTransactions.put("params", queryParams);
+			*/
+			JSONObject paramsCombine = new JSONObject();
+            paramsCombine.put("combine", "or");
+            JSONObject expr1JO = new JSONObject();
+            expr1JO.put("column", "C_STORE_ID");
+            expr1JO.put("condition", "=" + storeNo);
+            paramsCombine.put("expr1", expr1JO);
+            
+            JSONObject expr2JO = new JSONObject();
+            expr2JO.put("column", "C_CUSTOMER_ID:name");
+            expr2JO.put("condition", "="+App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.agency_key));
+            paramsCombine.put("expr2", expr2JO);
 			
+            paramsInTransactions.put("params", paramsCombine);
 			transactions.put("params", paramsInTransactions);
 			array.put(transactions);
 			Log.d(TAG, array.toString());
