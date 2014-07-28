@@ -51,7 +51,6 @@ public class CheckScanActivity extends BaseActivity {
     private HashMap<String, ArrayList<Product>> productMap = new HashMap<String, ArrayList<Product>>();
     private String no;
     private boolean hasDataNotSave = false;
-    private boolean isXuPan = false;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +61,6 @@ public class CheckScanActivity extends BaseActivity {
 		if (intent != null) {
 			no = intent.getStringExtra("checkNo");
 			if (no != null && no.length() > 0) {
-				isXuPan = true;
-				
 				// 查数据(续盘过来的)
 				ArrayList<Product> products = new ArrayList<Product>();
 				String sql = "select shelf, count, stylename, barcode, color, size from c_check_detail where checkno = ? group by shelf, barcode";
@@ -143,10 +140,9 @@ public class CheckScanActivity extends BaseActivity {
 					String currShelfET = shelfET.getText().toString();
 					// 有值但值变了
 					if (currShelfET.length() > 0 && !shelfNo.equals(currShelfET)) {
-						if (isXuPan) {
-							shelfNo = currShelfET;
-						}
+						shelfNo = currShelfET;
 						mAdapter.setList(productMap.get(currShelfET));
+						upateBottomBarInfo();
 					}
 				}
 			}
@@ -171,6 +167,9 @@ public class CheckScanActivity extends BaseActivity {
         reviewBtn = (Button) findViewById(R.id.reviewBtn);
         gatherBtn.setOnClickListener(clickListener);
         reviewBtn.setOnClickListener(clickListener);
+        
+        // 续盘会有值
+        upateBottomBarInfo();
     }
 
     private void verifyBarCode(String barcodeText) {
@@ -226,34 +225,15 @@ public class CheckScanActivity extends BaseActivity {
 
 	private void generateProductList(Product currProduct) {
 		hasDataNotSave = true;
+		shelfNo = currProduct.getShelf();
 		
 		if (productMap.size() > 0) {
-			// 货架改变
-			if (!currProduct.getShelf().equals(shelfNo)) {
-				shelfNo = currProduct.getShelf();
-
-				ArrayList<Product> products = productMap.get(shelfNo);
-				if (products == null) {
-					ArrayList<Product> list = new ArrayList<Product>();
-					list.add(currProduct);
-					productMap.put(shelfNo, list);
-				} else {
-					for (Product product : products) {
-						// 同一个条码
-						if (product.getBarCode().equals(currProduct.getBarCode())) {
-							product.setCount(String.valueOf(Integer.valueOf(product.getCount()) + 1));
-						} else {
-							// 该条码已存在
-							if (!isExsitBarCode(currProduct.getBarCode())) {
-								products.add(currProduct);
-							}
-						}
-					}
-				}
-			}
-			// 货架未改变
-			else {
-				ArrayList<Product> products = productMap.get(shelfNo);
+			ArrayList<Product> products = productMap.get(shelfNo);
+			if (products == null) {
+				ArrayList<Product> list = new ArrayList<Product>();
+				list.add(currProduct);
+				productMap.put(shelfNo, list);
+			} else {
 				for (Product product : products) {
 					// 同一个条码
 					if (product.getBarCode().equals(currProduct.getBarCode())) {
@@ -267,8 +247,6 @@ public class CheckScanActivity extends BaseActivity {
 				}
 			}
 		} else {
-			shelfNo = currProduct.getShelf();
-
 			ArrayList<Product> list = new ArrayList<Product>();
 			list.add(currProduct);
 			productMap.put(shelfNo, list);
@@ -286,14 +264,19 @@ public class CheckScanActivity extends BaseActivity {
 		return isFlag;
 	}
 	
-    private void upateBottomBarInfo() {
-        int count = 0;
-        for (Product pro : productMap.get(shelfNo)) {
-            count += Integer.parseInt(pro.getCount());
-        }
-        totalCountTV.setText("总数量：" + count + "件");
-        recodeNumTV.setText("当前货架：" + productMap.get(shelfNo).size() + "件");
-    }
+	private void upateBottomBarInfo() {
+		if (productMap.get(shelfNo) != null) {
+			int count = 0;
+			for (Product pro : productMap.get(shelfNo)) {
+				count += Integer.parseInt(pro.getCount());
+			}
+			totalCountTV.setText("总数量：" + count + "件");
+			recodeNumTV.setText("当前货架：" + productMap.get(shelfNo).size() + "件");
+		} else {
+			totalCountTV.setText("总数量：0件");
+			recodeNumTV.setText("当前货架：0件");
+		}
+	}
 
     OnEditorActionListener editorActionListener = new OnEditorActionListener() {
 
