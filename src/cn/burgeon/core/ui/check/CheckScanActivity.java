@@ -88,6 +88,16 @@ public class CheckScanActivity extends BaseActivity {
 						productMap.put(product.getShelf(), list);
 					}
 				}
+				
+				// 显示最后一个货架
+				String sql2 = "select shelf, max(_id) from c_check_detail where checkno = ?";
+				Cursor c2 = db.rawQuery(sql2, new String[] { no });
+				if (c2.moveToFirst()) {
+					String shelfStr = c2.getString(c.getColumnIndex("shelf"));
+					shelfNo = shelfStr;
+				}
+				if (c != null && !c.isClosed())
+					c.close();
 			} else {
 				no = getNo();
 			}
@@ -121,6 +131,7 @@ public class CheckScanActivity extends BaseActivity {
         TextView currTimeTV = (TextView) findViewById(R.id.currTimeTV);
         currTimeTV.setText(getCurrDate());
         shelfET = (EditText) findViewById(R.id.shelfET);
+        shelfET.setText(shelfNo);
         shelfET.setOnFocusChangeListener(new OnFocusChangeListener() {
         	@Override
 			public void onFocusChange(View v, boolean hasFocus) {
@@ -130,7 +141,8 @@ public class CheckScanActivity extends BaseActivity {
 					// 有值但值变了
 					if (currShelfET.length() > 0 && !shelfNo.equals(currShelfET)) {
 						// 清空列表，productMap值不变
-						mAdapter.setList(null);
+						shelfNo = currShelfET;
+						mAdapter.setList(productMap.get(currShelfET));
 					}
 				}
 			}
