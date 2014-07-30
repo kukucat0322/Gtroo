@@ -35,6 +35,7 @@ import android.widget.Spinner;
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
 import cn.burgeon.core.bean.Member;
+import cn.burgeon.core.bean.Order;
 import cn.burgeon.core.bean.RequestResult;
 import cn.burgeon.core.ui.BaseActivity;
 import cn.burgeon.core.ui.sales.SalesNewOrderActivity;
@@ -211,7 +212,7 @@ public class MemberRegistActivity extends BaseActivity {
 		return src.length() > 0;
 	}
 	
-	private boolean validate(){
+	private boolean validate(){//31011519850322
 		if(!isRequired(cardNOET.getText())){   
 			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
         	UndoBarController.show(MemberRegistActivity.this, "卡号不能为空", null, MESSAGESTYLE);
@@ -228,12 +229,24 @@ public class MemberRegistActivity extends BaseActivity {
 			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
         	UndoBarController.show(MemberRegistActivity.this, "身份证号码不正确", null, MESSAGESTYLE);
         	return false;
+		}else if(!birthday()){
+			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+        	UndoBarController.show(MemberRegistActivity.this, "出生日期不正确", null, MESSAGESTYLE);
+        	return false;
 		}else if(!isVerifyed){
 			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
         	UndoBarController.show(MemberRegistActivity.this, "卡号尚未验证通过", null, MESSAGESTYLE);
         	return false;
 		}
 		return true;
+	}
+	
+	private boolean birthday(){
+		if(birthdayET.getText().length() == 0) return true;
+		String birthday = birthdayET.getText().length() > 0?birthdayET.getText().toString():"";
+		String identity = identityET.getText().toString();
+		String idno = identity.substring(0,8);
+		return idno.equals(birthday);
 	}
 	
 	Member vip = null;
@@ -250,22 +263,35 @@ public class MemberRegistActivity extends BaseActivity {
 	        vip.setBirthday(birthdayET.getText().toString().trim());
 	        vip.setType(((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("key"));
 	        vip.setDiscount(((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("value"));
-			if("search".equals(from)){
+			/*if("search".equals(from)){
 				vip.setStatus(getString(R.string.sales_settle_hasup));
 		        startProgressDialog();
 	        	uploadV1ip(vip);
 			}else{
 				vip.setStatus(getString(R.string.sales_settle_noup));
 				insert(vip);
-		        UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
-	    		UndoBarController.show(MemberRegistActivity.this, "注册会员成功", new UndoListener() {
-											@Override
-											public void onUndo(Parcelable token) {
-									        		forwardActivity(MemberListActivity.class);
-											}
-										}, MESSAGESTYLE);
+		        popToast();
+			}*/
+			vip.setStatus(getString(R.string.sales_settle_noup));
+			insert(vip);
+			if(!networkReachable()){
+				popToast();
+			}else{
+				startProgressDialog();
+				uploadV1ip(vip);
 			}
+			
 		}
+	}
+
+	private void popToast() {
+		UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+		UndoBarController.show(MemberRegistActivity.this, "注册会员成功", new UndoListener() {
+									@Override
+									public void onUndo(Parcelable token) {
+							        		forwardActivity(MemberListActivity.class);
+									}
+								}, MESSAGESTYLE);
 	}
 	
 	private void insert(Member vip){
@@ -328,10 +354,6 @@ public class MemberRegistActivity extends BaseActivity {
 						msg.obj = result;
 						msg.what = 2;
 						handler.dispatchMessage(msg);
-					}else{
-						stopProgressDialog();
-						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
-			        	UndoBarController.show(MemberRegistActivity.this, result.getMessage(), null, MESSAGESTYLE);
 					}
 				}
 			});
@@ -473,7 +495,7 @@ public class MemberRegistActivity extends BaseActivity {
 				}
 				break;
 			case 2:
-				insert(vip);
+				updateStatus();
                 stopProgressDialog();
 				RequestResult result =  (RequestResult) msg.obj;
 				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
@@ -498,7 +520,20 @@ public class MemberRegistActivity extends BaseActivity {
 			}
 			
 		}
-		
 	};
+	
+	private void updateStatus() {
+		db.beginTransaction();
+        try {
+        	db.execSQL("update c_vip set status = ? where cardno = ?",
+					new Object[]{
+								getResources().getString(R.string.sales_settle_hasup),
+								vip.getCardNum()});
+            db.setTransactionSuccessful();
+        } catch(Exception e){}
+        finally {  
+            db.endTransaction();
+        } 
+	}
 	
 }

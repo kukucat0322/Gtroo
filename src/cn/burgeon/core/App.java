@@ -80,6 +80,8 @@ public class App extends Application {
         helper = new DbHelper(this);
         db = helper.getWritableDatabase();
         App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.config_pswd, "87654321");
+        App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.interactiveURLAddressKeySuffix, "/servlets/binserv/Rest");
+        App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.downloadURLAddressKeySuffix, "/DownloadFiles");
     }
 
     public String MD5(String s) {
@@ -113,7 +115,7 @@ public class App extends Application {
     }
    
     public static String getHosturl() {
-    	return App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.interactiveURLAddressKey);
+    	return App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.interactiveURLAddressKey) + App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.interactiveURLAddressKeySuffix);
     }
 
     public static String getSipkey() {

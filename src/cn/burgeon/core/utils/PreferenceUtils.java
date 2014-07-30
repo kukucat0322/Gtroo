@@ -16,8 +16,10 @@ public class PreferenceUtils {
     //系统配置：网络配置 关键字
     	//交互服务器
     public static final String interactiveURLAddressKey = "interactiveURLAddressKey";
+    public static final String interactiveURLAddressKeySuffix = "interactiveURLAddressKeySuffix";
     	//下载服务器
     public static final String downloadURLAddressKey = "downloadURLAddressKey";
+    public static final String downloadURLAddressKeySuffix = "downloadURLAddressKeySuffix";
     //系统配置：门店信息  关键字
     	//门店编号
     public static final String storeNumberKey = "storeNumberKey";
