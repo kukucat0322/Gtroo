@@ -352,12 +352,14 @@ public class SalesNewOrderActivity extends BaseActivity {
 		pro.setPrice(c.getString(c.getColumnIndex("fprice")));
 		pro.setColor(c.getString(c.getColumnIndex("clrname")));
 		pro.setSize(c.getString(c.getColumnIndex("sizename")));
-		pro.setDiscount("100");//
-		pro.setCount("1");//
-		int count = Integer.parseInt(pro.getCount());
+		if(cardNoET.getText().length() > 0)
+			pro.setDiscount(searchedMember.getDiscount());
+		else
+			pro.setDiscount("1.0");
+		pro.setCount("1");
 		float price = Float.parseFloat(pro.getPrice());
 		//商品折扣
-		float proDiscount = Float.parseFloat(pro.getDiscount()) / 100;
+		//float proDiscount = Float.parseFloat(pro.getDiscount()) / 100;
 		//会员折扣
 		float vipDiscount = 0.0f;
 		if(cardNoET.getText().length() > 0)
@@ -370,19 +372,19 @@ public class SalesNewOrderActivity extends BaseActivity {
 		switch (salesTypeSP.getSelectedItemPosition()) {
 			case 0://正常
 				if(cardNoET.getText().length() > 0){
-					pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
+					pro.setMoney(String.format("%.2f",price * vipDiscount));
 				}else{
 					//策略
 					if(!isFitPolicy(pro))
-					pro.setMoney(String.format("%.2f",price * proDiscount));
+					pro.setMoney(String.format("%.2f",price));
 				}
 				pro.setSalesType(1);
 				break;
 			case 1://全额 
 				if(cardNoET.getText().length() > 0)
-					pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
+					pro.setMoney(String.format("%.2f",price * vipDiscount));
 				else
-					pro.setMoney(String.format("%.2f",price * proDiscount));
+					pro.setMoney(String.format("%.2f",price));
 				pro.setSalesType(4);
 				break;
 			case 2://赠送
@@ -393,11 +395,11 @@ public class SalesNewOrderActivity extends BaseActivity {
 				pro.setCount("-1");
 				pro.setSalesType(2);
 				if(cardNoET.getText().length() > 0){
-					pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
+					pro.setMoney(String.format("%.2f",price * vipDiscount));
 				}else{
 					//策略
 					if(!isFitPolicy(pro))
-					pro.setMoney(String.format("%.2f",price * proDiscount));
+					pro.setMoney(String.format("%.2f",price));
 				}
 				break;
 			default:

@@ -175,12 +175,14 @@ public class MemberListActivity extends BaseActivity {
 				forwardActivity(MemberRegistActivity.class);
 				break;
 			case R.id.memberListUpdate:
-				if(getString(R.string.sales_settle_hasup).equals(selectedMember.getStatus())){
-					showTips();
-				}else{
-					Intent intent = new Intent(MemberListActivity.this,MemberRegistActivity.class);
-					intent.putExtra("_id", _id);
-					startActivity(intent);
+				if(selectedMember != null){
+					if(getString(R.string.sales_settle_hasup).equals(selectedMember.getStatus())){
+						showTips();
+					}else{
+						Intent intent = new Intent(MemberListActivity.this,MemberRegistActivity.class);
+						intent.putExtra("_id", _id);
+						startActivity(intent);
+					}
 				}
 				break;
 			case R.id.memberListQuery:

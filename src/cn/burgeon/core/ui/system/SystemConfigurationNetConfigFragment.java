@@ -147,10 +147,10 @@ public class SystemConfigurationNetConfigFragment extends Fragment {
     //http://g.burgeon.cn:290/servlets/binserv/Rest
     private void saveToMemory(){
     	if( !TextUtils.isEmpty(interactiveURLAddress)){
-    		App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.interactiveURLAddressKey, interactiveURLAddress + "/servlets/binserv/Rest");
+    		App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.interactiveURLAddressKey, interactiveURLAddress);
     	}
     	if( !TextUtils.isEmpty(downloadURLAddress)){
-    		App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.downloadURLAddressKey, downloadURLAddress + "/DownloadFiles");
+    		App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.downloadURLAddressKey, downloadURLAddress);
     	}
     	showTips(R.string.tipsSaveSucess);
     }

@@ -103,8 +103,8 @@ import cn.burgeon.core.utils.PreferenceUtils;
 	
 	//取得已经设置好的URLAddress
 	private void getSettedURLAddress(){
-		downloadURLAddress = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.downloadURLAddressKey);
-		interactiveURLAddress = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.interactiveURLAddressKey);
+		downloadURLAddress = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.downloadURLAddressKey) + App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.downloadURLAddressKeySuffix);
+		interactiveURLAddress = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.interactiveURLAddressKey) + App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.interactiveURLAddressKeySuffix);
 	}
 		
 	private String getDownloadURLAddress(){

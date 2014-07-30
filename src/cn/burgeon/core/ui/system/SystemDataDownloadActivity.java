@@ -49,7 +49,7 @@ public class SystemDataDownloadActivity extends BaseActivity{
 	private String downloadPath;
 	
 	//用户资料下载地址
-	private final String baseUrl = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.downloadURLAddressKey);
+	private final String baseUrl = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.downloadURLAddressKey) + App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.downloadURLAddressKeySuffix);
 	private final String userDataURL     =    baseUrl + "/sys_user.zip";
 	private final String storeDataURL    =    baseUrl + "/tc_store.zip";
 	private final String[]userDataURLs   =    {storeDataURL};
@@ -458,7 +458,7 @@ public class SystemDataDownloadActivity extends BaseActivity{
 	}
     
 	//用户所有选择同时下载
-	private void startDownload(){	
+	private void startDownload(){
 		delExistFiles();
 		delExistDatabase();
 		//开始下载系统参数
