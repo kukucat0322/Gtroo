@@ -202,6 +202,9 @@ import com.android.volley.Response;
 						}else{
 							failures.add(order.getOrderNo()+":"+result.getMessage());
 					}}
+		          }else{
+		        	  UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+					  UndoBarController.show(SalesManagerActivity.this, "网络异常，上传失败", null, MESSAGESTYLE);
 		          }
 	            } catch(Exception e) {
 	               e.printStackTrace();

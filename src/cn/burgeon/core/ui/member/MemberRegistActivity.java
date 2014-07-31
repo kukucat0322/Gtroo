@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -38,13 +39,16 @@ import cn.burgeon.core.bean.Member;
 import cn.burgeon.core.bean.Order;
 import cn.burgeon.core.bean.RequestResult;
 import cn.burgeon.core.ui.BaseActivity;
+import cn.burgeon.core.ui.LoginActivity;
 import cn.burgeon.core.ui.sales.SalesNewOrderActivity;
+import cn.burgeon.core.ui.sales.SalesSettleActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
 import cn.burgeon.core.widget.UndoBarController;
 import cn.burgeon.core.widget.UndoBarController.UndoListener;
 import cn.burgeon.core.widget.UndoBarStyle;
 
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 
 public class MemberRegistActivity extends BaseActivity {
 	
@@ -355,6 +359,12 @@ public class MemberRegistActivity extends BaseActivity {
 						msg.what = 2;
 						handler.dispatchMessage(msg);
 					}
+				}
+			},new Response.ErrorListener() {
+				@Override
+				public void onErrorResponse(VolleyError error) {
+					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+					  UndoBarController.show(MemberRegistActivity.this, "网络异常，上传失败", null, MESSAGESTYLE);
 				}
 			});
 		} catch (JSONException e) {}

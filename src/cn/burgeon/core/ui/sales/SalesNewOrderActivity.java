@@ -1,5 +1,6 @@
 package cn.burgeon.core.ui.sales;
 
+import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,10 +22,12 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -48,6 +51,7 @@ import cn.burgeon.core.bean.Product;
 import cn.burgeon.core.ui.BaseActivity;
 import cn.burgeon.core.ui.LoginActivity;
 import cn.burgeon.core.ui.member.MemberSearchActivity;
+import cn.burgeon.core.ui.system.SystemConfigurationActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
 import cn.burgeon.core.utils.ScreenUtils;
 
@@ -315,7 +319,15 @@ public class SalesNewOrderActivity extends BaseActivity {
 
 	private void varLocal(String barcode) {
 		Log.d(TAG, "barcode2======" + barcode);
-		String sql = "select a.style,b.style_name,c.clrname,d.sizename,e.fprice"
+		if(salesTypeSP.getSelectedItemPosition() == 3){
+			showOrginOrdernoTips(barcode);
+		}else{
+			normalSales(barcode);
+		}
+	}
+	
+	private void normalSales(String barcode){
+			String sql = "select a.style,b.style_name,c.clrname,d.sizename,e.fprice"
 					+" from tc_sku as a"
 					+" left join tc_style as b"
 					+" on a.style = b.style"
@@ -328,11 +340,11 @@ public class SalesNewOrderActivity extends BaseActivity {
 					+" where a.sku = ?";
 		Cursor c = db.rawQuery(sql, new String[]{barcode});
 		Log.d(TAG, "result size = " + c.getCount());
-        if(c.getCount() == 0){
-        	styleBarcodeET.setText(barcode);
-        	showAlertMsg(R.string.nothatbarcode);
-        	return;
-        }
+	    if(c.getCount() == 0){
+	    	styleBarcodeET.setText(barcode);
+	    	showAlertMsg(R.string.nothatbarcode);
+	    	return;
+	    }
 		if(c.moveToFirst()){
 			List<Product> list = parseSQLResult(c,barcode);
 			data.addAll(list);
@@ -597,5 +609,57 @@ public class SalesNewOrderActivity extends BaseActivity {
 		}
 		return new String[]{};
 	}
+    
+    private void showOrginOrdernoTips(final String barcode){
+    	Log.d(TAG, "=====showOrginOrdernoTips======");
+    	LayoutInflater inflater = getLayoutInflater();
+    	View tipsLayout = inflater.inflate(R.layout.orgin_orderno_tips, 
+    			(ViewGroup)findViewById(R.id.orginOrdernoTipsLayout));
+    	final EditText tipsText = (EditText) tipsLayout.findViewById(R.id.orginOrdernoTipsText);
+    	AlertDialog dialog = null;
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this)
+    	.setTitle("请输入原单号")
+    		.setView(tipsLayout)
+    		.setPositiveButton(getString(R.string.confirm),new OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int arg1) {
+					if(tipsText.getText().length() > 0){
+						String orginOrderno = tipsText.getText().toString();
+						String sql = "select b.* from c_settle as a, c_settle_detail as b"
+									+" where a.settleUUID = b.settleUUID"
+									+" and b.barcode = '"+barcode+"' and a.orderno = '"+orginOrderno+"' limit 1";
+						Log.d(TAG, "sql====" + sql);
+						Cursor c = db.rawQuery(sql, null);
+						Log.d(TAG, "size==" + c.getCount());
+						if(c.moveToNext()){
+							Product pro = new Product();
+							pro.setCount("-1");
+							pro.setBarCode(barcode);
+							pro.setDiscount(c.getString(c.getColumnIndex("discount")));
+							pro.setStyle(c.getString(c.getColumnIndex("style")));
+							pro.setName(c.getString(c.getColumnIndex("pdtname")));
+							pro.setPrice(c.getString(c.getColumnIndex("price")));
+							pro.setColor(c.getString(c.getColumnIndex("color")));
+							pro.setSize(c.getString(c.getColumnIndex("size")));
+							pro.setMoney(c.getString(c.getColumnIndex("money")));
+							data.add(pro);//SA30515214073000001
+							mAdapter.notifyDataSetChanged();
+							upateBottomBarInfo();
+						}
+						if(c !=null && !c.isClosed()) c.close();
+					}
+				}
+			}).setNegativeButton(getString(R.string.cancel), new OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int arg1) {
+					normalSales(barcode);
+			    	dialog.dismiss();
+				}
+			});
+    	dialog = builder.create();
+    	dialog.show();
+    }
 
 }

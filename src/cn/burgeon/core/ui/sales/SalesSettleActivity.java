@@ -232,7 +232,6 @@ public class SalesSettleActivity extends BaseActivity {
 		orginET = (EditText) findViewById(R.id.salesSettleOrginET);
 		disCounET = (EditText) findViewById(R.id.salesSettleDiscountET);
 		realityET = (EditText) findViewById(R.id.salesSettleRealityET);
-		//mListView = (ListView) findViewById(R.id.settleLV);
 	}
 	
 	View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -529,6 +528,9 @@ public class SalesSettleActivity extends BaseActivity {
 					}else{
 						//delete(order.getUuid());
 				}}
+	          }else{
+	        	  UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+				  UndoBarController.show(SalesSettleActivity.this, "网络异常，上传失败", null, MESSAGESTYLE);
 	          }
             } catch(Exception e) {
                e.printStackTrace();

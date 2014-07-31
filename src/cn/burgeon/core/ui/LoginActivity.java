@@ -122,7 +122,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 				},new Response.ErrorListener() {
 					@Override
 					public void onErrorResponse(VolleyError error) {
-						Log.d(TAG, "error response======="+error.networkResponse.statusCode+"");
+						ArrayAdapter<String> adapter = new ArrayAdapter<String>(LoginActivity.this, android.R.layout.simple_spinner_item, getEmployees());
+				        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				        userSpinner.setAdapter(adapter);
+				        stopProgressDialog();
 					}
 				});
     		}

@@ -145,7 +145,7 @@ public class BaseActivity extends Activity {
             }
         });
 
-        StringRequest request = new StringRequest(Request.Method.POST, App.getHosturl(), successListener, createMyReqErrorListener()) {
+        StringRequest request = new StringRequest(Request.Method.POST, App.getHosturl(), successListener, errorListener) {
             protected Map<String, String> getParams() throws AuthFailureError {
                 String tt = mApp.getSDF().format(new Date());
 
