@@ -72,19 +72,24 @@ public class CheckManagerActivity extends BaseActivity {
                     forwardActivity(CheckDocManagerActivity.class);
                 } else if (itemValue != null && Constant.checkManagerTextValues[2].equals(itemValue)) {
                     forwardActivity(CheckQueryActivity.class);
-                } else if (itemValue != null && Constant.checkManagerTextValues[3].equals(itemValue)) {
-                	ArrayList<Order> orders = fetchData();
-                	int orderSize = orders.size();
-					if (orders != null && orderSize > 0) {
-						lastOrderNo = orders.get(orderSize - 1).getOrderNo();
-						for (Order order : orders) {
-							uploadSalesOrder(order);
+				} else if (itemValue != null && Constant.checkManagerTextValues[3].equals(itemValue)) {
+					if (App.getNetUtils().isNetworkAvailable()) {
+						ArrayList<Order> orders = fetchData();
+						int orderSize = orders.size();
+						if (orders != null && orderSize > 0) {
+							lastOrderNo = orders.get(orderSize - 1).getOrderNo();
+							for (Order order : orders) {
+								uploadSalesOrder(order);
+							}
+						} else {
+							UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+							UndoBarController.show(CheckManagerActivity.this, "没有数据可以上传", null, MESSAGESTYLE);
 						}
 					} else {
 						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
-						UndoBarController.show(CheckManagerActivity.this, "没有数据可以上传", null, MESSAGESTYLE);
+						UndoBarController.show(CheckManagerActivity.this, "网络不可用", null, MESSAGESTYLE);
 					}
-                }
+				}
             }
         });
     }

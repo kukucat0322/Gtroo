@@ -14,6 +14,7 @@ import cn.burgeon.core.ic.ImageCacheManager;
 import cn.burgeon.core.ic.ImageCacheManager.CacheType;
 import cn.burgeon.core.net.RequestManager;
 import cn.burgeon.core.net.SimonHttpStack;
+import cn.burgeon.core.utils.NetUtils;
 import cn.burgeon.core.utils.PreferenceUtils;
 
 public class App extends Application {
@@ -35,6 +36,12 @@ public class App extends Application {
         return singleton;
     }
 
+    private static NetUtils netUtils;
+
+    public static NetUtils getNetUtils() {
+        return netUtils;
+    }
+    
     private static SimonHttpStack simonHttpStack;
 
     public static SimonHttpStack getHttpStack() {
@@ -65,6 +72,8 @@ public class App extends Application {
      */
     private void init() {
     	singleton = this;
+    	
+    	netUtils = new NetUtils(getApplicationContext());
     	
         simonHttpStack = new SimonHttpStack();
         RequestManager.init(this, simonHttpStack);
