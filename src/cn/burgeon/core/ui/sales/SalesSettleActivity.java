@@ -107,6 +107,7 @@ public class SalesSettleActivity extends BaseActivity {
 	int count = 0;
 	float discount = 0;
 	String regex = "^[\\d]\\.[\\d]{1,2}$";
+	boolean hasBack;
 
 	private void settle() {
 		IntentData iData = (IntentData) getIntent().getParcelableExtra(PAR_KEY);
@@ -118,6 +119,7 @@ public class SalesSettleActivity extends BaseActivity {
 		for(Product pro : products){
 			pay += Float.parseFloat(pro.getMoney()) * Integer.parseInt(pro.getCount());
 			count += Integer.parseInt(pro.getCount());
+			if(pro.getSalesType() == 2)hasBack = true;
 		}
 		payTV.setText(String.format(getResources().getString(R.string.sales_settle_pay),String.format("%.2f",pay)));
 		counTV.setText(String.format(getResources().getString(R.string.sales_settle_count),count));
@@ -204,13 +206,8 @@ public class SalesSettleActivity extends BaseActivity {
 				}
 				if(realityET.getText().length() > 0)
 					total = Float.parseFloat(realityET.getText().toString());
-				
 				String currPayStr = "0.00".equals(String.format("%.2f", total - other))?"":String.format("%.2f", total - other);
-				float currPayFlt = Float.parseFloat(currPayStr);
-				if((other+currPayFlt) > total)
-					((EditText)view).setError("金额错误");
-				else
-					((EditText)view).setText(currPayStr);
+				((EditText)view).setText(currPayStr);
 				
 			}
 		}
@@ -240,7 +237,7 @@ public class SalesSettleActivity extends BaseActivity {
 		public void onClick(View v) {
 			if(!validate()){
 				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
-		        UndoBarController.show(SalesSettleActivity.this, "金额不正确", null, MESSAGESTYLE);
+		        UndoBarController.show(SalesSettleActivity.this, "付款金额不正确", null, MESSAGESTYLE);
 		        return;
 			}
 			if("unknow".equals(command) || null == command){
@@ -278,21 +275,38 @@ public class SalesSettleActivity extends BaseActivity {
     	dialog.show();
     }
     
+    
+    //整单折扣更新明细价格
     private void discoutDetail(){
     	if(Pattern.compile(regex).matcher(disCounET.getText().toString()).find()){
     		for(Product pro : products){
-    			pro.setMoney(String.format("%.2f", Float.parseFloat(pro.getMoney()) * Float.parseFloat(disCounET.getText().toString())));
+    			//退货和赠送不打折
+    			if(pro.getSalesType() == 1 || pro.getSalesType() == 4){
+    				pro.setMoney(String.format("%.2f", Float.parseFloat(pro.getMoney()) * Float.parseFloat(disCounET.getText().toString())));
+    				pro.setDiscount(String.format("%.2f", Float.parseFloat(pro.getDiscount()) * Float.parseFloat(disCounET.getText().toString())));
+    			}
     		}
     	}
     }
     
     private boolean validate(){
     	float money = 0.0f;
+    	float temp = 0.0f;
     	for(int i = 0; i < mPaywayLayout.getChildCount(); i++){
     		LinearLayout item = (LinearLayout) mPaywayLayout.getChildAt(i);
     		EditText editText = (EditText) item.getChildAt(2);
     		if(editText.getText().length() > 0){
-    			money += Float.parseFloat(editText.getText().toString());
+    			temp = Float.parseFloat(editText.getText().toString());
+    			if(!hasBack){//无退货不能有负数
+	    			if(temp < 0){
+	    				editText.setError("不正确");
+	    				return false;
+	    			}else{
+	    				money += temp;
+	    			}
+    			}else{
+    				money += temp;
+    			}
     		}
     	}
     	Log.d(TAG, "====validate money" + money);
@@ -325,7 +339,7 @@ public class SalesSettleActivity extends BaseActivity {
         		db.execSQL("insert into c_settle_detail('style','barcode','price','discount','orgdocno',"
         				+ "'count','money','settleUUID','pdtname','color','size','settleDate','salesType')"
         				+ " values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
-    					new Object[]{pro.getStyle(),pro.getBarCode(),pro.getPrice(), pro.getDiscount(),orginET.getText().length()==0?"":orginET.getText().toString(),
+    					new Object[]{pro.getStyle(),pro.getBarCode(),pro.getPrice(), pro.getDiscount(),pro.getOrgorderNO(),
         						pro.getCount(), pro.getMoney(), uuid, pro.getName(),
         						pro.getColor(),pro.getSize(),
         						new SimpleDateFormat("yyyy-MM-dd").format(currentTime),pro.getSalesType()});
@@ -558,7 +572,7 @@ public class SalesSettleActivity extends BaseActivity {
 				//masterobj
 				JSONObject masterObj = new JSONObject();
 				masterObj.put("id", -1);
-				masterObj.put("REFNO", order.getOrderNo());
+				//masterObj.put("REFNO", order.getOrderNo());
 				masterObj.put("SALESREP_ID__NAME", order.getSaleAsistant());
 				masterObj.put("DOCTYPE", order.getOrderType());
 				masterObj.put("C_STORE_ID__NAME", App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
@@ -583,11 +597,11 @@ public class SalesSettleActivity extends BaseActivity {
 						JSONObject item = new JSONObject();
 						item.put("QTY", product.getCount());
 						item.put("TYPE", product.getSalesType());
-//						if(product.getSalesType() == 2){
-//							item.put("ORGDOCNO", order.getOrderNo());
-//						}
+						if(product.getSalesType() == 2)
+							item.put("ORGDOCNO", product.getOrgorderNO());
 						item.put("M_PRODUCT_ID__NAME", product.getBarCode());
-						item.put("PRICEACTUAL", product.getMoney());
+						if(product.getSalesType() == 2)
+							item.put("PRICEACTUAL", "-"+product.getMoney());
 						item.put("TOT_AMT_ACTUAL", String.format("%.2f", (Float.parseFloat(product.getMoney()) * Integer.parseInt(product.getCount()))));
 						addList.put(item);
 					}
@@ -660,7 +674,7 @@ public class SalesSettleActivity extends BaseActivity {
 		
 		private List<Product> getDetailsData(String primaryKey) {
 			List<Product> details = new ArrayList<Product>();
-			Cursor c = db.rawQuery("select money,barcode, count,salesType from c_settle_detail where settleUUID = ?", new String[]{primaryKey});
+			Cursor c = db.rawQuery("select money,barcode, count,salesType,orgdocno from c_settle_detail where settleUUID = ?", new String[]{primaryKey});
 			Product product = null;
 			while(c.moveToNext()){
 				product = new Product();
@@ -668,6 +682,7 @@ public class SalesSettleActivity extends BaseActivity {
 				product.setCount(c.getString(c.getColumnIndex("count")));
 				product.setMoney(c.getString(c.getColumnIndex("money")));
 				product.setSalesType(c.getInt(c.getColumnIndex("salesType")));
+				product.setOrgorderNO(c.getString(c.getColumnIndex("orgdocno")));
 				details.add(product);
 			}
 			if(c != null && !c.isClosed())

@@ -635,7 +635,9 @@ public class SalesNewOrderActivity extends BaseActivity {
 						if(c.moveToNext()){
 							Product pro = new Product();
 							pro.setCount("-1");
+							pro.setSalesType(2);
 							pro.setBarCode(barcode);
+							pro.setOrgorderNO(orginOrderno);
 							pro.setDiscount(c.getString(c.getColumnIndex("discount")));
 							pro.setStyle(c.getString(c.getColumnIndex("style")));
 							pro.setName(c.getString(c.getColumnIndex("pdtname")));
