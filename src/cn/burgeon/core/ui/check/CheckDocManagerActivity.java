@@ -134,7 +134,7 @@ public class CheckDocManagerActivity extends BaseActivity {
         String sql = "select * from c_check where checkTime between " + "'" + finalStartTime + "'" + " and " + "'" + finalEndTime + "'";
         String checkno = customDialogForCheckQuery.getCheckNo();
         if(checkno != null && checkno.length() > 0) {
-        	sql += " and checkno = '" + checkno + "'";
+        	sql += " and checkno like '" + checkno + "%'";
         }
         if (!"所有".equals(customDialogForCheckQuery.getCheckType())) {
             sql += " and type = " + "'" + customDialogForCheckQuery.getCheckType() + "'";
