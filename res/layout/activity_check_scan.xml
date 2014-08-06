@@ -52,23 +52,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:paddingRight="5dp"
                 android:text="@string/shelf"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:paddingRight="5dp"/>
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <EditText
                 android:id="@+id/shelfET"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.90" 
-                android:text="01"/>
+                android:layout_weight="0.90"
+                android:text="01" />
             <!--
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:text="@string/delshelf" />
-            -->
+                android:text="@string/delshelf" />            -->
         </LinearLayout>
 
         <LinearLayout
@@ -83,11 +82,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:paddingRight="5dp"
                 android:text="@string/barcode"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:paddingRight="5dp"/>
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <!-- ZHJ01YL -->
+            <!--
             <EditText
                 android:id="@+id/barcodeET"
                 android:layout_width="match_parent"
@@ -101,14 +101,22 @@
                 android:id="@+id/okBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="OK" />
+                android:text="OK" />            -->
+
+            <EditText
+                android:id="@+id/barcodeET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.9"
+                android:imeOptions="actionSearch"
+                android:singleLine="true" />
         </LinearLayout>
 
         <HorizontalScrollView
             android:id="@+id/hsv"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" 
-            android:scrollbars="none">
+            android:layout_height="match_parent"
+            android:scrollbars="none" >
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -120,7 +128,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/corners_bg"
                     android:orientation="horizontal" >
-                    
+
                     <TextView
                         android:layout_width="40dp"
                         android:layout_height="wrap_content"
@@ -144,7 +152,7 @@
                         android:layout_width="0.5dp"
                         android:layout_height="match_parent"
                         android:background="@android:color/black" />
-                    
+
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
@@ -156,7 +164,7 @@
                         android:layout_width="0.5dp"
                         android:layout_height="match_parent"
                         android:background="@android:color/black" />
-                    
+
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
@@ -227,7 +235,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginRight="20dp"
                 android:text="当前货架：0件"
-                android:textSize="15sp"/>
+                android:textSize="15sp" />
         </RelativeLayout>
 
         <LinearLayout
@@ -238,15 +246,15 @@
             <Button
                 android:id="@+id/gatherBtn"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="@string/gather"/>
+                android:layout_weight="1"
+                android:text="@string/gather" />
 
             <Button
                 android:id="@+id/reviewBtn"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="@string/review" />
         </LinearLayout>
     </LinearLayout>
