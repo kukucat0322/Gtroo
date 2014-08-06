@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.json.JSONArray;
@@ -14,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -22,8 +24,10 @@ import android.os.Message;
 import android.os.Parcelable;
 import android.text.Editable;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -54,9 +58,9 @@ public class MemberRegistActivity extends BaseActivity {
 	
 	private final String TAG = "MemberRegistActivity";
 	Button saveBtn,veryfiyBtn;
-	EditText cardNOET,nameET,identityET,emailET,employeeSP;
+	EditText cardNOET,nameET,identityET,emailET;
 	EditText createDateET,mobilePhoneET,birthdayET;
-	Spinner typeSp;
+	Spinner typeSp,employeeSP;
 	RadioGroup radioGroup;
 	int _id = -1;
 	String from = "";
@@ -115,8 +119,10 @@ public class MemberRegistActivity extends BaseActivity {
 		birthdayET.setOnClickListener(mOnclickListener);
 		radioGroup = (RadioGroup) findViewById(R.id.memberRegistRG);
 		emailET = (EditText) findViewById(R.id.memberRegistEmailET);
-		employeeSP = (EditText) findViewById(R.id.memberRegistSalesAssistantSP);
-		employeeSP.setText(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key));
+		employeeSP = (Spinner) findViewById(R.id.memberRegistSalesAssistantSP);
+		ArrayAdapter<String> epadapter = new ArrayAdapter<String>(MemberRegistActivity.this, android.R.layout.simple_spinner_item, getEmployees());
+		epadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		employeeSP.setAdapter(epadapter);
 		SimpleAdapter adapter = new SimpleAdapter(MemberRegistActivity.this, 
 				fetchData(), 
 				android.R.layout.simple_spinner_item, 
@@ -128,6 +134,19 @@ public class MemberRegistActivity extends BaseActivity {
 		veryfiyBtn.setOnClickListener(mOnclickListener);
 	}
 	
+    private String[] getEmployees() {
+		Cursor c = db.rawQuery("select name from employee",null);
+		if(c!=null){
+			int i = 0;
+			String[] employees = new String[c.getCount()];
+			while(c.moveToNext()){
+				employees[i++] = c.getString(c.getColumnIndex("name"));
+			}
+			if(!c.isClosed()) c.close();
+			return employees;
+		}
+		return new String[]{};
+	}
 	
 	private List<HashMap<String, String>> fetchData() {
 		HashMap<String, String> item = null;
@@ -177,6 +196,14 @@ public class MemberRegistActivity extends BaseActivity {
 				
 	        	break;
 			case R.id.memberRegistVerifyBtn:
+				InputMethodManager imm= (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(v.getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
+					
+				if(cardNOET.getText().length() == 0){
+					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+		        	UndoBarController.show(MemberRegistActivity.this, "请输入卡号", null, MESSAGESTYLE);
+					return;
+				}
 				verifyNet();
 				break;
 			case R.id.memberRegistBirthdayET:
@@ -229,13 +256,20 @@ public class MemberRegistActivity extends BaseActivity {
 			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
         	UndoBarController.show(MemberRegistActivity.this, "手机号码不正确", null, MESSAGESTYLE);
         	return false;
-		}else if(!Pattern.compile(identityRegExp).matcher(identityET.getText()).find()){
-			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
-        	UndoBarController.show(MemberRegistActivity.this, "身份证号码不正确", null, MESSAGESTYLE);
-        	return false;
+		}else if(isRequired(identityET.getText())){
+			if(!Pattern.compile(identityRegExp).matcher(identityET.getText()).find()){
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+	        	UndoBarController.show(MemberRegistActivity.this, "身份证号码不正确", null, MESSAGESTYLE);
+	        	return false;
+			}
+			if(!verifyDate(identityET.getText().toString())){
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+	        	UndoBarController.show(MemberRegistActivity.this, "身份证中出生日期不正确", null, MESSAGESTYLE);
+	        	return false;
+			}
 		}else if(!birthday()){
 			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
-        	UndoBarController.show(MemberRegistActivity.this, "出生日期不正确", null, MESSAGESTYLE);
+        	UndoBarController.show(MemberRegistActivity.this, "出生日期和身份证不匹配", null, MESSAGESTYLE);
         	return false;
 		}else if(!isVerifyed){
 			UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
@@ -263,7 +297,7 @@ public class MemberRegistActivity extends BaseActivity {
 	        vip.setPhoneNum(mobilePhoneET.getText().toString().trim());
 	        vip.setSex(radioGroup.getCheckedRadioButtonId()==R.id.radioMale?getResources().getString(R.string.male):getResources().getString(R.string.female));
 	        vip.setEmail(emailET.getText().toString().trim());
-	        vip.setEmployee(employeeSP.getText().toString().trim());   
+	        vip.setEmployee(employeeSP.getSelectedItem().toString().trim());   
 	        vip.setBirthday(birthdayET.getText().toString().trim());
 	        vip.setType(((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("key"));
 	        vip.setDiscount(((HashMap<String, String>)typeSp.getAdapter().getItem(typeSp.getSelectedItemPosition())).get("value"));
@@ -281,7 +315,6 @@ public class MemberRegistActivity extends BaseActivity {
 			if(!networkReachable()){
 				popToast();
 			}else{
-				startProgressDialog();
 				uploadV1ip(vip);
 			}
 			
@@ -322,6 +355,7 @@ public class MemberRegistActivity extends BaseActivity {
 	}
 	
 	private void uploadV1ip(Member vip){
+		startProgressDialog();
 		Map<String,String> params = new HashMap<String, String>();
 		JSONArray array;
 		JSONObject transactions;
@@ -363,8 +397,9 @@ public class MemberRegistActivity extends BaseActivity {
 			},new Response.ErrorListener() {
 				@Override
 				public void onErrorResponse(VolleyError error) {
+					stopProgressDialog();
 					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
-					  UndoBarController.show(MemberRegistActivity.this, "网络异常，上传失败", null, MESSAGESTYLE);
+					UndoBarController.show(MemberRegistActivity.this, "网络异常，上传失败", null, MESSAGESTYLE);
 				}
 			});
 		} catch (JSONException e) {}
@@ -544,6 +579,20 @@ public class MemberRegistActivity extends BaseActivity {
         finally {  
             db.endTransaction();
         } 
+	}
+	
+	public boolean verifyDate(String eighteencardid) {
+		String date = eighteencardid.substring(6, 10);
+		date += "-";
+		date += eighteencardid.substring(10, 12);
+		date += "-";
+		date += eighteencardid.substring(12, 14);
+		// System.out.println(date);
+		// 判断年月日的正则表达式，接受输入格式为2010-12-24，可接受平年闰年的日期
+		String v = "(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)";
+		Pattern p = Pattern.compile(v);
+		Matcher m = p.matcher(date);
+		return m.matches();
 	}
 	
 }

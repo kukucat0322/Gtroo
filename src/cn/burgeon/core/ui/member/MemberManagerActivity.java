@@ -81,7 +81,6 @@ public class MemberManagerActivity extends BaseActivity {
 				} else if (itemValue != null && Constant.memberManagerTextValues[1].equals(itemValue)) {
 					forwardActivity(MemberListActivity.class);
 				} else if (itemValue != null && Constant.memberManagerTextValues[2].equals(itemValue)) {
-					startProgressDialog();
 					List<Member> vips = query();
 //					if(vips != null && vips.size() > 0){
 //						for(Member vip : vips){
@@ -326,17 +325,18 @@ public class MemberManagerActivity extends BaseActivity {
 
 		@Override
 		public void run() {
+			startProgressDialog();
 			ArrayList<String> failures = new ArrayList<String>();
 			for(Member vip : vips){
 				App mApp = ((App)getApplication());
-				String tt = mApp.getSDF().format(new Date());
+				String tt = getSDF().format(new Date());
 		        String uriAPI = App.getHosturl();
 		        HttpPost httpRequest = new HttpPost(uriAPI);
 		        httpRequest.addHeader("Content-Type", getBodyContentType());
 		        Map<String,String> map = construct(vip);
-		        map.put("sip_appkey", App.getSipkey());
+		        map.put("sip_appkey", getSipkey());
 		        map.put("sip_timestamp", tt);
-		        map.put("sip_sign", mApp.MD5(App.getSipkey() + tt + mApp.getSIPPSWDMD5()));
+		        map.put("sip_sign", MD5(getSipkey() + tt + getSIPPSWDMD5()));
 		        
 		        try{
 		          HttpEntity entity = new ByteArrayEntity(encodeParameters(map, "UTF-8"));

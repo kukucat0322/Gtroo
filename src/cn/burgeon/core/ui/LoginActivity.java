@@ -36,8 +36,11 @@ import cn.burgeon.core.App;
 import cn.burgeon.core.R;
 import cn.burgeon.core.bean.Employee;
 import cn.burgeon.core.bean.RequestResult;
+import cn.burgeon.core.ui.sales.SalesSettleActivity;
 import cn.burgeon.core.ui.system.SystemConfigurationActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
+import cn.burgeon.core.widget.UndoBarController;
+import cn.burgeon.core.widget.UndoBarStyle;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -72,12 +75,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     private String[] getEmployees() {
-		Cursor c = db.rawQuery("select name from employee",null);
+		Cursor c = db.rawQuery("select usercode from sys_user where storeid = ?",new String[]{App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey)});
 		if(c!=null){
 			int i = 0;
 			String[] employees = new String[c.getCount()];
 			while(c.moveToNext()){
-				employees[i++] = c.getString(c.getColumnIndex("name"));
+				employees[i++] = c.getString(c.getColumnIndex("usercode"));
 			}
 			if(!c.isClosed()) c.close();
 			return employees;
@@ -97,8 +100,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 	
     private void initStoreData() {
-    	String store = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey);
-    	if(!TextUtils.isEmpty(store)){
+    	//String store = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey);
+    	ArrayAdapter<String> adapter = new ArrayAdapter<String>(LoginActivity.this, android.R.layout.simple_spinner_item, getEmployees());
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        userSpinner.setAdapter(adapter);
+/*    	if(!TextUtils.isEmpty(store)){
     		//检测网络状态
     		if(!networkReachable()){
     			ArrayAdapter<String> adapter = new ArrayAdapter<String>(LoginActivity.this, android.R.layout.simple_spinner_item, getEmployees());
@@ -129,7 +135,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 					}
 				});
     		}
-    	}
+    	}*/
     }
     
 	private RequestResult parseResult(String response) {
@@ -214,18 +220,60 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             	if(hasConfigured()){
 	            	 // 存入本地
 	                App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.store_key, storeSpinner.getText().toString());
-	                if(userSpinner.getAdapter().getCount() > 0)
-	                App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.user_key, userSpinner.getSelectedItem().toString());
-	                if(pswET.getText().length() > 0 || userSpinner.getAdapter().getCount() == 0){
+	                
+	                if(userSpinner.getAdapter().getCount() == 0){
 	                	showAlertMsg(R.string.pswderror);
 	                }else{
-	                	forwardActivity(SystemActivity.class);
+	                	if(verifyUserAndPswd()){
+	                		App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.user_key, userSpinner.getSelectedItem().toString());
+	                		App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.user_pswd, pswET.getText().toString());
+	                		login();
+	                	}
+	                	else
+	                		showAlertMsg(R.string.pswderror);
 	                }
             	}else{
             		showAlertMsg(R.string.tipsNeedConfigure);
             	}
                 break;
         }
+    }
+    
+    private void login(){
+    	startProgressDialog();
+    	sendRequest(constructParams(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey)),new Response.Listener<String>() {
+			@Override
+			public void onResponse(String response) {
+				Log.d(TAG, response);
+				if(!TextUtils.isEmpty(response)){
+					RequestResult result = parseResult(response);
+					//请求成功，更新记录状态
+					if("0".equals(result.getCode())){
+						parseResponse(response);
+						mHandler.sendEmptyMessage(1);
+					}
+				}
+			}
+		},new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+				UndoBarController.show(LoginActivity.this, "登录失败，请检测网络！", null, MESSAGESTYLE);
+			}
+		});
+    }
+    
+    private boolean verifyUserAndPswd(){
+    	Cursor c = null;
+    	int count = 0;
+    	try {
+			c = db.rawQuery("select * from sys_user where usercode = ? and password = ?", 
+					new String[]{userSpinner.getSelectedItem().toString(),
+					pswET.getText().length() == 0 ? "" : pswET.getText().toString()});
+			count = c.getCount();
+		} catch (Exception e) {}
+		if(c != null && !c.isClosed()) c.close();
+    	return count > 0;
     }
 
 	private boolean hasConfigured() {
@@ -266,10 +314,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 				isExit = false;
 				break;
 			case 1:
-		    	ArrayAdapter<String> adapter = new ArrayAdapter<String>(LoginActivity.this, android.R.layout.simple_spinner_item, getEmployees());
+		    	/*ArrayAdapter<String> adapter = new ArrayAdapter<String>(LoginActivity.this, android.R.layout.simple_spinner_item, getEmployees());
 		        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		        userSpinner.setAdapter(adapter);
+		        userSpinner.setAdapter(adapter);*/
 		        stopProgressDialog();
+        		forwardActivity(SystemActivity.class);
 				break;
 			default:
 				break;

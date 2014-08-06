@@ -131,7 +131,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingLeft="5dp"
-                android:textColor="@android:color/holo_red_dark"
                 android:text="@string/memberRegistIdentityCardNum"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -202,13 +201,11 @@
                 android:text="@string/memberRegistSalesAssistant"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <EditText
+            <Spinner
                 android:id="@+id/memberRegistSalesAssistantSP"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="2" 
-                android:focusable="false"
-                android:focusableInTouchMode="false"/>
+                android:layout_weight="2"/>
         </LinearLayout>
 
         <LinearLayout

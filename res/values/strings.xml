@@ -113,6 +113,7 @@
     <string name="sales_settle_count">数量：%1$d</string>
     <string name="sales_settle_orgin">原始单号</string>
     <string name="sales_settle_discount">整单折扣</string>
+    <string name="sales_settle_nodata">没有需要结账的商品！</string>
     <string name="sales_settle_reality">折  后  额</string>
     <string name="sales_settle_payway">付款方式</string>
     <string name="sales_settle_paymoney">付款金额</string>
@@ -260,7 +261,7 @@
     <string name="tipsNetworkAvailable">有可用网络</string>
     <string name="tipsNetworkUnAvailable">无可用网络</string>
      
-    <string name="storeInfoStoreIndex">门店编号</string>
+    <string name="storeInfoStoreIndex">门店名称</string>
     <string name="storeInfoCustomerName">顾客名称</string>
     <string name="storeInfoTerminalIndex">终端编号</string>
     <string name="storeInfoInventoryShowLines">盘点显示行数</string>

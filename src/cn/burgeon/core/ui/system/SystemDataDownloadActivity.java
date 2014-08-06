@@ -52,7 +52,7 @@ public class SystemDataDownloadActivity extends BaseActivity{
 	private final String baseUrl = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.downloadURLAddressKey) + App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.downloadURLAddressKeySuffix);
 	private final String userDataURL     =    baseUrl + "/sys_user.zip";
 	private final String storeDataURL    =    baseUrl + "/tc_store.zip";
-	private final String[]userDataURLs   =    {storeDataURL};
+	private final String[]userDataURLs   =    {storeDataURL,userDataURL};
 	
 	//商品资料下载地址
 	private final String productData_tc_sku_URL         =    baseUrl + "/tc_sku.zip";
@@ -87,7 +87,8 @@ public class SystemDataDownloadActivity extends BaseActivity{
 	//下载完之后保存的文件名字
 	//用户资料
 	private final String userDataDownloadFileName                    = "userData.zip";
-	private final String[]userDataDownloadFileNames                  = {userDataDownloadFileName};
+	private final String userDataDownload_sys_user_FileName          = "sys_user.zip";
+	private final String[]userDataDownloadFileNames                  = {userDataDownloadFileName,userDataDownload_sys_user_FileName};
 	//商品资料
 	private final String productDataDownload_tc_sku_FileName         = "tc_sku.zip";
 	private final String productDataDownload_tc_style_FileName       = "tc_style.zip";
@@ -743,6 +744,18 @@ public class SystemDataDownloadActivity extends BaseActivity{
 						temp[6].substring(2),temp[7].substring(2)});
 			}catch(Exception e){
 				if(LocalDebug) Log.d(TAG,"插tc_store表失败！");
+			}	
+		}
+		
+		if(filePath.equals(userDataUnZipFiles[1])){
+			if(LocalDebug) Log.d(TAG,"插sys_user表");
+			try{
+				db.execSQL("insert into sys_user(user_id,user_name,password,usercode,lowestdiscount,storeid) "
+						+ "values (?,?,?,?,?,?)", 
+						new Object[]{temp[0],temp[1].substring(2),temp[2].substring(2),
+						temp[3].substring(2),temp[4].substring(2),temp[5].substring(2)});
+			}catch(Exception e){
+				if(LocalDebug) Log.d(TAG,"插sys_user表失败！");
 			}	
 		}
 		

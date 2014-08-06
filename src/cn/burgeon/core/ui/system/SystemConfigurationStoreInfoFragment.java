@@ -1,5 +1,6 @@
 package cn.burgeon.core.ui.system;
 
+import java.security.MessageDigest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -262,7 +263,7 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
         };
     }
     
-    public void sendRequest(final Map<String, String> params, Response.Listener<String> successListener) {
+/*    public void sendRequest(final Map<String, String> params, Response.Listener<String> successListener) {
 
         StringRequest request = new StringRequest(Request.Method.POST, App.getHosturl(), successListener, createMyReqErrorListener()) {
             protected Map<String, String> getParams() throws AuthFailureError {
@@ -271,12 +272,12 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
                 //appKey,时间戳,MD5签名
                 params.put("sip_appkey", App.getSipkey());
                 params.put("sip_timestamp", tt);
-                params.put("sip_sign", mApp.MD5(App.getSipkey() + tt + mApp.getSIPPSWDMD5()));
+                params.put("sip_sign", mApp.MD5("nea@burgeon.com.cn" + tt + mApp.getSIPPSWDMD5()));
                 return params;
             }
         };
         RequestManager.getRequestQueue().add(request);
-    }
+    }*/
     
 	private void parseResult(String response) {
 		SQLiteDatabase db = mApp.getDB();
@@ -338,4 +339,5 @@ public class SystemConfigurationStoreInfoFragment extends Fragment {
 		} catch (JSONException e) {}
 		return params;
 	}
+
 }

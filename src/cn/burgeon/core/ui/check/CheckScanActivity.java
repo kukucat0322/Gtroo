@@ -635,11 +635,11 @@ public class CheckScanActivity extends BaseActivity {
 			Log.d("check", array.toString());
 			params.put("transactions", array.toString());
 
-			String tt = App.getInstance().getSDF().format(new Date());
+			String tt = getSDF().format(new Date());
 			// appKey,时间戳,MD5签名
-			params.put("sip_appkey", App.getSipkey());
+			params.put("sip_appkey", getSipkey());
 			params.put("sip_timestamp", tt);
-			params.put("sip_sign", App.getInstance().MD5(App.getSipkey() + tt + App.getInstance().getSIPPSWDMD5()));
+			params.put("sip_sign", MD5(getSipkey() + tt + getSIPPSWDMD5()));
 
 			// 执行请求
 			UploadTask uploadTask = new UploadTask(params);
