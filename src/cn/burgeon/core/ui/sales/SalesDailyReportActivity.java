@@ -158,13 +158,15 @@ public class SalesDailyReportActivity extends BaseActivity {
         String sql = null;
         if(settleMonth != null)
 			sql = "select settleDate, sum(count) as totalCount,sum(money) as totalMoney from c_settle where settleDate like '"+settleMonth+"%' "
-					+ " and settleTime between " + "'" + finalStartTime + "'" + " and " + "'" + finalEndTime + "' group by settleDate";
+					+ " and settleTime between " + "'" + finalStartTime + "'" + " and " + "'" + finalEndTime + "'";
 		else
 			sql = "select settleDate, sum(count) as totalCount,sum(money) as totalMoney from c_settle"
-					+ " where settleTime between " + "'" + finalStartTime + "'" + " and " + "'" + finalEndTime + "' group by settleDate";
+					+ " where settleTime between " + "'" + finalStartTime + "'" + " and " + "'" + finalEndTime + "'";
         if (!"所有".equals(dialog.getState())) {//上传、未上传
             sql += " and status = " + "'" + dialog.getState() + "'";
         }
+        
+        sql += " group by settleDate";
         
         Log.d("DailySalesActivity", "sql = " + sql);//SA30515214061100001
         

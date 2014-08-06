@@ -241,7 +241,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 			case R.id.salesNewVIPbtn:
 				//跳转到会员注册页面
 				if(!"unknow".equals(updateID) && (updateID != null)){
-					showTips();
+					showTips(R.string.sales_settle_clear2);
 				}else{
 					//temp.clear();
 					//temp.addAll(data);
@@ -250,13 +250,17 @@ public class SalesNewOrderActivity extends BaseActivity {
 				break;
 			case R.id.salesNewJiezhangBtn:
 				// 跳转并传递数据
-                IntentData intentData = new IntentData();
-                intentData.setProducts(data);
-            	intentData.setCommand(updateID);
-            	intentData.setEmployee(salesAssistantSP.getSelectedItem().toString());
-            	intentData.setVipCardno(searchedMember != null?searchedMember.getCardNum():"");
-                forwardActivity(SalesSettleActivity.class, intentData,SALESSETTLE);
-				break;
+				if(data.size() > 0){
+	                IntentData intentData = new IntentData();
+	                intentData.setProducts(data);
+	            	intentData.setCommand(updateID);
+	            	intentData.setEmployee(salesAssistantSP.getSelectedItem().toString());
+	            	intentData.setVipCardno(searchedMember != null?searchedMember.getCardNum():"");
+	                forwardActivity(SalesSettleActivity.class, intentData,SALESSETTLE);
+				}else{
+					showTips(R.string.sales_settle_nodata);
+				}
+                break;
 /*			case R.id.verifyBarCodeBtn:
 				verifyBarCode();
 				break;*/
@@ -359,6 +363,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 		List<Product> items = new ArrayList<Product>(1);
 		Product pro = new Product();
 		pro.setBarCode(barcode);
+		pro.setEmployee(salesAssistantSP.getSelectedItem().toString());
 		pro.setStyle(c.getString(c.getColumnIndex("style")));
 		pro.setName(c.getString(c.getColumnIndex("style_name")));
 		pro.setPrice(c.getString(c.getColumnIndex("fprice")));
@@ -561,11 +566,11 @@ public class SalesNewOrderActivity extends BaseActivity {
 	};
 	
 	 //显示对话框
-    private void showTips(){
+    private void showTips(int msgResId){
     	AlertDialog dialog = null;
     	AlertDialog.Builder builder = new AlertDialog.Builder(this)
     		.setTitle(getString(R.string.systemtips))
-    		.setMessage(R.string.sales_settle_clear2)
+    		.setMessage(msgResId)
     		.setPositiveButton(getString(R.string.yes),new DialogInterface.OnClickListener(){
 				@Override
 				public void onClick(DialogInterface arg0, int arg1) {
@@ -638,6 +643,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 							pro.setSalesType(2);
 							pro.setBarCode(barcode);
 							pro.setOrgorderNO(orginOrderno);
+							pro.setEmployee(salesAssistantSP.getSelectedItem().toString());
 							pro.setDiscount(c.getString(c.getColumnIndex("discount")));
 							pro.setStyle(c.getString(c.getColumnIndex("style")));
 							pro.setName(c.getString(c.getColumnIndex("pdtname")));

@@ -135,7 +135,7 @@ import com.android.volley.Response;
 	
 	private List<Product> getDetailsData(String primaryKey) {
 		List<Product> details = new ArrayList<Product>();
-		Cursor c = db.rawQuery("select money,barcode, count,salesType from c_settle_detail where settleUUID = ?", new String[]{primaryKey});
+		Cursor c = db.rawQuery("select employee,money,barcode, count,salesType,orgdocno from c_settle_detail where settleUUID = ?", new String[]{primaryKey});
 		Product product = null;
 		while(c.moveToNext()){
 			product = new Product();
@@ -143,6 +143,8 @@ import com.android.volley.Response;
 			product.setCount(c.getString(c.getColumnIndex("count")));
 			product.setMoney(c.getString(c.getColumnIndex("money")));
 			product.setSalesType(c.getInt(c.getColumnIndex("salesType")));
+			product.setOrgorderNO(c.getString(c.getColumnIndex("orgdocno")));
+			product.setEmployee(c.getString(c.getColumnIndex("employee")));
 			details.add(product);
 		}
 		if(c != null && !c.isClosed())
@@ -178,14 +180,14 @@ import com.android.volley.Response;
 			ArrayList<String> failures = new ArrayList<String>();
 			for(Order order : orders){
 				App mApp = ((App)getApplication());
-				String tt = mApp.getSDF().format(new Date());
+				String tt = getSDF().format(new Date());
 		        String uriAPI = App.getHosturl();
 		        HttpPost httpRequest = new HttpPost(uriAPI);
 		        httpRequest.addHeader("Content-Type", getBodyContentType());
 		        Map<String,String> map = construct(order);
-		        map.put("sip_appkey", App.getSipkey());
+		        map.put("sip_appkey", getSipkey());
 		        map.put("sip_timestamp", tt);
-		        map.put("sip_sign", mApp.MD5(App.getSipkey() + tt + mApp.getSIPPSWDMD5()));
+		        map.put("sip_sign", MD5(getSipkey() + tt + getSIPPSWDMD5()));
 		        
 		        try{
 		          HttpEntity entity = new ByteArrayEntity(encodeParameters(map, "UTF-8"));
@@ -259,11 +261,12 @@ import com.android.volley.Response;
 						JSONObject item = new JSONObject();
 						item.put("QTY", product.getCount());
 						item.put("TYPE", product.getSalesType());
-//						if(product.getSalesType() == 2){
-//							item.put("ORGDOCNO", order.getOrderNo());
-//						}
+						item.put("SALESREP_ID__NAME", product.getEmployee());
+						if(product.getSalesType() == 2)
+							item.put("ORGDOCNO", product.getOrgorderNO());
 						item.put("M_PRODUCT_ID__NAME", product.getBarCode());
-						item.put("PRICEACTUAL", product.getMoney());
+						if(product.getSalesType() == 2)
+							item.put("PRICEACTUAL", "-"+product.getMoney());
 						item.put("TOT_AMT_ACTUAL", String.format("%.2f", (Float.parseFloat(product.getMoney()) * Integer.parseInt(product.getCount()))));
 						addList.put(item);
 					}

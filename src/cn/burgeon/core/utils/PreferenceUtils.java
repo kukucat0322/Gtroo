@@ -9,6 +9,7 @@ public class PreferenceUtils {
     public static final String Burgeon_PREF = "BurgeonPreference";
     public static final String store_key = "storeKey";
     public static final String user_key = "userKey";
+    public static final String user_pswd = "userPswd";
     public static final String agency_key = "agencyKey";
     public static final String config_pswd = "configPswd";
     

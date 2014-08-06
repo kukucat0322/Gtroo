@@ -240,6 +240,11 @@ public class SalesSettleActivity extends BaseActivity {
 		        UndoBarController.show(SalesSettleActivity.this, "付款金额不正确", null, MESSAGESTYLE);
 		        return;
 			}
+/*			if(isSettled()){
+				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+		        UndoBarController.show(SalesSettleActivity.this, "已结账，不能重复结账", null, MESSAGESTYLE);
+		        return;
+			}*/
 			if("unknow".equals(command) || null == command){
 				showTips(1);
 			}
@@ -259,11 +264,12 @@ public class SalesSettleActivity extends BaseActivity {
 
 				@Override
 				public void onClick(DialogInterface arg0, int arg1) {
+					settleBtn.setClickable(false);
 					discoutDetail();
 					if(what == 1){
 						save();
 					}
-					else if(what == 2)update();
+					//else if(what == 2)update();
 				}})
 			.setNegativeButton(getString(R.string.cancel),new DialogInterface.OnClickListener(){
 
@@ -272,9 +278,22 @@ public class SalesSettleActivity extends BaseActivity {
 					dialog.dismiss();
 				}});
     	dialog = builder.create();
+    	dialog.setCanceledOnTouchOutside(false);
     	dialog.show();
     }
     
+    private boolean isSettled(){
+    	if(uuid != null){
+    		Cursor c = db.rawQuery("select * from c_settle where settleUUID = ?", new String[]{uuid});
+    		if(c != null){
+	    		int result = c.getCount();
+	    		if(!c.isClosed()) c.close();
+	    		return result > 0;
+    		}else{return false;}
+    	}else{
+    		return false;
+    	}
+    }
     
     //整单折扣更新明细价格
     private void discoutDetail(){
@@ -314,9 +333,9 @@ public class SalesSettleActivity extends BaseActivity {
     	return money == Float.parseFloat(realityET.getText().toString());
     }
 	
+    String uuid = null;
 	public void save(){
 		db.beginTransaction();
-		String uuid = null;
         try {
         	uuid = UUID.randomUUID().toString();
         	Date currentTime = new Date();
@@ -337,12 +356,13 @@ public class SalesSettleActivity extends BaseActivity {
 								uuid});
         	for(Product pro : products){
         		db.execSQL("insert into c_settle_detail('style','barcode','price','discount','orgdocno',"
-        				+ "'count','money','settleUUID','pdtname','color','size','settleDate','salesType')"
-        				+ " values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        				+ "'count','money','settleUUID','pdtname','color','size','settleDate','salesType','employee')"
+        				+ " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
     					new Object[]{pro.getStyle(),pro.getBarCode(),pro.getPrice(), pro.getDiscount(),pro.getOrgorderNO(),
         						pro.getCount(), pro.getMoney(), uuid, pro.getName(),
         						pro.getColor(),pro.getSize(),
-        						new SimpleDateFormat("yyyy-MM-dd").format(currentTime),pro.getSalesType()});
+        						new SimpleDateFormat("yyyy-MM-dd").format(currentTime),
+        						pro.getSalesType(),pro.getEmployee()});
         	}
         	for(int i = 0; i < mPaywayLayout.getChildCount(); i++){
         		LinearLayout item = (LinearLayout) mPaywayLayout.getChildAt(i);
@@ -518,14 +538,14 @@ public class SalesSettleActivity extends BaseActivity {
 		public void run() {
 			ArrayList<String> failures = new ArrayList<String>();
 			App mApp = ((App)getApplication());
-			String tt = mApp.getSDF().format(new Date());
+			String tt = getSDF().format(new Date());
 	        String uriAPI = App.getHosturl();
 	        HttpPost httpRequest = new HttpPost(uriAPI);
 	        httpRequest.addHeader("Content-Type", getBodyContentType());
 	        Map<String,String> map = construct(order);
-	        map.put("sip_appkey", App.getSipkey());
+	        map.put("sip_appkey", getSipkey());
 	        map.put("sip_timestamp", tt);
-	        map.put("sip_sign", mApp.MD5(App.getSipkey() + tt + mApp.getSIPPSWDMD5()));
+	        map.put("sip_sign", MD5(getSipkey() + tt + getSIPPSWDMD5()));
 	        
 	        try{
 	          HttpEntity entity = new ByteArrayEntity(encodeParameters(map, "UTF-8"));
@@ -572,7 +592,7 @@ public class SalesSettleActivity extends BaseActivity {
 				//masterobj
 				JSONObject masterObj = new JSONObject();
 				masterObj.put("id", -1);
-				//masterObj.put("REFNO", order.getOrderNo());
+				masterObj.put("REFNO", order.getOrderNo());
 				masterObj.put("SALESREP_ID__NAME", order.getSaleAsistant());
 				masterObj.put("DOCTYPE", order.getOrderType());
 				masterObj.put("C_STORE_ID__NAME", App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.store_key));
@@ -597,6 +617,7 @@ public class SalesSettleActivity extends BaseActivity {
 						JSONObject item = new JSONObject();
 						item.put("QTY", product.getCount());
 						item.put("TYPE", product.getSalesType());
+						item.put("SALESREP_ID__NAME", product.getEmployee());
 						if(product.getSalesType() == 2)
 							item.put("ORGDOCNO", product.getOrgorderNO());
 						item.put("M_PRODUCT_ID__NAME", product.getBarCode());
@@ -674,7 +695,7 @@ public class SalesSettleActivity extends BaseActivity {
 		
 		private List<Product> getDetailsData(String primaryKey) {
 			List<Product> details = new ArrayList<Product>();
-			Cursor c = db.rawQuery("select money,barcode, count,salesType,orgdocno from c_settle_detail where settleUUID = ?", new String[]{primaryKey});
+			Cursor c = db.rawQuery("select employee,money,barcode, count,salesType,orgdocno from c_settle_detail where settleUUID = ?", new String[]{primaryKey});
 			Product product = null;
 			while(c.moveToNext()){
 				product = new Product();
@@ -683,6 +704,7 @@ public class SalesSettleActivity extends BaseActivity {
 				product.setMoney(c.getString(c.getColumnIndex("money")));
 				product.setSalesType(c.getInt(c.getColumnIndex("salesType")));
 				product.setOrgorderNO(c.getString(c.getColumnIndex("orgdocno")));
+				product.setEmployee(c.getString(c.getColumnIndex("employee")));
 				details.add(product);
 			}
 			if(c != null && !c.isClosed())

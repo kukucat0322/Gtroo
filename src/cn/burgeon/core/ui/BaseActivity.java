@@ -1,5 +1,6 @@
 package cn.burgeon.core.ui;
 
+import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -45,6 +46,10 @@ import com.android.volley.toolbox.StringRequest;
  */
 public class BaseActivity extends Activity {
     public final static String PAR_KEY = "ParcelableKey";
+    private static final String SIPKEY = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key);
+    private static final String SIPPSWD = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_pswd);
+    private SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private String SIPPSWDMD5;
 
     App mApp;
     protected SQLiteDatabase db;
@@ -59,8 +64,8 @@ public class BaseActivity extends Activity {
         setupFullscreen();
         mApp = (App) getApplication();
         db = mApp.getDB();
-        //因为getWritableDatabase内部调用了mContext.openOrCreateDatabase(mName, 0, mFactory);  
-        //所以要确保context已初始化,我们可以把实例化DBManager的步骤放在Activity的onCreate里  
+        SDF.setLenient(false);
+        SIPPSWDMD5 = MD5(SIPPSWD);
     }
     
     @Override
@@ -147,12 +152,12 @@ public class BaseActivity extends Activity {
 
         StringRequest request = new StringRequest(Request.Method.POST, App.getHosturl(), successListener, errorListener) {
             protected Map<String, String> getParams() throws AuthFailureError {
-                String tt = mApp.getSDF().format(new Date());
+                String tt = getSDF().format(new Date());
 
                 //appKey,时间戳,MD5签名
-                params.put("sip_appkey", App.getSipkey());
+                params.put("sip_appkey", getSipkey());
                 params.put("sip_timestamp", tt);
-                params.put("sip_sign", mApp.MD5(App.getSipkey() + tt + mApp.getSIPPSWDMD5()));
+                params.put("sip_sign", MD5(getSipkey() + tt + getSIPPSWDMD5()));
                 return params;
             }
         };
@@ -236,4 +241,42 @@ public class BaseActivity extends Activity {
 		if(networkInfo != null && networkInfo.isConnected())  return true;
 		return false;	
 	}
+	
+	public static String getSipkey() {
+        return SIPKEY;
+    }
+
+    public static String getSippswd() {
+        return SIPPSWD;
+    }
+
+    public SimpleDateFormat getSDF() {
+        return SDF;
+    }
+
+    public String getSIPPSWDMD5() {
+        return SIPPSWDMD5;
+    }
+    
+    public String MD5(String s) {
+        String r = "";
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(s.getBytes());
+            byte b[] = md.digest();
+            int i;
+            StringBuffer buf = new StringBuffer("");
+            for (int offset = 0; offset < b.length; offset++) {
+                i = b[offset];
+                if (i < 0)
+                    i += 256;
+                if (i < 16)
+                    buf.append("0");
+                buf.append(Integer.toHexString(i));
+            }
+            r = buf.toString();
+        } catch (Exception e) {
+        }
+        return r;
+    }
 }
