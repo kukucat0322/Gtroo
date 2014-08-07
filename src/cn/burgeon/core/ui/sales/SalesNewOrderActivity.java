@@ -103,7 +103,8 @@ public class SalesNewOrderActivity extends BaseActivity {
         				float vipDiscount = 0.0f;
         				if(cardNoET.getText().length() > 0) 
         					vipDiscount = Float.parseFloat(searchedMember.getDiscount());
-        				pro.setMoney(String.format("%.2f",price * proDiscount * vipDiscount));
+        				pro.setDiscount(searchedMember.getDiscount());
+        				pro.setMoney(String.format("%.2f",price * vipDiscount));
         				mAdapter.notifyDataSetChanged();
         				upateBottomBarInfo();
         			}

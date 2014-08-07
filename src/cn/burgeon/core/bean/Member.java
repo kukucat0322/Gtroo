@@ -17,8 +17,16 @@ public class Member implements Parcelable{
 	private String discount;
 	private String yue;
 	private String status;
+	private String vipState;
 	private int customerID;
 	private int storeID;
+	public String getVipState() {
+		return vipState;
+	}
+	public void setVipState(String vipState) {
+		this.vipState = vipState;
+	}
+
 	public int getCustomerID() {
 		return customerID;
 	}

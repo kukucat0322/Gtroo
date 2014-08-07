@@ -32,6 +32,7 @@ import cn.burgeon.core.adapter.MemberSearchAdapter;
 import cn.burgeon.core.bean.Member;
 import cn.burgeon.core.bean.RequestResult;
 import cn.burgeon.core.ui.BaseActivity;
+import cn.burgeon.core.ui.LoginActivity;
 import cn.burgeon.core.ui.sales.SalesNewOrderActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
 import cn.burgeon.core.utils.ScreenUtils;
@@ -39,6 +40,7 @@ import cn.burgeon.core.widget.UndoBarController;
 import cn.burgeon.core.widget.UndoBarStyle;
 
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 
 public class MemberSearchActivity extends BaseActivity {
 	
@@ -170,7 +172,7 @@ public class MemberSearchActivity extends BaseActivity {
             JSONObject paramsTable = new JSONObject();
             paramsTable.put("table", "12899");
             paramsTable.put("columns", new JSONArray().put("cardno").put("vipname")
-            		.put("C_VIPTYPE_ID:DISCOUNT").put("birthday"));
+            		.put("C_VIPTYPE_ID:DISCOUNT").put("VIPSTATE").put("birthday"));
             JSONObject paramsCombine = new JSONObject();
             
             if(cardNoET.getText().length() > 0 && mobileET.getText().length() == 0){
@@ -233,6 +235,13 @@ public class MemberSearchActivity extends BaseActivity {
 					}
 
 				}
+			},new Response.ErrorListener() {
+				@Override
+				public void onErrorResponse(VolleyError error) {
+					stopProgressDialog();
+					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+					UndoBarController.show(MemberSearchActivity.this, "网络异常，请检测网络", null, MESSAGESTYLE);
+				}
 			});
 		} catch (JSONException e) {}
 	}
@@ -257,12 +266,13 @@ public class MemberSearchActivity extends BaseActivity {
 			for(int i = 0; i < rows.length(); i++){
 				String row = rows.get(i).toString();
 				String[] rowArr = row.split(",");
-				//["7877638","hhhv",0.5,19850311]
+				//["7877638","hhhv",0.5,"是",19850311]
 				member = new Member();
 				member.setCardNum(rowArr[0].substring(2,rowArr[0].length()-1));
 				member.setName(rowArr[1].substring(1,rowArr[1].length()-1));
 				member.setDiscount(rowArr[2]);
-				member.setBirthday("null".equals(rowArr[3].substring(0,rowArr[3].length()-1))?"":rowArr[3].substring(0,rowArr[3].length()-1));
+				member.setVipState(rowArr[3].substring(1,rowArr[3].length()-1));
+				member.setBirthday("null".equals(rowArr[4].substring(0,rowArr[4].length()-1))?"":rowArr[4].substring(0,rowArr[4].length()-1));
 				data.add(member);
 			}
 			if(member != null)
@@ -285,11 +295,16 @@ public class MemberSearchActivity extends BaseActivity {
 				postRequest();
 				break;
 			case R.id.memberSearchConfirmBtn:
-				Intent intent = new Intent(MemberSearchActivity.this,SalesNewOrderActivity.class);
-				Bundle bundle = new Bundle();
-				bundle.putParcelable("searchedMember", selectedMember);
-				intent.putExtras(bundle);
-                startActivity(intent);
+				if("是".equals(selectedMember.getVipState())){
+					Intent intent = new Intent(MemberSearchActivity.this,SalesNewOrderActivity.class);
+					Bundle bundle = new Bundle();
+					bundle.putParcelable("searchedMember", selectedMember);
+					intent.putExtras(bundle);
+	                startActivity(intent);
+				}else{
+					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+			        UndoBarController.show(MemberSearchActivity.this, "对不起，该会员已过期", null, MESSAGESTYLE);
+				}
 				break;
 			default:
 				break;

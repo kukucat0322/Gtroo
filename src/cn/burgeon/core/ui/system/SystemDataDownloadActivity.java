@@ -13,15 +13,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import com.android.volley.toolbox.UnZip;
-
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -39,6 +36,8 @@ import cn.burgeon.core.App;
 import cn.burgeon.core.R;
 import cn.burgeon.core.ui.BaseActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
+
+import com.android.volley.toolbox.UnZip;
 
 public class SystemDataDownloadActivity extends BaseActivity{
 		
@@ -272,6 +271,11 @@ public class SystemDataDownloadActivity extends BaseActivity{
 		mDownloadButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v){ 
+				userDataTotalSize = 0;
+				productDataTotalSize = 0;
+				vipTypeTotalSize = 0;
+				itemStrategyTotalSize = 0;
+				systemParamTotalSize = 0;
 				checkToStartDownload();
 			}
 		});			
