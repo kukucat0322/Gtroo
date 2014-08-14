@@ -20,6 +20,13 @@ public class Order {
 	private String shelfNO;
 	private String vipCardno;
 	private String style;
+	private String desc;
+	public String getDesc() {
+		return desc;
+	}
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
 	public String getStyle() {
 		return style;
 	}

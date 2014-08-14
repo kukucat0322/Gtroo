@@ -295,15 +295,20 @@ public class MemberSearchActivity extends BaseActivity {
 				postRequest();
 				break;
 			case R.id.memberSearchConfirmBtn:
-				if("是".equals(selectedMember.getVipState())){
-					Intent intent = new Intent(MemberSearchActivity.this,SalesNewOrderActivity.class);
-					Bundle bundle = new Bundle();
-					bundle.putParcelable("searchedMember", selectedMember);
-					intent.putExtras(bundle);
-	                startActivity(intent);
+				if(selectedMember != null){
+					if("是".equals(selectedMember.getVipState())){
+						Intent intent = new Intent(MemberSearchActivity.this,SalesNewOrderActivity.class);
+						Bundle bundle = new Bundle();
+						bundle.putParcelable("searchedMember", selectedMember);
+						intent.putExtras(bundle);
+		                startActivity(intent);
+					}else{
+						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+				        UndoBarController.show(MemberSearchActivity.this, "对不起，该会员已过期", null, MESSAGESTYLE);
+					}
 				}else{
-					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
-			        UndoBarController.show(MemberSearchActivity.this, "对不起，该会员已过期", null, MESSAGESTYLE);
+					Intent intent = new Intent(MemberSearchActivity.this,SalesNewOrderActivity.class);
+					startActivity(intent);
 				}
 				break;
 			default:

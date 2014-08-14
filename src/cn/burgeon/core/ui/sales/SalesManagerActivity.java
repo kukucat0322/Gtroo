@@ -126,6 +126,7 @@ import com.android.volley.Response;
 			order.setOrderMoney(c.getString(c.getColumnIndex("money")));
 			order.setSaleAsistant(c.getString(c.getColumnIndex("orderEmployee")));
 			order.setVipCardno(c.getString(c.getColumnIndex("vipCardno")));
+			order.setDesc(c.getString(c.getColumnIndex("description")));
 			data.add(order);
 		}
 		if(c != null && !c.isClosed())
@@ -244,6 +245,7 @@ import com.android.volley.Response;
 				masterObj.put("BILLDATE", order.getOrderDate());
 				masterObj.put("C_RETAILTYPE_ID__NAME", order.getOrderType());
 				masterObj.put("C_VIP_ID__CARDNO", order.getVipCardno());
+				masterObj.put("DESCRIPTION", order.getDesc());
 				paramsInTransactions.put("masterobj", masterObj);  
 				
 				//detailobjs

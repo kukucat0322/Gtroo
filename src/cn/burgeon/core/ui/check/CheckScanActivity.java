@@ -176,8 +176,8 @@ public class CheckScanActivity extends BaseActivity {
         recodeNumTV = (TextView) findViewById(R.id.recodeNumTV);
         totalCountTV = (TextView) findViewById(R.id.totalCountTV);
 
-        okBtn = (Button) findViewById(R.id.okBtn);
-        okBtn.setOnClickListener(clickListener);
+        //okBtn = (Button) findViewById(R.id.okBtn);
+        //okBtn.setOnClickListener(clickListener);
 
         gatherBtn = (Button) findViewById(R.id.gatherBtn);
         reviewBtn = (Button) findViewById(R.id.reviewBtn);

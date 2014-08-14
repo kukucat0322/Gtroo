@@ -95,11 +95,11 @@ public class MemberListActivity extends BaseActivity {
 			member.setId(c.getInt(c.getColumnIndex("_id")));
 			member.setCardNum(c.getString(c.getColumnIndex("cardno")));
 			member.setName(c.getString(c.getColumnIndex("name")));
-			member.setiDentityCardNum(c.getString(c.getColumnIndex("idno")));
+			member.setiDentityCardNum("null".equals(c.getString(c.getColumnIndex("idno")))?"":c.getString(c.getColumnIndex("idno")));
 			member.setPhoneNum(c.getString(c.getColumnIndex("mobile")));
-			member.setBirthday(c.getString(c.getColumnIndex("birthday")));
+			member.setBirthday("null".equals(c.getString(c.getColumnIndex("birthday")))?"":c.getString(c.getColumnIndex("birthday")));
 			member.setEmployee(c.getString(c.getColumnIndex("employee")));
-			member.setEmail(c.getString(c.getColumnIndex("email")));
+			member.setEmail("null".equals(c.getString(c.getColumnIndex("email")))?"":c.getString(c.getColumnIndex("email")));
 			member.setCreateCardDate(c.getString(c.getColumnIndex("createTime")));
 			member.setType(c.getString(c.getColumnIndex("type")));
 			member.setSex(c.getString(c.getColumnIndex("sex")));

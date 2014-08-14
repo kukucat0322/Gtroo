@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
 import android.widget.EditText;
@@ -40,6 +41,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
+import cn.burgeon.core.bean.Employee;
 import cn.burgeon.core.bean.IntentData;
 import cn.burgeon.core.bean.Order;
 import cn.burgeon.core.bean.PayWay;
@@ -57,10 +59,11 @@ public class SalesSettleActivity extends BaseActivity {
 	ListView mListView;
 	Button settleBtn;
 	TextView payTV, counTV;
-	EditText orginET, disCounET, realityET;
+	EditText orginET, disCounET, realityET,salesSettleDescET;
 	ArrayList<Product> products;
-	String command, vipCardno,employee;
+	String command, vipCardno,employeeName,employeeID;
 	LinearLayout mPaywayLayout;
+	Employee emp;
 	
 	public EditText getOrginET() {
 		return orginET;
@@ -114,8 +117,10 @@ public class SalesSettleActivity extends BaseActivity {
 		products = iData.getProducts();
 		command = iData.getCommand();
 		vipCardno = iData.getVipCardno();
-		employee = iData.getEmployee();
-		Log.d("zhang.h", "command=" + command);
+		emp = iData.getEmployee();
+		employeeName = emp.getName();
+		employeeID = emp.getId();
+		Log.d("zhang.h", "emp=" + emp.getId());
 		for(Product pro : products){
 			pay += Float.parseFloat(pro.getMoney()) * Integer.parseInt(pro.getCount());
 			count += Integer.parseInt(pro.getCount());
@@ -184,6 +189,7 @@ public class SalesSettleActivity extends BaseActivity {
 			editText.setOnFocusChangeListener(focusChangeListener);
 			editText.setText(payway.getPayMoney());
 			mPaywayLayout.addView(item);
+			
 		}
 	}
 	
@@ -194,6 +200,7 @@ public class SalesSettleActivity extends BaseActivity {
 		public void onFocusChange(View view, boolean hasFocus) {
 			if(hasFocus){
 				Log.d(TAG, "view tag = " + view.getTag());
+				//((EditText)view).setSelectAllOnFocus(true);
 				float total = 0.0f;
 				float other = 0.0f;
 				for(int i = 0; i < mPaywayLayout.getChildCount(); i++){
@@ -229,6 +236,7 @@ public class SalesSettleActivity extends BaseActivity {
 		orginET = (EditText) findViewById(R.id.salesSettleOrginET);
 		disCounET = (EditText) findViewById(R.id.salesSettleDiscountET);
 		realityET = (EditText) findViewById(R.id.salesSettleRealityET);
+		salesSettleDescET = (EditText) findViewById(R.id.salesSettleDescET);
 	}
 	
 	View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -340,19 +348,20 @@ public class SalesSettleActivity extends BaseActivity {
         	uuid = UUID.randomUUID().toString();
         	Date currentTime = new Date();
         	db.execSQL("insert into c_settle('settleTime','type','count','money','employeeID','orderEmployee',"
-        			+ "'status','settleDate','settleMonth','vipCardno','orderno','settleUUID')"+
-        				" values(?,?,?,?,?,?,?,?,?,?,?,?)",
+        			+ "'status','settleDate','settleMonth','vipCardno','orderno','description''settleUUID')"+
+        				" values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
 					new Object[]{new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(currentTime),
 								getResources().getString(R.string.sales_settle_type),
 								count,
 								realityET.getText(),
-								employee,
-								employee,
+								employeeID,
+								employeeName,
 								getString(R.string.sales_settle_noup),
 								new SimpleDateFormat("yyyy-MM-dd").format(currentTime),
 								new SimpleDateFormat("yyyy-MM-dd").format(currentTime).substring(0, 7),
 								vipCardno,
 								getNo(),//销售单号
+								salesSettleDescET.getText().length() == 0?"":salesSettleDescET.getText().toString(),
 								uuid});
         	for(Product pro : products){
         		db.execSQL("insert into c_settle_detail('style','barcode','price','discount','orgdocno',"
@@ -420,6 +429,7 @@ public class SalesSettleActivity extends BaseActivity {
 				order.setOrderMoney(c.getString(c.getColumnIndex("money")));
 				order.setSaleAsistant(c.getString(c.getColumnIndex("orderEmployee")));
 				order.setVipCardno(c.getString(c.getColumnIndex("vipCardno")));
+				order.setDesc(c.getString(c.getColumnIndex("description")));
 				new Thread(new RequestRunable(order)).start();
 			}
 		}
@@ -600,6 +610,7 @@ public class SalesSettleActivity extends BaseActivity {
 				masterObj.put("BILLDATE", order.getOrderDate());
 				masterObj.put("C_RETAILTYPE_ID__NAME", order.getOrderType());
 				masterObj.put("C_VIP_ID__CARDNO", order.getVipCardno());
+				masterObj.put("DESCRIPTION", order.getDesc());
 				paramsInTransactions.put("masterobj", masterObj);  
 				
 				//detailobjs

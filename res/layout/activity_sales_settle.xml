@@ -64,6 +64,27 @@
                 android:layout_gravity="right"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
         </LinearLayout>
+        
+               <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" 
+            android:background="@drawable/corners_bg">
+
+			<TextView
+                android:layout_width="0dp"
+                android:layout_weight="0.28"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="@string/description"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <EditText
+                android:id="@+id/salesSettleDescET"
+                android:layout_width="0dp"
+                android:layout_weight="0.72"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -121,15 +142,6 @@
                 android:layout_height="wrap_content"
                 android:focusable="false"
                 android:focusableInTouchMode="false"/>
-        </LinearLayout>
-        
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" 
-            android:background="@drawable/corners_bg">
-
-
         </LinearLayout>
         
         <LinearLayout

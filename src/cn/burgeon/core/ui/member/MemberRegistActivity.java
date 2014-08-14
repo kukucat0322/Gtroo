@@ -290,6 +290,7 @@ public class MemberRegistActivity extends BaseActivity {
 	Member vip = null;
 	public void save(){
 		if(validate()){
+			saveBtn.setClickable(false);
 			vip = new Member();
 	        vip.setCardNum(cardNOET.getText().toString().trim());
 	        vip.setName(nameET.getText().toString().trim());
@@ -392,6 +393,10 @@ public class MemberRegistActivity extends BaseActivity {
 						msg.obj = result;
 						msg.what = 2;
 						handler.dispatchMessage(msg);
+					}else{
+						stopProgressDialog();
+						UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+						UndoBarController.show(MemberRegistActivity.this, result.getMessage(), null, MESSAGESTYLE);
 					}
 				}
 			},new Response.ErrorListener() {
@@ -540,6 +545,7 @@ public class MemberRegistActivity extends BaseActivity {
 				}
 				break;
 			case 2:
+				saveBtn.setClickable(true);
 				updateStatus();
                 stopProgressDialog();
 				RequestResult result =  (RequestResult) msg.obj;

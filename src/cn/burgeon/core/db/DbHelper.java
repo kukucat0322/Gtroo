@@ -21,7 +21,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		db.execSQL("CREATE TABLE IF NOT EXISTS c_settle" +  
                 "(_id INTEGER PRIMARY KEY AUTOINCREMENT, orderno VARCHAR,vipCardno VARCHAR,"+
 				"settleTime VARCHAR, type VARCHAR,count VARCHAR,money VARCHAR,"
-				+ "orderEmployee VARCHAR,employeeID VARCHAR,status VARCHAR,settleDate VARCHAR,"
+				+ "orderEmployee VARCHAR,employeeID VARCHAR,status VARCHAR,description varchar,settleDate VARCHAR,"
 				+ "settleMonth VARCHAR,settleUUID VARCHAR)");
 		
 		db.execSQL("CREATE TABLE IF NOT EXISTS c_settle_detail" +  

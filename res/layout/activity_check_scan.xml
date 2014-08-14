@@ -96,7 +96,7 @@
                 android:layout_weight="0.9"
                 android:singleLine="true"
                 android:imeOptions="actionSearch"/>
-
+			
             <Button
                 android:id="@+id/okBtn"
                 android:layout_width="wrap_content"

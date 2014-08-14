@@ -15,16 +15,16 @@ public class IntentData implements Parcelable {
     private String user;
     private String command;
     private String vipCardno;
-    private String employee;
+    private Employee employee;
 
 	private ArrayList<AllotInDetail> allotInDetails;
     private ArrayList<Product> products;
     
-    public String getEmployee() {
+    public Employee getEmployee() {
 		return employee;
 	}
 
-	public void setEmployee(String employee) {
+	public void setEmployee(Employee employee) {
 		this.employee = employee;
 	}
 
@@ -87,7 +87,7 @@ public class IntentData implements Parcelable {
         dest.writeString(this.user);
         dest.writeString(this.command);
         dest.writeString(this.vipCardno);
-        dest.writeString(this.employee);
+        dest.writeSerializable(this.employee);
         dest.writeTypedList(allotInDetails);
         dest.writeTypedList(products);
     }
@@ -100,7 +100,7 @@ public class IntentData implements Parcelable {
         this.user = in.readString();
         this.command = in.readString();
         this.vipCardno = in.readString();
-        this.employee = in.readString();
+        this.employee = (Employee) in.readSerializable();
 
         this.allotInDetails = new ArrayList<AllotInDetail>();
         in.readTypedList(allotInDetails, AllotInDetail.CREATOR);

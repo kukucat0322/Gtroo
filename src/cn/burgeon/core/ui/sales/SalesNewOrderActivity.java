@@ -33,6 +33,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -45,6 +46,7 @@ import android.widget.TextView.OnEditorActionListener;
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
 import cn.burgeon.core.adapter.SalesNewOrderAdapter;
+import cn.burgeon.core.bean.Employee;
 import cn.burgeon.core.bean.IntentData;
 import cn.burgeon.core.bean.Member;
 import cn.burgeon.core.bean.Product;
@@ -208,9 +210,23 @@ public class SalesNewOrderActivity extends BaseActivity {
 			public void onNothingSelected(AdapterView<?> arg0) {}
 		});*/
         salesAssistantSP = (Spinner) findViewById(R.id.salesAssistantET);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(SalesNewOrderActivity.this, android.R.layout.simple_spinner_item, getEmployees());
+        ArrayAdapter<Employee> adapter = new ArrayAdapter<Employee>(SalesNewOrderActivity.this, android.R.layout.simple_spinner_item, getEmployees());
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         salesAssistantSP.setAdapter(adapter);
+        salesAssistantSP.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> arg0, View arg1,
+					int arg2, long arg3) {
+				Log.d(TAG, ((Employee)salesAssistantSP.getSelectedItem()).getId());
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
         
         commonRecordnum = (TextView) findViewById(R.id.sales_common_recordnum);
         commonCount = (TextView) findViewById(R.id.sales_common_count);
@@ -246,6 +262,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 				}else{
 					//temp.clear();
 					//temp.addAll(data);
+					if(data.size() == 0)
 					forwardActivity(MemberSearchActivity.class);
 				}
 				break;
@@ -255,7 +272,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 	                IntentData intentData = new IntentData();
 	                intentData.setProducts(data);
 	            	intentData.setCommand(updateID);
-	            	intentData.setEmployee(salesAssistantSP.getSelectedItem().toString());
+	            	intentData.setEmployee((Employee)salesAssistantSP.getSelectedItem());
 	            	intentData.setVipCardno(searchedMember != null?searchedMember.getCardNum():"");
 	                forwardActivity(SalesSettleActivity.class, intentData,SALESSETTLE);
 				}else{
@@ -410,14 +427,14 @@ public class SalesNewOrderActivity extends BaseActivity {
 				pro.setSalesType(3);
 				break;
 			case 3://退货
-				pro.setCount("-1");
+				pro.setCount("1");
 				pro.setSalesType(2);
 				if(cardNoET.getText().length() > 0){
 					pro.setMoney(String.format("%.2f",price * vipDiscount));
 				}else{
 					//策略
 					if(!isFitPolicy(pro))
-					pro.setMoney(String.format("%.2f",price));
+					pro.setMoney("-"+String.format("%.2f",price));
 				}
 				break;
 			default:
@@ -602,18 +619,17 @@ public class SalesNewOrderActivity extends BaseActivity {
     	dialog.show();
     }
     
-    private String[] getEmployees() {
-		Cursor c = db.rawQuery("select name from employee",null);
+    private List<Employee> getEmployees() {
+		Cursor c = db.rawQuery("select id, name from employee",null);
+		List<Employee> employees = new ArrayList<Employee>();
 		if(c!=null){
-			int i = 0;
-			String[] employees = new String[c.getCount()];
 			while(c.moveToNext()){
-				employees[i++] = c.getString(c.getColumnIndex("name"));
+				employees.add(new Employee(c.getString(c.getColumnIndex("id")),c.getString(c.getColumnIndex("name"))));
 			}
 			if(!c.isClosed()) c.close();
 			return employees;
 		}
-		return new String[]{};
+		return employees;
 	}
     
     private void showOrginOrdernoTips(final String barcode){
