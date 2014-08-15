@@ -236,7 +236,7 @@ public class MemberRegistActivity extends BaseActivity {
         }
     }
 	
-    String phoneRegExp = "^[1]([3][0-9]{1}|59|58|88|89)[0-9]{8}$";
+    String phoneRegExp = "^[1]([3][0-9]{1}|50|59|58|88|89)[0-9]{8}$";
     String identityRegExp = "^[1-9]\\d{5}[1-9]\\d{3}((0\\d)|(1[0-2]))(([0|1|2]\\d)|3[0-1])\\d{4}$";
 	
 	private boolean isRequired(Editable src){

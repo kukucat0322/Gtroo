@@ -31,6 +31,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnFocusChangeListener;
@@ -186,21 +187,18 @@ public class SalesSettleActivity extends BaseActivity {
 			((TextView)item.getChildAt(0)).setText(payway.getPayWay());
 			EditText editText = (EditText)item.getChildAt(2);
 			editText.setTag(payway.getId());
-			editText.setOnFocusChangeListener(focusChangeListener);
+			editText.setOnTouchListener(touchListener);
 			editText.setText(payway.getPayMoney());
 			mPaywayLayout.addView(item);
-			
 		}
 	}
 	
-	
-	View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
-		
+	View.OnTouchListener touchListener = new View.OnTouchListener() {
+
 		@Override
-		public void onFocusChange(View view, boolean hasFocus) {
-			if(hasFocus){
-				Log.d(TAG, "view tag = " + view.getTag());
-				//((EditText)view).setSelectAllOnFocus(true);
+		public boolean onTouch(View view, MotionEvent event) {
+			if(event.getAction() == MotionEvent.ACTION_DOWN){
+				Log.d(TAG, "on onTouch view tag = " + view.getTag());
 				float total = 0.0f;
 				float other = 0.0f;
 				for(int i = 0; i < mPaywayLayout.getChildCount(); i++){
@@ -215,8 +213,8 @@ public class SalesSettleActivity extends BaseActivity {
 					total = Float.parseFloat(realityET.getText().toString());
 				String currPayStr = "0.00".equals(String.format("%.2f", total - other))?"":String.format("%.2f", total - other);
 				((EditText)view).setText(currPayStr);
-				
 			}
+			return false;
 		}
 	};
 
@@ -348,7 +346,7 @@ public class SalesSettleActivity extends BaseActivity {
         	uuid = UUID.randomUUID().toString();
         	Date currentTime = new Date();
         	db.execSQL("insert into c_settle('settleTime','type','count','money','employeeID','orderEmployee',"
-        			+ "'status','settleDate','settleMonth','vipCardno','orderno','description''settleUUID')"+
+        			+ "'status','settleDate','settleMonth','vipCardno','orderno','description','settleUUID')"+
         				" values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
 					new Object[]{new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(currentTime),
 								getResources().getString(R.string.sales_settle_type),

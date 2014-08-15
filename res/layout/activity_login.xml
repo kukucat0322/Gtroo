@@ -50,6 +50,8 @@
         android:inputType="textPassword"
         android:maxLength="20"
         android:hint="@string/input_psw_hint"/>
+    
+    <!-- android:text="bosxekaifa" -->
 
     <ImageView
         android:id="@+id/userIV"

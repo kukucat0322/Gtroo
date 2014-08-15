@@ -28,6 +28,7 @@
         android:gravity="center"
         android:layout_gravity="center"
         android:inputType="numberDecimal"
+        android:selectAllOnFocus="true"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <View

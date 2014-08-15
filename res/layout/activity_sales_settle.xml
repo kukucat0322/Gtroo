@@ -181,13 +181,9 @@
             android:id="@+id/wrapPayway"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"/>
-        <!--  
-        <ListView
-            android:id="@+id/settleLV"
-            android:layout_width="match_parent"
-            android:layout_height="185dp" />
-            -->
+            android:orientation="vertical">
+            
+        </LinearLayout>
     </LinearLayout> 
 
     <LinearLayout
