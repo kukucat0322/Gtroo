@@ -1,6 +1,5 @@
 package cn.burgeon.core.ui.sales;
 
-import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,8 +20,8 @@ import org.json.JSONObject;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -51,9 +50,7 @@ import cn.burgeon.core.bean.IntentData;
 import cn.burgeon.core.bean.Member;
 import cn.burgeon.core.bean.Product;
 import cn.burgeon.core.ui.BaseActivity;
-import cn.burgeon.core.ui.LoginActivity;
 import cn.burgeon.core.ui.member.MemberSearchActivity;
-import cn.burgeon.core.ui.system.SystemConfigurationActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
 import cn.burgeon.core.utils.ScreenUtils;
 
@@ -93,6 +90,7 @@ public class SalesNewOrderActivity extends BaseActivity {
         if(bundle != null){
         	searchedMember = bundle.getParcelable("searchedMember");
         	Log.d(TAG, "searchedMember = " + searchedMember ==null?"null" : searchedMember + "");
+        	Log.d(TAG, "viptypeid = " + searchedMember.getTypeid());
         	if(searchedMember != null){
         		cardNoET.setText(searchedMember.getCardNum() + "\\" + searchedMember.getDiscount());
         		if(data.size() > 0){
@@ -349,7 +347,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 	}
 	
 	private void normalSales(String barcode){
-			String sql = "select a.style,b.style_name,c.clrname,d.sizename,e.fprice"
+			String sql = "select a.style,b.attrib1,b.style_name,c.clrname,d.sizename,e.fprice"
 					+" from tc_sku as a"
 					+" left join tc_style as b"
 					+" on a.style = b.style"
@@ -382,26 +380,28 @@ public class SalesNewOrderActivity extends BaseActivity {
 		Product pro = new Product();
 		pro.setBarCode(barcode);
 		pro.setEmployee(salesAssistantSP.getSelectedItem().toString());
+		pro.setBrand(c.getString(c.getColumnIndex("attrib1")));
 		pro.setStyle(c.getString(c.getColumnIndex("style")));
 		pro.setName(c.getString(c.getColumnIndex("style_name")));
 		pro.setPrice(c.getString(c.getColumnIndex("fprice")));
 		pro.setColor(c.getString(c.getColumnIndex("clrname")));
 		pro.setSize(c.getString(c.getColumnIndex("sizename")));
-		if(cardNoET.getText().length() > 0)
+/*		if(cardNoET.getText().length() > 0)
 			pro.setDiscount(searchedMember.getDiscount());
 		else
-			pro.setDiscount("1.0");
+			pro.setDiscount("1.0");*/
 		pro.setCount("1");
 		float price = Float.parseFloat(pro.getPrice());
-		//商品折扣
-		//float proDiscount = Float.parseFloat(pro.getDiscount()) / 100;
-		//会员折扣
 		float vipDiscount = 0.0f;
-		if(cardNoET.getText().length() > 0)
-			vipDiscount = Float.parseFloat(searchedMember.getDiscount());
-//		Log.d(TAG, "proDiscount=" + proDiscount + "      vipDiscount=" + vipDiscount);
-//		Log.d(TAG, "salesTypeSP=" + salesTypeSP.getSelectedItemPosition());
-//		Log.d(TAG, "price=" + pro.getPrice());
+		if(cardNoET.getText().length() > 0){
+			Cursor c1 = db.rawQuery("select discount from tc_vipTypeDis where vtpid = ? and brandid = ?", new String[]{searchedMember.getTypeid(),pro.getBrand()});
+			if(c1.moveToFirst()){
+				vipDiscount = Float.parseFloat(c1.getString(0));
+			}else{
+				vipDiscount = Float.parseFloat(searchedMember.getDiscount());
+			}
+			if(c1!=null && !c1.isClosed()) c1.close();
+		}
 		//   1:正常零售,2:退货,
 		//   3:赠品,4:全额,
 		switch (salesTypeSP.getSelectedItemPosition()) {
@@ -411,7 +411,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 				}else{
 					//策略
 					if(!isFitPolicy(pro))
-					pro.setMoney(String.format("%.2f",price));
+						pro.setMoney(String.format("%.2f",price));
 				}
 				pro.setSalesType(1);
 				break;
@@ -440,6 +440,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 			default:
 				break;
 		}
+		pro.setDiscount(String.format("%.2f", Float.parseFloat(pro.getMoney())/price));
 		items.add(pro);
 		return items;
 	}
@@ -456,7 +457,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 			flag1 = true;
 			flowNO = c.getString(c.getColumnIndex("flowno"));
 			money = c.getString(c.getColumnIndex("exexcontent"));
-			pro.setMoney(money);
+			pro.setMoney(String.format("%.2f", Float.parseFloat(money)));
 		} else return false;
 		//2.策略有没有本店
 		c = db.rawQuery("select * from TdefPosSkuRel where store = ?", new String[]{App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey)});

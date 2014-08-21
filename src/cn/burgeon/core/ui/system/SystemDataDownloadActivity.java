@@ -71,7 +71,8 @@ public class SystemDataDownloadActivity extends BaseActivity{
 	
 	//会员类型下载地址								
 	private final String vipTypeURL        =    baseUrl + "/tc_vip.zip";
-	private final String[]vipTypeURLs      =    {vipTypeURL};
+	private final String vipTypeDisURL     =    baseUrl + "/c_viptype_dis.zip";
+	private final String[]vipTypeURLs      =    {vipTypeURL,vipTypeDisURL};
 	
 	//单品策略下载地址
 	private final String TdefPosSkuURL     =    baseUrl + "/TdefPosSku.zip";
@@ -106,7 +107,8 @@ public class SystemDataDownloadActivity extends BaseActivity{
 	
 	//会员类型
 	private final String vipTypeDownloadFileName        = "vipType.zip";
-	private final String[]vipTypeDownloadFileNames      = {vipTypeDownloadFileName};
+	private final String vipTypeDisDownloadFileName     = "vipTypeDis.zip";
+	private final String[]vipTypeDownloadFileNames      = {vipTypeDownloadFileName,vipTypeDisDownloadFileName};
 	
 	//单品策略
 	private final String TdefPosSkuDownloadFileName     = "TdefPosSku.zip";
@@ -820,9 +822,10 @@ public class SystemDataDownloadActivity extends BaseActivity{
 
 		if(filePath.equals(productDataUnZipFiles[5])){
 			if(LocalDebug) Log.d(TAG,"插tc_payway表");
-			try{
-				db.execSQL("insert into tc_payway(_id,name) values (?,?)", 
-						new Object[]{temp[0],temp[1].substring(2)});
+			try{//iscash INTEGER, isvip INTEGER, iszhaol INTEGER
+				db.execSQL("insert into tc_payway(_id,name,iscash,isvip,iszhaol) values (?,?,?,?,?)", 
+						new Object[]{temp[0],temp[1].substring(2),temp[2].substring(2),temp[3].substring(2),
+						temp[4].substring(2)});
 			}catch(Exception e){
 				if(LocalDebug) Log.d(TAG,"插tc_payway表失败！");
 			}			
@@ -837,6 +840,16 @@ public class SystemDataDownloadActivity extends BaseActivity{
 				if(LocalDebug) Log.d(TAG,"插VipType表失败！");
 			}
 			
+		}
+		
+		if(filePath.equals(vipTypeUnZipFiles[1])){
+			if(LocalDebug) Log.d(TAG,"插vipTypeDis表");
+			try{
+				db.execSQL("insert into tc_vipTypeDis(vtpid,discount,brandid) values (?,?,?)", 
+						new Object[]{temp[0],temp[1].substring(2),temp[2].substring(2)});
+			}catch(Exception e){
+				if(LocalDebug) Log.d(TAG,"插VipTypeDis表失败！");
+			}
 		}
 		
 		if(filePath.equals(itemStrategyUnZipFiles[0])){
@@ -1243,40 +1256,40 @@ public class SystemDataDownloadActivity extends BaseActivity{
 				//显示下载开始消息
 				case userDataDownloadStartMsg:
 					userDataProgressBar.setVisibility(View.VISIBLE);
-					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsStartDownloadUserData, Toast.LENGTH_SHORT).show();
+					//Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsStartDownloadUserData, Toast.LENGTH_SHORT).show();
 					break;
 				case productDataDownloadStartMsg:
 					productDataProgressBar.setVisibility(View.VISIBLE);
-					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsStartDownloadProductData, Toast.LENGTH_SHORT).show();
+					//Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsStartDownloadProductData, Toast.LENGTH_SHORT).show();
 					break;
 				case vipTypeDownloadStartMsg:
 					vipTypeProgressBar.setVisibility(View.VISIBLE);
-					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsStartDownloadVipType, Toast.LENGTH_SHORT).show();
+					//Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsStartDownloadVipType, Toast.LENGTH_SHORT).show();
 					break;
 				case itemStrategyDownloadStartMsg:
 					itemStrategyProgressBar.setVisibility(View.VISIBLE);
-					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsStartDownloadItemStrategy, Toast.LENGTH_SHORT).show();
+					//Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsStartDownloadItemStrategy, Toast.LENGTH_SHORT).show();
 					break;
 				case systemParamDownloadStartMsg:
 					systemParamProgressBar.setVisibility(View.VISIBLE);
-					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsStartDownloadSystemParam, Toast.LENGTH_SHORT).show();
+					//Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsStartDownloadSystemParam, Toast.LENGTH_SHORT).show();
 					break;
 					
 				//显示下载完成消息
 				case userDataDownloadFinishMsg:
-					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsUserDataDownloadFinish, Toast.LENGTH_SHORT).show();
+					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsUserDataDownloadFinish, 400).show();
 					break;
 				case productDataDownloadFinishMsg:
-					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsProductDataDownloadFinish, Toast.LENGTH_SHORT).show();
+					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsProductDataDownloadFinish, 400).show();
 					break;
 				case vipTypeDownloadFinishMsg:
-					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsVipTypeDownloadFinish, Toast.LENGTH_SHORT).show();
+					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsVipTypeDownloadFinish, 400).show();
 					break;
 				case itemStrategyDownloadFinishMsg:
-					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsItemStrategyDownloadFinish, Toast.LENGTH_SHORT).show();
+					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsItemStrategyDownloadFinish, 400).show();
 					break;
 				case systemParamDownloadFinishMsg:
-					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsSystemParamDownloadFinish, Toast.LENGTH_SHORT).show();
+					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsSystemParamDownloadFinish, 400).show();
 					break;
 					
 				//设置下载进度		
@@ -1311,7 +1324,7 @@ public class SystemDataDownloadActivity extends BaseActivity{
 					break;	
 				}
 				
-				//显示开始解压信息
+/*				//显示开始解压信息
 				case userDataStartUnZipMsg:{
 					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsStartUnZipUserData, Toast.LENGTH_SHORT).show();
 					break;	
@@ -1353,16 +1366,16 @@ public class SystemDataDownloadActivity extends BaseActivity{
 				case systemParamUnZipFinishMsg:{
 					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsUnZipSystemParamFinish, Toast.LENGTH_SHORT).show();
 					break;	
-				}
+				}*/
 				//显示网络状态消息
-				case networkAvailableMsg:{
+				/*case networkAvailableMsg:{
 					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsNetworkAvailable, Toast.LENGTH_SHORT).show();
 					break;	
 				}
 				case networkUnAvailableMsg:{
 					Toast.makeText(SystemDataDownloadActivity.this, R.string.tipsNetworkUnAvailable, Toast.LENGTH_SHORT).show();
 					break;	
-				}
+				}*/
 			}
 			
 		}

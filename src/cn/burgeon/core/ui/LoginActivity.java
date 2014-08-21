@@ -227,6 +227,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 	                	if(verifyUserAndPswd()){
 	                		App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.user_key, userSpinner.getSelectedItem().toString());
 	                		App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.user_pswd, pswET.getText().toString());
+	                		//forwardActivity(SystemActivity.class);
 	                		login();
 	                	}
 	                	else
@@ -244,8 +245,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     	sendRequest(constructParams(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.storeNumberKey)),new Response.Listener<String>() {
 			@Override
 			public void onResponse(String response) {
-				Log.d(TAG, response);
-				if(!TextUtils.isEmpty(response)){
+				Log.d("xxee", response);
+				if(!"null".equals(response) && !TextUtils.isEmpty(response)){
 					RequestResult result = parseResult(response);
 					//请求成功，更新记录状态
 					if("0".equals(result.getCode())){

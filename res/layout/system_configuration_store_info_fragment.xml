@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:minEms="12"
         android:completionThreshold="1"
-        android:hint="请输入门店名称，会自动提示"
+        android:hint="请输入门店名称"
         android:dropDownAnchor="@+id/storeNoEditText"
         android:layout_toRightOf="@+id/storeNoTextView"
         android:layout_alignBaseline="@+id/storeNoTextView"

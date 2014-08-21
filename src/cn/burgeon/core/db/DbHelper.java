@@ -16,7 +16,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		db.execSQL("CREATE TABLE IF NOT EXISTS c_vip" +  
                 "(_id INTEGER PRIMARY KEY AUTOINCREMENT, cardno VARCHAR UNIQUE,status varchar,"+
 				"name VARCHAR, sex VARCHAR,idno VARCHAR,mobile VARCHAR,birthday VARCHAR,storeID INTEGER,customerID INTEGER,"+
-                "employee VARCHAR,email VARCHAR,createTime VARCHAR,type VARCHAR,discount varchar)");
+                "employee VARCHAR,email VARCHAR,createTime VARCHAR,type VARCHAR,typeID VARCHAR,discount varchar)");
 		
 		db.execSQL("CREATE TABLE IF NOT EXISTS c_settle" +  
                 "(_id INTEGER PRIMARY KEY AUTOINCREMENT, orderno VARCHAR,vipCardno VARCHAR,"+
@@ -91,9 +91,11 @@ public class DbHelper extends SQLiteOpenHelper {
 		
 		db.execSQL("CREATE TABLE IF NOT EXISTS tc_vip(_id INTEGER PRIMARY KEY,name varchar,discount varchar,rate varchar)");
 		
+		db.execSQL("CREATE TABLE IF NOT EXISTS tc_vipTypeDis(vtpid varchar,discount varchar,brandid varchar)");
+		
 		db.execSQL("CREATE TABLE IF NOT EXISTS c_payway_detail(_id INTEGER PRIMARY KEY,paywayID INTEGER,name varchar,money varchar,settleUUID VARCHAR)");
 		
-		db.execSQL("CREATE TABLE IF NOT EXISTS tc_payway(_id INTEGER PRIMARY KEY,name varchar)");
+		db.execSQL("CREATE TABLE IF NOT EXISTS tc_payway(_id INTEGER PRIMARY KEY,name varchar,iscash INTEGER, isvip INTEGER, iszhaol INTEGER)");
 		
 		db.execSQL("CREATE TABLE IF NOT EXISTS TdefPosSku(flowno INTEGER PRIMARY KEY,posdisname varchar,describes varchar,datebeg varchar,dateEnd varchar,novipdisc varchar,creater varchar,reatetime varchar)");
 		

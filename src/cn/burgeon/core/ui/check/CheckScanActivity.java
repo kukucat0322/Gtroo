@@ -215,7 +215,7 @@ public class CheckScanActivity extends BaseActivity {
         	return;
         }
         if (c.moveToFirst()) {
-            Product currProduct = parseSQLResult(c);
+            Product currProduct = parseSQLResult(c,barcodeText);
             // 生成ProductList
             generateProductList(currProduct);
             // 刷新列表
@@ -226,10 +226,10 @@ public class CheckScanActivity extends BaseActivity {
             c.close();
     }
 
-    private Product parseSQLResult(Cursor c) {
+    private Product parseSQLResult(Cursor c, String barcode) {
         Product pro = new Product();
         pro.setShelf(shelfET.getText().toString());
-        pro.setBarCode(barcodeET.getText().toString());
+        pro.setBarCode(barcode);
         pro.setName(c.getString(c.getColumnIndex("style_name")));
         pro.setPrice(c.getString(c.getColumnIndex("fprice")));
         pro.setColor(c.getString(c.getColumnIndex("clrname")));

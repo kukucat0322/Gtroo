@@ -172,7 +172,7 @@ public class MemberSearchActivity extends BaseActivity {
             JSONObject paramsTable = new JSONObject();
             paramsTable.put("table", "12899");
             paramsTable.put("columns", new JSONArray().put("cardno").put("vipname")
-            		.put("C_VIPTYPE_ID:DISCOUNT").put("VIPSTATE").put("birthday"));
+            		.put("C_VIPTYPE_ID:DISCOUNT").put("VIPSTATE").put("birthday").put("C_VIPTYPE_ID"));
             JSONObject paramsCombine = new JSONObject();
             
             if(cardNoET.getText().length() > 0 && mobileET.getText().length() == 0){
@@ -266,13 +266,14 @@ public class MemberSearchActivity extends BaseActivity {
 			for(int i = 0; i < rows.length(); i++){
 				String row = rows.get(i).toString();
 				String[] rowArr = row.split(",");
-				//["7877638","hhhv",0.5,"是",19850311]
+				//["123321","yyuu",0.5,"是",null,67]
 				member = new Member();
 				member.setCardNum(rowArr[0].substring(2,rowArr[0].length()-1));
 				member.setName(rowArr[1].substring(1,rowArr[1].length()-1));
 				member.setDiscount(rowArr[2]);
 				member.setVipState(rowArr[3].substring(1,rowArr[3].length()-1));
-				member.setBirthday("null".equals(rowArr[4].substring(0,rowArr[4].length()-1))?"":rowArr[4].substring(0,rowArr[4].length()-1));
+				member.setBirthday("null".equals(rowArr[4])?"":rowArr[4]);
+				member.setTypeid("null".equals(rowArr[5].substring(0,rowArr[5].length()-1))?"":rowArr[5].substring(0,rowArr[5].length()-1));
 				data.add(member);
 			}
 			if(member != null)

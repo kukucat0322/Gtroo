@@ -46,8 +46,8 @@ import com.android.volley.toolbox.StringRequest;
  */
 public class BaseActivity extends Activity {
     public final static String PAR_KEY = "ParcelableKey";
-    private static final String SIPKEY = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key);
-    private static final String SIPPSWD = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_pswd);
+    //private static final String SIPKEY = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key);
+    //private static final String SIPPSWD = App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_pswd);
     private SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private String SIPPSWDMD5;
 
@@ -65,7 +65,7 @@ public class BaseActivity extends Activity {
         mApp = (App) getApplication();
         db = mApp.getDB();
         SDF.setLenient(false);
-        SIPPSWDMD5 = MD5(SIPPSWD);
+        //SIPPSWDMD5 = MD5(SIPPSWD);
     }
     
     @Override
@@ -155,9 +155,12 @@ public class BaseActivity extends Activity {
                 String tt = getSDF().format(new Date());
 
                 //appKey,时间戳,MD5签名
-                params.put("sip_appkey", getSipkey());
+                Log.d("Base", "sip_appkey:" + getSipkey());
+                Log.d("Base", "sip_timestamp:" + tt);
+                Log.d("Base", "sip_sign:" + MD5(getSipkey() + tt + getSIPPSWDMD5()));
+                params.put("sip_appkey", App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key));
                 params.put("sip_timestamp", tt);
-                params.put("sip_sign", MD5(getSipkey() + tt + getSIPPSWDMD5()));
+                params.put("sip_sign", MD5(getSipkey() + tt + MD5(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_pswd))));
                 return params;
             }
         };
@@ -243,11 +246,11 @@ public class BaseActivity extends Activity {
 	}
 	
 	public static String getSipkey() {
-        return SIPKEY;
+        return App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_key);
     }
 
     public static String getSippswd() {
-        return SIPPSWD;
+        return App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_pswd);
     }
 
     public SimpleDateFormat getSDF() {
@@ -255,7 +258,7 @@ public class BaseActivity extends Activity {
     }
 
     public String getSIPPSWDMD5() {
-        return SIPPSWDMD5;
+        return MD5(App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.user_pswd));
     }
     
     public String MD5(String s) {

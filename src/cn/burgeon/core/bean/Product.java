@@ -18,6 +18,7 @@ public class Product implements Parcelable {
     private String style;
     private String orgorderNO;
     private String employee;
+    private String brand;
     private int salesType;
     public int getSalesType() {
 		return salesType;
@@ -29,6 +30,14 @@ public class Product implements Parcelable {
 
 	public String getEmployee() {
 		return employee;
+	}
+
+	public String getBrand() {
+		return brand;
+	}
+
+	public void setBrand(String brand) {
+		this.brand = brand;
 	}
 
 	public void setEmployee(String employee) {
@@ -158,6 +167,7 @@ public class Product implements Parcelable {
         dest.writeString(this.size);
         dest.writeString(this.orgorderNO);
         dest.writeString(this.employee);
+        dest.writeString(this.brand);
         dest.writeInt(this.salesType);
     }
 
@@ -177,6 +187,7 @@ public class Product implements Parcelable {
         this.size = in.readString();
         this.orgorderNO = in.readString();
         this.employee = in.readString();
+        this.brand = in.readString();
         this.salesType = in.readInt();
     }
 

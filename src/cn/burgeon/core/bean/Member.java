@@ -18,8 +18,16 @@ public class Member implements Parcelable{
 	private String yue;
 	private String status;
 	private String vipState;
+	private String typeid;
 	private int customerID;
 	private int storeID;
+
+	public String getTypeid() {
+		return typeid;
+	}
+	public void setTypeid(String typeid) {
+		this.typeid = typeid;
+	}
 	public String getVipState() {
 		return vipState;
 	}
@@ -163,6 +171,7 @@ public class Member implements Parcelable{
 		dest.writeString(this.createCardDate);
 		dest.writeString(this.employee);
 		dest.writeString(this.discount);
+		dest.writeString(this.typeid);
 	}
 	
 	
@@ -180,6 +189,7 @@ public class Member implements Parcelable{
     	this.createCardDate=in.readString();
     	this.employee=in.readString();
     	this.discount=in.readString();
+    	this.typeid=in.readString();
 	}
 
 

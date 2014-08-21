@@ -166,7 +166,11 @@ public class SalesSettleActivity extends BaseActivity {
 		realityET.setText(String.format("%.2f", pay));
 		ArrayList<PayWay> pays = new ArrayList<PayWay>();
 		if("unknow".equals(command) || null == command){
-			Cursor c = db.rawQuery("select * from tc_payway where _id != ?", new String[]{"26"});
+			String sql = null;
+			if(!TextUtils.isEmpty(vipCardno))
+				sql = "select * from tc_payway where _id != 26";
+			else sql = "select * from tc_payway where _id != 26 and isvip = 0";
+			Cursor c = db.rawQuery(sql, null);
 			while(c.moveToNext()){
 				if(27 == c.getInt(0))
 					pays.add(new PayWay(c.getInt(0), c.getString(1), String.format("%.2f",pay)));
