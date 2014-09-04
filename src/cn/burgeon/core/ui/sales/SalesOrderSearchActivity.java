@@ -57,9 +57,9 @@ public class SalesOrderSearchActivity extends BaseActivity {
         TextView currTimeTV = (TextView) findViewById(R.id.currTimeTV);
         currTimeTV.setText(getCurrDate());
 
-        HorizontalScrollView hsv = (HorizontalScrollView) findViewById(R.id.hsv);
-        ViewGroup.LayoutParams params = hsv.getLayoutParams();
-        params.height = (int) ScreenUtils.getAllotInLVHeight(this);
+//        HorizontalScrollView hsv = (HorizontalScrollView) findViewById(R.id.hsv);
+//        ViewGroup.LayoutParams params = hsv.getLayoutParams();
+//        params.height = (int) ScreenUtils.getAllotInLVHeight(this);
         
         recodeNumTV = (TextView) findViewById(R.id.recodeNumTV);
     	mList = (ListView) findViewById(R.id.salesOrderLV);

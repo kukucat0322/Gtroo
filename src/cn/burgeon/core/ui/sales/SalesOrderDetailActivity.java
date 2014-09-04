@@ -77,9 +77,9 @@ public class SalesOrderDetailActivity extends BaseActivity {
         TextView currTimeTV = (TextView) findViewById(R.id.currTimeTV);
         currTimeTV.setText(getCurrDate());
 
-        HorizontalScrollView hsv = (HorizontalScrollView) findViewById(R.id.hsv);
-        ViewGroup.LayoutParams params = hsv.getLayoutParams();
-        params.height = (int) ScreenUtils.getAllotInDetailLVHeight(this)-100;
+//        HorizontalScrollView hsv = (HorizontalScrollView) findViewById(R.id.hsv);
+//        ViewGroup.LayoutParams params = hsv.getLayoutParams();
+//        params.height = (int) ScreenUtils.getAllotInDetailLVHeight(this)-100;
         
         commonRecordnum = (TextView) findViewById(R.id.sales_common_recordnum);
         commonCount = (TextView) findViewById(R.id.sales_common_count);
