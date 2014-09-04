@@ -125,6 +125,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="0.9"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
                 android:inputType="numberDecimal"/>
             
             <TextView
@@ -140,6 +141,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
                 android:focusable="false"
                 android:focusableInTouchMode="false"/>
         </LinearLayout>
