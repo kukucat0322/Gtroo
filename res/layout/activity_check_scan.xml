@@ -86,7 +86,7 @@
                 android:text="@string/barcode"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <!-- ZHJ01YL -->
+            <!-- CG001R60, ZHJ01RM, AS001BL -->
             <!--
             <EditText
                 android:id="@+id/barcodeET"

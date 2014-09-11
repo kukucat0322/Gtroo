@@ -176,8 +176,8 @@ public class CheckScanActivity extends BaseActivity {
         recodeNumTV = (TextView) findViewById(R.id.recodeNumTV);
         totalCountTV = (TextView) findViewById(R.id.totalCountTV);
 
-        //okBtn = (Button) findViewById(R.id.okBtn);
-        //okBtn.setOnClickListener(clickListener);
+        // okBtn = (Button) findViewById(R.id.okBtn);
+        // okBtn.setOnClickListener(clickListener);
 
         gatherBtn = (Button) findViewById(R.id.gatherBtn);
         reviewBtn = (Button) findViewById(R.id.reviewBtn);
@@ -250,16 +250,11 @@ public class CheckScanActivity extends BaseActivity {
 				list.add(currProduct);
 				productMap.put(shelfNo, list);
 			} else {
-				for (Product product : products) {
-					// 同一个条码
-					if (product.getBarCode().equals(currProduct.getBarCode())) {
-						product.setCount(String.valueOf(Integer.valueOf(product.getCount()) + 1));
-					} else {
-						// 该条码已存在
-						if (!isExsitBarCode(currProduct.getBarCode())) {
-							products.add(currProduct);
-						}
-					}
+				Product product = queryProduct(currProduct.getBarCode());
+				if (product != null) {
+					product.setCount(String.valueOf(Integer.valueOf(product.getCount()) + 1));
+				} else {
+					products.add(currProduct);
 				}
 			}
 		} else {
@@ -269,15 +264,13 @@ public class CheckScanActivity extends BaseActivity {
 		}
 	}
 
-	private boolean isExsitBarCode(String barCode) {
-		boolean isFlag = false;
+	private Product queryProduct(String barCode) {
 		for (Product product : productMap.get(shelfNo)) {
 			if (barCode.equals(product.getBarCode())) {
-				isFlag = true;
-				break;
+				return product;
 			}
 		}
-		return isFlag;
+		return null;
 	}
 	
 	private void upateBottomBarInfo() {
