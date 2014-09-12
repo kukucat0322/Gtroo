@@ -335,8 +335,8 @@ public class MemberRegistActivity extends BaseActivity {
 	private void insert(Member vip){
 		try {
 			db.beginTransaction();
-        	db.execSQL("insert into c_vip('cardno','name','idno','mobile','sex','email','birthday','createTime','employee','type','status','discount')"+
-        				" values(?,?,?,?,?,?,?,?,?,?,?,?)",
+        	db.execSQL("insert into c_vip('cardno','name','idno','mobile','sex','email','birthday','createTime','employee','type','status','discount','customerID')"+
+        				" values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
 					new Object[]{vip.getCardNum(),
 								vip.getName(),
 								vip.getiDentityCardNum(),
@@ -348,7 +348,8 @@ public class MemberRegistActivity extends BaseActivity {
 								vip.getEmployee(),
 								vip.getType(),
 								vip.getStatus(),
-								vip.getDiscount()});
+								vip.getDiscount(),
+								App.getPreferenceUtils().getPreferenceStr(PreferenceUtils.customerid)});
             db.setTransactionSuccessful();
         } finally {  
             db.endTransaction();

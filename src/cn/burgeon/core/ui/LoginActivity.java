@@ -159,7 +159,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 			db.execSQL("delete from employee");
 			Employee employee = null;
 			for (int i = 0; i < len; i++) {
-			    // ["BURGEON1108001","权威全额","苏州经销商","苏州001"]
+			    // ["BURGEON1108001","权威全额","苏州经销商","苏州001",176]
 			    String currRow = rowsJA.get(i).toString();
 			    String[] currRows = currRow.split(",");
 
@@ -167,12 +167,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 			    employee.setId(currRows[0].substring(2, currRows[0].length() - 1));
 			    employee.setName(currRows[1].substring(1, currRows[1].length() - 1));
 			    employee.setAgency(currRows[2].substring(1, currRows[2].length() - 1));
-			    employee.setStore(currRows[3].substring(1, currRows[3].length() - 2));
+			    employee.setStore(currRows[3].substring(1, currRows[3].length() - 1));
+			    employee.setCustomerID(currRows[4].substring(0, currRows[4].length() - 1));
 
 			    db.execSQL("insert into employee(id,name,agency,store) values(?,?,?,?)", 
 			    		new Object[]{employee.getId(),employee.getName(),employee.getAgency(),employee.getStore()});
 			}
 			App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.agency_key, employee == null? "":employee.getAgency());
+			App.getPreferenceUtils().savePreferenceStr(PreferenceUtils.customerid, employee == null? "":employee.getCustomerID());
 			db.setTransactionSuccessful();
 			db.endTransaction();
 		} catch (JSONException e) {
@@ -192,7 +194,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 			JSONObject paramsInTransactions = new JSONObject();
 			paramsInTransactions.put("table", 14630);
 			paramsInTransactions.put("columns", new JSONArray().put("no")
-					.put("name").put("C_CUSTOMER_ID:name").put("C_STORE_ID:name"));
+					.put("name").put("C_CUSTOMER_ID:name").put("C_STORE_ID:name").put("C_CUSTOMER_ID"));
 			
 			//查询条件的params
 			JSONObject queryParams = new JSONObject();
@@ -258,6 +260,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 		},new Response.ErrorListener() {
 			@Override
 			public void onErrorResponse(VolleyError error) {
+				stopProgressDialog();
 				UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
 				UndoBarController.show(LoginActivity.this, "登录失败，请检测网络！", null, MESSAGESTYLE);
 			}

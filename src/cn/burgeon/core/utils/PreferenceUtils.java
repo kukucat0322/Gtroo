@@ -12,6 +12,7 @@ public class PreferenceUtils {
     public static final String user_pswd = "userPswd";
     public static final String agency_key = "agencyKey";
     public static final String config_pswd = "configPswd";
+    public static final String customerid = "customerid";
     
 
     //系统配置：网络配置 关键字

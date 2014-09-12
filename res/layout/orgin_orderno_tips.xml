@@ -8,7 +8,6 @@
     <EditText
         android:id="@+id/orginOrdernoTipsText"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="SA30515214073100001"/>
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>

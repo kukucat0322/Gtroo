@@ -14,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,13 +27,18 @@ import android.widget.TextView;
 import cn.burgeon.core.App;
 import cn.burgeon.core.R;
 import cn.burgeon.core.adapter.MemberListAdapter;
+import cn.burgeon.core.adapter.MemberSearchAdapter;
 import cn.burgeon.core.bean.Member;
+import cn.burgeon.core.bean.RequestResult;
 import cn.burgeon.core.ui.BaseActivity;
 import cn.burgeon.core.utils.PreferenceUtils;
 import cn.burgeon.core.utils.ScreenUtils;
 import cn.burgeon.core.widget.CustomDialogForVIPQuery;
+import cn.burgeon.core.widget.UndoBarController;
+import cn.burgeon.core.widget.UndoBarStyle;
 
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 
 public class MemberListActivity extends BaseActivity {
 	
@@ -189,7 +195,8 @@ public class MemberListActivity extends BaseActivity {
 				dialog = new CustomDialogForVIPQuery.Builder(MemberListActivity.this).setPositiveButton("确定", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        search();
+                        //search();
+                    	viaNet();
                         if (dialog.isShowing())
                         	dialog.dismiss();
                     }
@@ -206,6 +213,156 @@ public class MemberListActivity extends BaseActivity {
 			}
 		}
 	}; 
+	
+	
+	private void viaNet() {
+		if(!networkReachable()){
+			showAlertMsg(R.string.tipsNetworkUnReachable$_$);
+			return;
+		}
+		startProgressDialog();
+		try {
+			Map<String, String> params = new HashMap<String, String>();
+            JSONArray array = new JSONArray();
+
+            JSONObject transactions = new JSONObject();
+            transactions.put("id", 112);
+            transactions.put("command", "Query");
+
+            JSONObject paramsTable = new JSONObject();
+            paramsTable.put("table", "12899");
+            paramsTable.put("columns", new JSONArray().put("cardno").put("vipname")
+            		.put("C_VIPTYPE_ID:DISCOUNT").put("VIPSTATE").put("birthday").put("C_VIPTYPE_ID"));
+            JSONObject paramsCombine = new JSONObject();
+            
+/*            {
+                "params": {
+                    "combine": "and",
+                    "expr1": {
+                        "combine": "and",
+                        "expr1": {
+                            "column": "cardno",
+                            "condition": "=577775"
+                        },
+                        "expr2": {
+                            "column": "mobil",
+                            "condition": "=13678965466"
+                        }
+                    },
+                    "expr2": {
+                        "combine": "and",
+                        "expr1": {
+                            "column": "OPENCARDDATE",
+                            "condition": ">=20140909"
+                        },
+                        "expr2": {
+                            "column": "OPENCARDDATE",
+                            "condition": "<=20140912"
+                        }
+                    }
+                },
+            "columns":["CARDNO","MOBIL","OPENCARDDATE"],
+                "table": "12899"
+            }*/
+            paramsCombine.put("combine", "and");
+            JSONObject expr1JO = new JSONObject();
+            expr1JO.put("combine", "and");
+            
+            JSONObject innerExpr11 = new JSONObject();
+            innerExpr11.put("column", "cardno");
+            innerExpr11.put("condition", dialog.getCardNo().length() == 0 ?"":"=" + dialog.getCardNo());
+            
+            JSONObject innerExpr12 = new JSONObject();
+            innerExpr12.put("column", "mobil");
+            innerExpr12.put("condition", dialog.getMobileNo().length() == 0?"":"=" + dialog.getMobileNo());
+            
+            expr1JO.put("expr1", innerExpr11);
+            expr1JO.put("expr2", innerExpr12);
+            paramsCombine.put("expr1", expr1JO);
+            
+            JSONObject expr2JO = new JSONObject();
+        	expr2JO.put("combine", "and");
+            JSONObject innerExpr21 = new JSONObject();
+            innerExpr21.put("column", "OPENCARDDATE");
+            innerExpr21.put("condition", ">=" + dialog.getStartTime());
+            
+            JSONObject innerExpr22 = new JSONObject();
+            innerExpr22.put("column", "OPENCARDDATE");
+            innerExpr22.put("condition", "<=" + dialog.getEndTime());
+            expr2JO.put("expr1", innerExpr21);
+            expr2JO.put("expr2", innerExpr22);
+            paramsCombine.put("expr2", expr2JO);
+            
+            paramsTable.put("params", paramsCombine);
+            transactions.put("params", paramsTable);
+            array.put(transactions);
+            Log.d("MemberSearch", array.toString());
+            params.put("transactions", array.toString());
+			sendRequest(params,new Response.Listener<String>() {
+				@Override
+				public void onResponse(String response) {
+					Log.d("zhang.h", response);
+					if(!TextUtils.isEmpty(response)){
+						RequestResult result = parseResult(response);
+						//请求成功，更新记录状态
+						if("0".equals(result.getCode())){
+							//mAdapter = new MemberListAdapter(parseResponse(response), MemberListActivity.this);
+							mAdapter.setList(parseResponse(response));
+							stopProgressDialog();
+						}else{
+							stopProgressDialog();
+							UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+					        UndoBarController.show(MemberListActivity.this, "找不到该会员", null, MESSAGESTYLE);
+						}
+					}
+
+				}
+			},new Response.ErrorListener() {
+				@Override
+				public void onErrorResponse(VolleyError error) {
+					stopProgressDialog();
+					UndoBarStyle MESSAGESTYLE = new UndoBarStyle(-1, -1, 2000);
+					UndoBarController.show(MemberListActivity.this, "网络异常，请检测网络", null, MESSAGESTYLE);
+				}
+			});
+		} catch (JSONException e) {}
+	}
+	
+	private RequestResult parseResult(String response) {
+		RequestResult result = null;
+	    try {
+			JSONArray resJA = new JSONArray(response);
+			JSONObject resJO = resJA.getJSONObject(0);
+			result = new RequestResult(resJO.getString("code"), resJO.getString("message"));
+		} catch (JSONException e) {}
+		return result;
+	}
+	
+	private List<Member> parseResponse(String result){
+		List<Member> data = new ArrayList<Member>();
+		try {
+			JSONArray array = new JSONArray(result);
+			JSONObject obj = array.getJSONObject(0);
+			JSONArray rows = obj.getJSONArray("rows");
+			Member member = null;
+			for(int i = 0; i < rows.length(); i++){
+				String row = rows.get(i).toString();
+				String[] rowArr = row.split(",");
+				//["123321","yyuu",0.5,"是",null,67]
+				member = new Member();
+				member.setCardNum(rowArr[0].substring(2,rowArr[0].length()-1));
+				member.setName(rowArr[1].substring(1,rowArr[1].length()-1));
+				member.setDiscount(rowArr[2]);
+				member.setVipState(rowArr[3].substring(1,rowArr[3].length()-1));
+				member.setBirthday("null".equals(rowArr[4])?"":rowArr[4]);
+				member.setTypeid("null".equals(rowArr[5].substring(0,rowArr[5].length()-1))?"":rowArr[5].substring(0,rowArr[5].length()-1));
+				data.add(member);
+			}
+		} catch (JSONException e) {
+			Log.d("MemberListActivity", e.toString());
+		}
+		return data;
+	}
 	
     private void showTips(){
     	AlertDialog dialog = null;

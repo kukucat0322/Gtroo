@@ -11,6 +11,7 @@ public class Employee implements Serializable{
 	private String name;
 	private String agency;
 	private String store;
+	private String customerID;
 	public Employee() {
 		super();
 	}
@@ -46,6 +47,12 @@ public class Employee implements Serializable{
 	@Override
 	public String toString() {
 		return getName();
+	}
+	public String getCustomerID() {
+		return customerID;
+	}
+	public void setCustomerID(String customerID) {
+		this.customerID = customerID;
 	}
 	
 /*    @Override

@@ -161,6 +161,7 @@ public class MemberManagerActivity extends BaseActivity {
 			    //insert into c_vip('cardno','name','idno','mobile','sex',
 			    //'email','birthday','createTime','employee','type','status','discount
 			    if(!isExist(vip)){
+			    	//Log.d(TAG, "cardno = " + vip.getCardNum() + " customerID = "+vip.getCustomerID());
 			    db.execSQL("insert into c_vip(cardno,type,customerID,storeID,name,mobile,email,sex,status,discount,createTime,birthday) "
 			    		+ "values(?,?,?,?,?,?,?,?,?,?,?,?)", 
 			    		new Object[]{vip.getCardNum(),vip.getType(),vip.getCustomerID(),

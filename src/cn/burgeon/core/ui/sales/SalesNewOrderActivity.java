@@ -127,7 +127,7 @@ public class SalesNewOrderActivity extends BaseActivity {
 				// 调用 getBarcode()方法读取条码信息
 				Log.d(TAG, "=======barcode========" + bm.getBarcode());
 				String baString = bm.getBarcode() != null?bm.getBarcode().trim():"";
-				//styleBarcodeET.setText(baString);
+				styleBarcodeET.setText("");
 				verifyBarCode(baString);
 			}
 		}
@@ -416,10 +416,10 @@ public class SalesNewOrderActivity extends BaseActivity {
 				pro.setSalesType(1);
 				break;
 			case 1://全额 
-				if(cardNoET.getText().length() > 0)
-					pro.setMoney(String.format("%.2f",price * vipDiscount));
-				else
-					pro.setMoney(String.format("%.2f",price));
+//				if(cardNoET.getText().length() > 0)
+//					pro.setMoney(String.format("%.2f",price * vipDiscount));
+//				else
+				pro.setMoney(String.format("%.2f",price));
 				pro.setSalesType(4);
 				break;
 			case 2://赠送
