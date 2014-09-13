@@ -71,6 +71,7 @@
     <string name="sales_daily_list_title_danhao">单号</string>
     <string name="sales_daily_list_title_yinyeyuan">营业员</string>
     <string name="sales_daily_list_title_upstate">上传状态</string>
+    <string name="sales_daily_list_title_isactive">有效</string>
     <string name="sales_order_search_title">销售查询</string>
     <string name="sales_detail_title">单据明细</string>
     <string name="sales_detail_tiaoma">条码</string>

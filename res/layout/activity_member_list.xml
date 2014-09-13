@@ -129,7 +129,7 @@
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="@string/sales_daily_list_title_upstate"
+                        android:text="@string/sales_daily_list_title_isactive"
                         android:textSize="15sp" />
                 </LinearLayout>
 

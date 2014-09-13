@@ -232,7 +232,7 @@ public class MemberListActivity extends BaseActivity {
             JSONObject paramsTable = new JSONObject();
             paramsTable.put("table", "12899");
             paramsTable.put("columns", new JSONArray().put("cardno").put("vipname")
-            		.put("C_VIPTYPE_ID:DISCOUNT").put("VIPSTATE").put("birthday").put("C_VIPTYPE_ID"));
+            		.put("C_VIPTYPE_ID:DISCOUNT").put("VIPSTATE").put("birthday").put("C_VIPTYPE_ID:name").put("sex"));
             JSONObject paramsCombine = new JSONObject();
             
 /*            {
@@ -302,12 +302,13 @@ public class MemberListActivity extends BaseActivity {
 				@Override
 				public void onResponse(String response) {
 					Log.d("zhang.h", response);
-					if(!TextUtils.isEmpty(response)){
+					if(!TextUtils.isEmpty(response) && !"null".equals(response)){
 						RequestResult result = parseResult(response);
 						//请求成功，更新记录状态
 						if("0".equals(result.getCode())){
 							//mAdapter = new MemberListAdapter(parseResponse(response), MemberListActivity.this);
 							mAdapter.setList(parseResponse(response));
+							commonRecordnum.setText(String.format(getResources().getString(R.string.sales_new_common_record), mAdapter.getCount()));
 							stopProgressDialog();
 						}else{
 							stopProgressDialog();
@@ -355,7 +356,8 @@ public class MemberListActivity extends BaseActivity {
 				member.setDiscount(rowArr[2]);
 				member.setVipState(rowArr[3].substring(1,rowArr[3].length()-1));
 				member.setBirthday("null".equals(rowArr[4])?"":rowArr[4]);
-				member.setTypeid("null".equals(rowArr[5].substring(0,rowArr[5].length()-1))?"":rowArr[5].substring(0,rowArr[5].length()-1));
+				member.setType("null".equals(rowArr[5].substring(1,rowArr[5].length()-1))?"":rowArr[5].substring(1,rowArr[5].length()-1));
+				member.setSex("null".equals(rowArr[6].substring(1,rowArr[6].length()-2))?"":rowArr[6].substring(1,rowArr[6].length()-2));
 				data.add(member);
 			}
 		} catch (JSONException e) {

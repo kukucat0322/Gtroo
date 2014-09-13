@@ -65,7 +65,7 @@ public class MemberListAdapter extends BaseAdapter {
 		holder.textView3.setText(member.getType());
 		holder.textView4.setText(member.getSex());
 		holder.textView5.setText(member.getBirthday());
-		holder.textView6.setText(member.getStatus());
+		holder.textView6.setText(member.getVipState());
 		holder.textView7.setText(String.valueOf(member.getId()));
 		
 		//int[] colors = { Color.WHITE, Color.rgb(219, 238, 244) };//RGB颜色  
